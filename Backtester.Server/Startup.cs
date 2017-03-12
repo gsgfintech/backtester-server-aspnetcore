@@ -8,6 +8,9 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Capital.GSG.FX.Backtest.MongoConnector;
+using Capital.GSG.FX.Backtest.MongoConnector.Actioner;
+using Backtester.Server.ControllerUtils;
 
 namespace Backtester.Server
 {
@@ -34,6 +37,10 @@ namespace Backtester.Server
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddBacktestDBServer(Configuration.GetSection("BacktestDBServer"));
+
+            services.AddControllerUtils();
+
             // Add framework services.
             services.AddMvc();
 
@@ -74,6 +81,44 @@ namespace Backtester.Server
                     name: "default",
                     template: "{controller=Home}/{action=Index}/{id?}");
             });
+        }
+    }
+
+    internal static class ServiceExtensions
+    {
+        public static void AddBacktestDBServer(this IServiceCollection services, IConfigurationSection configSection)
+        {
+            string dbName = configSection.GetValue<string>("DBName");
+            string host = configSection.GetValue<string>("Host");
+            int port = configSection.GetValue<int>("Port");
+
+            BacktestMongoDBServer backtestDbServer = new BacktestMongoDBServer(dbName, host, port);
+
+            services.AddSingleton((serviceProvider) =>
+            {
+                return backtestDbServer.BacktestJobActioner;
+            });
+
+            services.AddSingleton((serviceProvider) =>
+            {
+                return backtestDbServer.BacktestJobGroupActioner;
+            });
+
+            services.AddSingleton((serviceProvider) =>
+            {
+                return backtestDbServer.BacktestWorkerActioner;
+            });
+        }
+
+        public static void AddControllerUtils(this IServiceCollection services)
+        {
+            services.AddSingleton((serviceProvider) =>
+            {
+                var actioner = serviceProvider.GetService<BacktestJobGroupActioner>();
+
+                return new JobGroupsControllerUtils(actioner);
+            });
+
         }
     }
 }

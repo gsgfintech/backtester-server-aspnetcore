@@ -1,0 +1,50 @@
+﻿@model IEnumerable<Backtester.Server.Models.BacktestJobGroupModel>
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <h4>@ViewData["Header"]</h4>
+    </div>
+    @if (Model.Count() > 0)
+    {
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <tr>
+                    <th>@Html.DisplayNameFor(m => Model.First().GroupId)</th>
+                    <th>@Html.DisplayNameFor(m => Model.First().CreateTime)</th>
+                    <th>@Html.DisplayNameFor(m => Model.First().Status)</th>
+                    <th>@Html.DisplayNameFor(m => Model.First().ActualStartTime)</th>
+                    <th>@Html.DisplayNameFor(m => Model.First().CompletionTime)</th>
+                    <th>@Html.DisplayNameFor(m => Model.First().Duration)</th>
+                    <th></th>
+                </tr>
+                @foreach (var jobGroup in Model)
+                {
+                    <tr>
+                        <td><a asp-controller="JobGroups" asp-route-groupid="@jobGroup.GroupId">@Html.DisplayFor(m => jobGroup.GroupId)</a></td>
+                        <td>@Html.DisplayFor(m => jobGroup.CreateTime)</td>
+                        <td>@Html.DisplayFor(m => jobGroup.Status)</td>
+                        <td>@Html.DisplayFor(m => jobGroup.ActualStartTime)</td>
+                        <td>@Html.DisplayFor(m => jobGroup.CompletionTime)</td>
+                        <td>@Html.DisplayFor(m => jobGroup.Duration)</td>
+                        <td>
+                            <div class="btn-group btn-group-sm">
+                                <button class="btn btn-primary">
+                                    <span class="glyphicon glyphicon-plus"></span>
+                                </button>
+                                <button class="btn btn-danger">
+                                    <span class="glyphicon glyphicon-trash"></span>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </table>
+        </div>
+    }
+    else
+    {
+        <div class="panel-body">
+            <p>No job</p>
+        </div>
+    }
+</div>
