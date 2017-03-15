@@ -1,4 +1,5 @@
-﻿using Capital.GSG.FX.Backtest.DataTypes;
+﻿using Backtester.Server.Utils;
+using Capital.GSG.FX.Backtest.DataTypes;
 using Capital.GSG.FX.Data.Core.ContractData;
 using Capital.GSG.FX.Data.Core.ExecutionData;
 using Capital.GSG.FX.Data.Core.OrderData;
@@ -67,7 +68,7 @@ namespace Backtester.Server.Models
                     Duration = trade.Duration,
                     OrderId = trade.OrderId,
                     OrderOrigin = trade.OrderOrigin,
-                    Price = Utils.FormatRate(trade.Cross, trade.Price),
+                    Price = FormatUtils.FormatRate(trade.Cross, trade.Price),
                     RealizedPnL = trade.RealizedPnL,
                     RealizedPnlPips = trade.RealizedPnlPips,
                     RealizedPnlUsd = trade.RealizedPnlUsd,

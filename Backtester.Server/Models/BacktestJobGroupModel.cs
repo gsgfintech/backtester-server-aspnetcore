@@ -53,8 +53,6 @@ namespace Backtester.Server.Models
         [DisplayFormat(DataFormatString = "{0:HH:mm}")]
         public DateTimeOffset EndTime { get; set; }
 
-        public List<BacktestUnrealizedPnlSerieModel> UnrealizedPnlSeries { get; set; }
-
         public BacktestJobStrategyModel Strategy { get; set; }
 
         public List<BacktestTradeModel> Trades { get; set; }
@@ -149,8 +147,7 @@ namespace Backtester.Server.Models
                 StartTime = group.StartTime,
                 Status = group.Status,
                 Strategy = group.Strategy.ToBacktestJobStrategyModel(),
-                Trades = group.Trades.ToTradeModels(),
-                UnrealizedPnlSeries = group.UnrealizedPnlSeries.ToBacktestUnrealizedPnlSerieModels()
+                Trades = group.Trades.ToTradeModels()
             };
         }
 

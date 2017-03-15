@@ -6,14 +6,4 @@
 
 @Html.Partial("JobGroupTabsPartial", Model)
 
-<div class="panel panel-default">
-    <div class="panel-heading">
-        <h4>Unrealized Pnl Series <small>@Html.DisplayFor(m => Model.GroupId)</small></h4>
-    </div>
-    @if (Model.UnrealizedPnlSeries.Count > 0)
-    {
-        <div class="panel-body">
-            <div job-unrealized-pnls-chart name="backtestJobName" data="backtestJobUnrealizedPnls" height="600px"></div>
-        </div>
-    }
-</div>
+@await Component.InvokeAsync("UnrealizedPnlSeries", new { jobGroupId = Model.GroupId })

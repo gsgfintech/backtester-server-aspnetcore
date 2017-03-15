@@ -19,7 +19,15 @@
         <li role="presentation"><a asp-action="AllTrades" asp-route-groupid="@Model.GroupId">All Trades</a></li>
     }
 
-    <li role="presentation"><a href>Unr PnLs</a></li>
+    @if (Url.ActionContext.ActionDescriptor.DisplayName.Contains("UnrealizedPnls"))
+    {
+        <li role="presentation" class="active"><a asp-action="UnrealizedPnls" asp-route-groupid="@Model.GroupId">Unr PnLs</a></li>
+    }
+    else
+    {
+        <li role="presentation"><a asp-action="UnrealizedPnls" asp-route-groupid="@Model.GroupId">Unr PnLs</a></li>
+    }
+
     @foreach (var item in Model.JobIds)
     {
         <li role="presentation"><a href="#">@item.Key</a></li>

@@ -1,0 +1,21 @@
+﻿@using Backtester.Server.Utils
+
+@model Backtester.Server.ViewModels.UnrealizedPnlSeriesViewModel
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <h4>Unrealized Pnl Series <small>@Html.DisplayFor(m => Model.JobGroupId)</small></h4>
+    </div>
+    @if (Model.DataProvider != null)
+    {
+        <script>renderChart("chartdiv", @JavaScriptConvert.SerializeObject(Model.Graphs), @JavaScriptConvert.SerializeObject(Model.DataProvider))</script>
+        <div class="panel-body" id="chartdiv">
+        </div>
+    }
+    else
+    {
+        <div class="panel-body">
+            <p>No data</p>
+        </div>
+    }
+</div>

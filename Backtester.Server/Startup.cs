@@ -108,6 +108,11 @@ namespace Backtester.Server
             {
                 return backtestDbServer.BacktestWorkerActioner;
             });
+
+            services.AddSingleton((serviceProvider) =>
+            {
+                return backtestDbServer.UnrealizedPnlSerieActioner;
+            });
         }
 
         public static void AddControllerUtils(this IServiceCollection services)
@@ -119,6 +124,12 @@ namespace Backtester.Server
                 return new JobGroupsControllerUtils(actioner);
             });
 
+            services.AddSingleton((serviceProvider) =>
+            {
+                var actioner = serviceProvider.GetService<UnrealizedPnlSerieActioner>();
+
+                return new UnrealizedPnlSeriesControllerUtils(actioner);
+            });
         }
     }
 }
