@@ -1,14 +1,12 @@
 ﻿using Backtester.Server.ControllerUtils;
 using Capital.GSG.FX.Utils.Core.Logging;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Backtester.Server.Controllers.Jobs
 {
+    [Authorize]
     public class JobsController : Controller
     {
         private readonly ILogger logger = GSGLoggerFactory.Instance.CreateLogger<JobsController>();

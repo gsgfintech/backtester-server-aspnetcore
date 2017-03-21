@@ -13,7 +13,7 @@
     <WebProject_DirectoryAccessLevelKey>0</WebProject_DirectoryAccessLevelKey>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Backtest.MongoConnector" Version="5.3.0" />
+    <PackageReference Include="Backtest.MongoConnector" Version="5.3.1" />
     <PackageReference Include="Capital.GSG.FX.Utils.Core.Logging" Version="2.2.0" />
     <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.0.0" />
     <PackageReference Include="Microsoft.AspNetCore" Version="1.1.1" />

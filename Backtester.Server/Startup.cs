@@ -7,6 +7,7 @@ using Microsoft.Extensions.Logging;
 using Capital.GSG.FX.Backtest.MongoConnector;
 using Capital.GSG.FX.Backtest.MongoConnector.Actioner;
 using Backtester.Server.ControllerUtils;
+using Capital.GSG.FX.Utils.Core.Logging;
 
 namespace Backtester.Server
 {
@@ -49,6 +50,9 @@ namespace Backtester.Server
         {
             loggerFactory.AddConsole(Configuration.GetSection("Logging"));
             loggerFactory.AddDebug();
+
+            GSGLoggerFactory.Instance.AddConsole(Configuration.GetSection("Logging"));
+            GSGLoggerFactory.Instance.AddDebug();
 
             if (env.IsDevelopment())
             {

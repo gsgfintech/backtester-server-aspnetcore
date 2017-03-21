@@ -4,10 +4,21 @@
     ViewBag.Title = "Job Group";
 }
 
-@Html.Partial("JobGroupTabsPartial", Model)
+@*@Html.Partial("JobGroupTabsPartial", Model)*@
 
-<div id="contentHolder">
-    @Html.Partial("JobGroupInfoPartial", Model)
+<ul class="nav nav-tabs" style="margin-bottom: 15px">
+    <li role="presentation"><a href onclick="changeContent('info')">Info</a></li>
+    <li role="presentation"><a href onclick="changeContent('trades')">All Trades</a></li>
+    <li role="presentation"><a href onclick="changeContent('pnls')">Unr PnLs</a></li>
+
+    @foreach (var item in Model.JobIds)
+    {
+        <li role="presentation"><a href onclick="changeContent('day', '@item.Value')">@item.Key</a></li>
+    }
+</ul>
+
+<div id="contentholder">
+    @*@Html.Partial("JobGroupInfoPartial", Model)*@
 </div>
 
 @section Scripts
@@ -15,13 +26,13 @@
     <script>
         function changeContent(contentTitle, jobId) {
             if (contentTitle === 'info') {
-                // TODO
+                $('#contentholder').load('/JobGroups/Info?groupId=' + '@Model.GroupId');
             } else if (contentTitle === 'trades') {
-                // TODO
+                $('#contentholder').load('/JobGroups/AllTrades?groupId=' + '@Model.GroupId');
             } else if (contentTitle === 'pnls') {
-                // TODO
+                $('#contentholder').load('/JobGroups/UnrealizedPnls?groupId=' + '@Model.GroupId');
             } else if (contentTitle === 'day' && jobId) {
-                $('#contentHolder').load('/Jobs/?jobId=' + jobId);
+                $('#contentholder').load('/Jobs/?jobId=' + jobId);
             }
         }
     </script>

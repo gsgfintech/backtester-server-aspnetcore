@@ -3,11 +3,11 @@
 <ul class="nav nav-tabs" style="margin-bottom: 15px">
     @if (Url.ActionContext.ActionDescriptor.DisplayName.Contains("Index"))
     {
-        <li role="presentation" class="active"><a asp-action="Index" asp-route-groupid="@Model.GroupId">Info</a></li>
+        <li role="presentation" class="active"><a href onclick="changeContent('info')">Info</a></li>
     }
     else
     {
-        <li role="presentation"><a asp-action="Index" asp-route-groupid="@Model.GroupId">Info</a></li>
+        <li role="presentation"><a href onclick="changeContent('info')">Info</a></li>
     }
 
     @if (Url.ActionContext.ActionDescriptor.DisplayName.Contains("AllTrades"))
