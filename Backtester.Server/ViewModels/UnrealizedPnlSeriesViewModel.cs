@@ -1,8 +1,5 @@
 ﻿using Capital.GSG.FX.Backtest.DataTypes;
 using Capital.GSG.FX.Utils.Core;
-using Newtonsoft.Json;
-using Syncfusion.JavaScript.DataVisualization;
-using Syncfusion.JavaScript.DataVisualization.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -26,49 +23,49 @@ namespace Backtester.Server.ViewModels
 
         public UnrealizedPnlSeriesViewModel(IEnumerable<BacktestUnrealizedPnlSerie> series)
         {
-            CreateGraphs(series);
-            CreateDataProvider(series);
+            //CreateGraphs(series);
+            //CreateDataProvider(series);
         }
 
-        private void CreateDataProvider(IEnumerable<BacktestUnrealizedPnlSerie> series)
-        {
-            if (!series.IsNullOrEmpty())
-            {
-                Dictionary<int, Dictionary<string, double>> pnls = new Dictionary<int, Dictionary<string, double>>();
+        //private void CreateDataProvider(IEnumerable<BacktestUnrealizedPnlSerie> series)
+        //{
+        //    if (!series.IsNullOrEmpty())
+        //    {
+        //        Dictionary<int, Dictionary<string, double>> pnls = new Dictionary<int, Dictionary<string, double>>();
 
-                foreach (var serie in series)
-                {
-                    string tradeDescription = serie.TradeDescription;
+        //        foreach (var serie in series)
+        //        {
+        //            string tradeDescription = serie.TradeDescription;
 
-                    foreach (var point in serie.Points)
-                    {
-                        int timeInSeconds = point.TimeInSeconds;
+        //            foreach (var point in serie.Points)
+        //            {
+        //                int timeInSeconds = point.TimeInSeconds;
 
-                        if (!pnls.ContainsKey(timeInSeconds))
-                            pnls.Add(timeInSeconds, new Dictionary<string, double>() { { "time", timeInSeconds } });
+        //                if (!pnls.ContainsKey(timeInSeconds))
+        //                    pnls.Add(timeInSeconds, new Dictionary<string, double>() { { "time", timeInSeconds } });
 
-                        pnls[timeInSeconds].Add(tradeDescription, point.UnrealizedPnlInPips);
-                    }
-                }
+        //                pnls[timeInSeconds].Add(tradeDescription, point.UnrealizedPnlInPips);
+        //            }
+        //        }
 
-                DataProvider = JsonConvert.SerializeObject(pnls.Values.ToList());
-            }
-        }
+        //        DataProvider = JsonConvert.SerializeObject(pnls.Values.ToList());
+        //    }
+        //}
 
-        private void CreateGraphs(IEnumerable<BacktestUnrealizedPnlSerie> series)
-        {
-            if (!series.IsNullOrEmpty())
-            {
-                var tradeDescriptions = series.Select(s => s.TradeDescription).Distinct();
+        //private void CreateGraphs(IEnumerable<BacktestUnrealizedPnlSerie> series)
+        //{
+        //    if (!series.IsNullOrEmpty())
+        //    {
+        //        var tradeDescriptions = series.Select(s => s.TradeDescription).Distinct();
 
-                Graphs = JsonConvert.SerializeObject(tradeDescriptions.Select(td => new Dictionary<string, string>()
-                {
-                    { "title", td },
-                    { "valueField", td },
-                    { "balloonText", "[[title]]: [[value]]" }
-                }).ToList());
-            }
-        }
+        //        Graphs = JsonConvert.SerializeObject(tradeDescriptions.Select(td => new Dictionary<string, string>()
+        //        {
+        //            { "title", td },
+        //            { "valueField", td },
+        //            { "balloonText", "[[title]]: [[value]]" }
+        //        }).ToList());
+        //    }
+        //}
 
         //private void CreatePnlChart(IEnumerable<BacktestUnrealizedPnlSerie> series)
         //{

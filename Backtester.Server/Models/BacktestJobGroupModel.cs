@@ -1,5 +1,4 @@
 ﻿using Capital.GSG.FX.Backtest.DataTypes;
-using Capital.GSG.FX.Data.Core.ContractData;
 using Capital.GSG.FX.Utils.Core;
 using DataTypes.Core;
 using System;

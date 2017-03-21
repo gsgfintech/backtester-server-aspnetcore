@@ -1,4 +1,5 @@
 ﻿using Capital.GSG.FX.Backtest.DataTypes;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 

@@ -1,5 +1,4 @@
-﻿using Backtester.Server.Models;
-using Capital.GSG.FX.Backtest.DataTypes;
+﻿using Capital.GSG.FX.Backtest.DataTypes;
 using Capital.GSG.FX.Backtest.MongoConnector.Actioner;
 using Capital.GSG.FX.Utils.Core;
 using Capital.GSG.FX.Utils.Core.Logging;
