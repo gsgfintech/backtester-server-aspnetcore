@@ -22,7 +22,7 @@ namespace Backtester.Server.ViewComponents
         {
             var unrealizedPnlSeries = await utils.GetForJobGroup(jobGroupId);
 
-            return View(new UnrealizedPnlSeriesViewModel(unrealizedPnlSeries));
+            return View(new UnrealizedPnlSeriesViewModel(jobGroupId, unrealizedPnlSeries));
         }
     }
 }

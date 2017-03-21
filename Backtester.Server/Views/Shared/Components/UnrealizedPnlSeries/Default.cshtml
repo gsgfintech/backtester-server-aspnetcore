@@ -2,14 +2,18 @@
 
 @model Backtester.Server.ViewModels.UnrealizedPnlSeriesViewModel
 
+<div id="toolTipTemplate" style="display:none; padding:3px;background-color:#B9C5C9; opacity:0.8;">
+    <div id="point">#point.x#h: #point.y# pips</div>
+</div>
+
 <div class="panel panel-default">
     <div class="panel-heading">
-        <h4>Unrealized Pnl Series <small>@Html.DisplayFor(m => Model.JobGroupId)</small></h4>
+        <h4>Unrealized Pnl Series <small>@Model.JobGroupId</small></h4>
     </div>
-    @if (Model.DataProvider != null)
+    @if (Model.ChartModel != null)
     {
-        <script>renderChart("chartdiv", @JavaScriptConvert.SerializeObject(Model.Graphs), @JavaScriptConvert.SerializeObject(Model.DataProvider))</script>
-        <div class="panel-body" id="chartdiv">
+        <div class="panel-body">
+            @{Html.EJ().Chart("chartDiv", Model.ChartModel).Render(); }
         </div>
     }
     else

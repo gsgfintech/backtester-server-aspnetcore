@@ -76,7 +76,7 @@ namespace Backtester.Server.ControllerUtils
                 return group;
             else
             {
-                logger.Info($"Querying backtest job {groupId} from database as it is not in the dictionary");
+                logger.Info($"Querying backtest job group {groupId} from database as it is not in the dictionary");
 
                 CancellationTokenSource cts = new CancellationTokenSource();
                 cts.CancelAfter(TimeSpan.FromSeconds(5));

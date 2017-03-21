@@ -115,6 +115,13 @@ namespace Backtester.Server
         {
             services.AddSingleton((serviceProvider) =>
             {
+                var actioner = serviceProvider.GetService<BacktestJobActioner>();
+
+                return new JobsControllerUtils(actioner);
+            });
+
+            services.AddSingleton((serviceProvider) =>
+            {
                 var actioner = serviceProvider.GetService<BacktestJobGroupActioner>();
 
                 return new JobGroupsControllerUtils(actioner);

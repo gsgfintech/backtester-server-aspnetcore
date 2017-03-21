@@ -6,4 +6,23 @@
 
 @Html.Partial("JobGroupTabsPartial", Model)
 
-@Html.Partial("JobGroupInfoPartial", Model)
+<div id="contentHolder">
+    @Html.Partial("JobGroupInfoPartial", Model)
+</div>
+
+@section Scripts
+{
+    <script>
+        function changeContent(contentTitle, jobId) {
+            if (contentTitle === 'info') {
+                // TODO
+            } else if (contentTitle === 'trades') {
+                // TODO
+            } else if (contentTitle === 'pnls') {
+                // TODO
+            } else if (contentTitle === 'day' && jobId) {
+                $('#contentHolder').load('/Jobs/?jobId=' + jobId);
+            }
+        }
+    </script>
+}

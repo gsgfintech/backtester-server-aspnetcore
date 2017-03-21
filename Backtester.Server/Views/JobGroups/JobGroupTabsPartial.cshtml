@@ -1,6 +1,6 @@
 ﻿@model Backtester.Server.Models.BacktestJobGroupModel
 
-<ul class="nav nav-tabs">
+<ul class="nav nav-tabs" style="margin-bottom: 15px">
     @if (Url.ActionContext.ActionDescriptor.DisplayName.Contains("Index"))
     {
         <li role="presentation" class="active"><a asp-action="Index" asp-route-groupid="@Model.GroupId">Info</a></li>
@@ -30,6 +30,6 @@
 
     @foreach (var item in Model.JobIds)
     {
-        <li role="presentation"><a href="#">@item.Key</a></li>
+        <li role="presentation"><a href onclick="changeContent('day', '@item.Value')">@item.Key</a></li>
     }
 </ul>
