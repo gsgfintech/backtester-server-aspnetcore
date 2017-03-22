@@ -61,7 +61,7 @@
             } else if (contentTitle === 'orders') {
                 $('#daycontentholder').load('/Jobs/Orders?jobId=' + jobId);
             } else if (contentTitle === 'positions') {
-                $('#contentholder').load('/Jobs/?jobId=');
+                $('#contentholder').load('/Jobs/Positions?jobId=' + jobId);
             } else {
                 console.error('error');
             }
