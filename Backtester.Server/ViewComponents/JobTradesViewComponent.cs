@@ -22,7 +22,7 @@ namespace Backtester.Server.ViewComponents
         {
             var job = await utils.Get(jobId);
 
-            return View(job?.Output?.Trades.Values.ToTradeModels());
+            return View(job?.Output?.Trades?.Values?.ToTradeModels());
         }
     }
 }

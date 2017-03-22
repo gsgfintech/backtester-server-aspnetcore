@@ -57,9 +57,9 @@
             if (contentTitle === 'status') {
                 $('#daycontentholder').load('/Jobs/Status?jobId=' + jobId);
             } else if (contentTitle === 'trades') {
-                $('#daycontentholder').load('/JobGroups/AllTrades?groupId=@Model.GroupId');
+                $('#daycontentholder').load('/Jobs/Trades?jobId=' + jobId);
             } else if (contentTitle === 'orders') {
-                $('#daycontentholder').load('/JobGroups/UnrealizedPnls?groupId=@Model.GroupId');
+                $('#daycontentholder').load('/Jobs/Orders?jobId=' + jobId);
             } else if (contentTitle === 'positions') {
                 $('#contentholder').load('/Jobs/?jobId=');
             } else {

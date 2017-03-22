@@ -1,4 +1,6 @@
-﻿@model IEnumerable<Backtester.Server.Models.BacktestTradeModel>
+﻿@using static Backtester.Server.Utils.FormatUtils
+
+@model IEnumerable<Backtester.Server.Models.BacktestTradeModel>
 
 <table class="table table-hover">
     <tr>
@@ -17,7 +19,7 @@
     {
         <tr>
             <td>@Html.DisplayFor(m => trade.Timestamp)</td>
-            <td>@Html.DisplayFor(m => trade.OrderOrigin)</td>
+            <td>@ShortenOrigin(trade.OrderOrigin)</td>
             <td>@Html.DisplayFor(m => trade.Side)</td>
             <td>@Html.DisplayFor(m => trade.Size)</td>
             <td>@Html.DisplayFor(m => trade.Cross)</td>

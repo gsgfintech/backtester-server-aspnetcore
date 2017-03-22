@@ -1,0 +1,42 @@
+﻿@using  static Backtester.Server.Utils.FormatUtils
+@using  static Capital.GSG.FX.Data.Core.OrderData.OrderStatusCode
+
+@model IEnumerable<Backtester.Server.Models.BacktestOrderModel>
+
+<div class="table-responsive">
+    <table class="table table-hover">
+        <tr>
+            <th>@Html.DisplayNameFor(m => Model.First().OrderId)</th>
+            <th>@Html.DisplayNameFor(m => Model.First().PlacedTime)</th>
+            <th>@Html.DisplayNameFor(m => Model.First().LastUpdateTime)</th>
+            <th>@Html.DisplayNameFor(m => Model.First().Origin)</th>
+            <th>@Html.DisplayNameFor(m => Model.First().Status)</th>
+            <th>@Html.DisplayNameFor(m => Model.First().Type)</th>
+            <th>@Html.DisplayNameFor(m => Model.First().Side)</th>
+            <th>@Html.DisplayNameFor(m => Model.First().Quantity)</th>
+            <th>@Html.DisplayNameFor(m => Model.First().Cross)</th>
+            <th>@Html.DisplayNameFor(m => Model.First().FillPrice)</th>
+            <th>@Html.DisplayNameFor(m => Model.First().LimitPrice)</th>
+            <th>@Html.DisplayNameFor(m => Model.First().StopPrice)</th>
+            <th>@Html.DisplayNameFor(m => Model.First().TrailingAmount)</th>
+        </tr>
+        @foreach (var order in Model)
+        {
+            <tr class="@(order.Status == Filled ? "success" : order.Status == Cancelled ? "danger" : "")">
+                <td>@Html.DisplayFor(m => order.OrderId)</td>
+                <td>@Html.DisplayFor(m => order.PlacedTime)</td>
+                <td>@Html.DisplayFor(m => order.LastUpdateTime)</td>
+                <td>@ShortenOrigin(order.Origin)</td>
+                <td>@Html.DisplayFor(m => order.Status)</td>
+                <td>@Html.DisplayFor(m => order.Type)</td>
+                <td>@Html.DisplayFor(m => order.Side)</td>
+                <td>@Html.DisplayFor(m => order.Quantity)</td>
+                <td>@Html.DisplayFor(m => order.Cross)</td>
+                <td>@Html.DisplayFor(m => order.FillPrice)</td>
+                <td>@Html.DisplayFor(m => order.LimitPrice)</td>
+                <td>@Html.DisplayFor(m => order.StopPrice)</td>
+                <td>@Html.DisplayFor(m => order.TrailingAmount)</td>
+            </tr>
+        }
+    </table>
+</div>

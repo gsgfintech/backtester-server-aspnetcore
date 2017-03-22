@@ -28,12 +28,15 @@ namespace Backtester.Server.Models
         public string Price { get; set; }
 
         [Display(Name = "Realized PnL")]
+        [DisplayFormat(DataFormatString = "{0:N2}")]
         public double? RealizedPnL { get; set; }
 
         [Display(Name = "Realized PnL (pips)")]
+        [DisplayFormat(DataFormatString = "{0:N1}")]
         public double? RealizedPnlPips { get; set; }
 
         [Display(Name = "Realized PnL (USD)")]
+        [DisplayFormat(DataFormatString = "{0:N2}")]
         public double? RealizedPnlUsd { get; set; }
 
         [Display(Name = "Quantity")]

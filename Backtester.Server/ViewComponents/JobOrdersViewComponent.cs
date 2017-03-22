@@ -1,8 +1,10 @@
 ﻿using Backtester.Server.ControllerUtils;
 using Backtester.Server.Models;
+using Backtester.Server.ViewModels;
 using Capital.GSG.FX.Utils.Core.Logging;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Backtester.Server.ViewComponents
@@ -22,7 +24,7 @@ namespace Backtester.Server.ViewComponents
         {
             var job = await utils.Get(jobId);
 
-            return View(job?.Output?.Orders.ToOrderModels());
+            return View(new JobOrdersViewModel(job?.Output?.Orders?.Values));
         }
     }
 }

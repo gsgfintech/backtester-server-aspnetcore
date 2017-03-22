@@ -1,0 +1,19 @@
+﻿@model IEnumerable<Backtester.Server.Models.BacktestTradeModel>
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <h4>Trades</h4>
+    </div>
+    @if (Model.Count() > 0)
+    {
+        <div class="table-responsive">
+            @Html.Partial("TradesListPartial", Model)
+        </div>
+    }
+    else
+    {
+        <div class="panel-body">
+            <p>No trade for this job</p>
+        </div>
+    }
+</div>

@@ -1,0 +1,32 @@
+﻿@model Backtester.Server.ViewModels.JobOrdersViewModel
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <h4>Active Orders</h4>
+    </div>
+    @if (Model.ActiveOrders.Count > 0)
+    {
+        @Html.Partial("OrdersListPartial", Model.ActiveOrders)
+    }
+    else
+    {
+        <div class="panel-body">
+            <p>No active order for this job</p>
+        </div>
+    }
+</div>
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <h4>Inactive Orders</h4>
+    </div>
+    @if (Model.InactiveOrders.Count > 0)
+    {
+        @Html.Partial("OrdersListPartial", Model.InactiveOrders)
+    }
+    else
+    {
+        <div class="panel-body">
+            <p>No inactive order for this job</p>
+        </div>
+    }
+</div>
