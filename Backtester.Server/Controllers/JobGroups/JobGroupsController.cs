@@ -30,20 +30,20 @@ namespace Backtester.Server.Controllers.JobGroups
             return PartialView("JobGroupInfoPartial", await LoadJobGroup(groupId));
         }
 
-        public async Task<IActionResult> AllTrades(string groupId)
+        public IActionResult AllTrades(string groupId)
         {
-            return View(await LoadJobGroup(groupId));
+            return ViewComponent("AllTrades", groupId);
         }
 
-        public async Task<IActionResult> UnrealizedPnls(string groupId)
+        public IActionResult UnrealizedPnls(string groupId)
         {
-            return View(await LoadJobGroup(groupId));
+            return ViewComponent("UnrealizedPnlSeries", new { jobGroupId = groupId });
         }
 
-        public IActionResult Create()
-        {
-            return View();
-        }
+        //public IActionResult Create()
+        //{
+        //    return View();
+        //}
 
         private async Task<BacktestJobGroupModel> LoadJobGroup(string groupId)
         {

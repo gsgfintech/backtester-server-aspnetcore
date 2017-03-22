@@ -4,36 +4,76 @@
     ViewBag.Title = "Job Group";
 }
 
-@*@Html.Partial("JobGroupTabsPartial", Model)*@
-
 <ul class="nav nav-tabs" style="margin-bottom: 15px">
-    <li role="presentation"><a href onclick="changeContent('info')">Info</a></li>
-    <li role="presentation"><a href onclick="changeContent('trades')">All Trades</a></li>
-    <li role="presentation"><a href onclick="changeContent('pnls')">Unr PnLs</a></li>
+    <li role="presentation" id="presinfo"><a onclick="changeContent('info')">Info</a></li>
+    <li role="presentation" id="prestrades"><a onclick="changeContent('trades')">All Trades</a></li>
+    <li role="presentation" id="prespnls"><a onclick="changeContent('pnls')">Unr PnLs</a></li>
 
     @foreach (var item in Model.JobIds)
     {
-        <li role="presentation"><a href onclick="changeContent('day', '@item.Value')">@item.Key</a></li>
+        <li role="presentation" id="@string.Format("pres{0}", item.Value)"><a onclick="changeContent('day', '@item.Value')">@item.Key</a></li>
     }
 </ul>
 
 <div id="contentholder">
-    @*@Html.Partial("JobGroupInfoPartial", Model)*@
 </div>
 
 @section Scripts
 {
     <script>
         function changeContent(contentTitle, jobId) {
+            activateTab(contentTitle, jobId);
+
             if (contentTitle === 'info') {
-                $('#contentholder').load('/JobGroups/Info?groupId=' + '@Model.GroupId');
+                $('#contentholder').load('/JobGroups/Info?groupId=@Model.GroupId');
             } else if (contentTitle === 'trades') {
-                $('#contentholder').load('/JobGroups/AllTrades?groupId=' + '@Model.GroupId');
+                $('#contentholder').load('/JobGroups/AllTrades?groupId=@Model.GroupId');
             } else if (contentTitle === 'pnls') {
-                $('#contentholder').load('/JobGroups/UnrealizedPnls?groupId=' + '@Model.GroupId');
+                $('#contentholder').load('/JobGroups/UnrealizedPnls?groupId=@Model.GroupId');
             } else if (contentTitle === 'day' && jobId) {
                 $('#contentholder').load('/Jobs/?jobId=' + jobId);
+            } else {
+                console.error('error');
             }
+        }
+
+        function activateTab(activeTab, jobId) {
+            $('li').removeClass('active');
+
+            if (jobId) {
+                $('#pres' + jobId).addClass('active');
+            } else {
+                $('#pres' + activeTab).addClass('active');
+            }
+        }
+
+        $(document).ready(function () {
+            changeContent('info');
+        });
+
+        function changeDayContent(contentTitle, jobId) {
+            activateDayTab(contentTitle);
+
+            if (contentTitle === 'status') {
+                $('#daycontentholder').load('/Jobs/Status?jobId=' + jobId);
+            } else if (contentTitle === 'trades') {
+                $('#daycontentholder').load('/JobGroups/AllTrades?groupId=@Model.GroupId');
+            } else if (contentTitle === 'orders') {
+                $('#daycontentholder').load('/JobGroups/UnrealizedPnls?groupId=@Model.GroupId');
+            } else if (contentTitle === 'positions') {
+                $('#contentholder').load('/Jobs/?jobId=');
+            } else {
+                console.error('error');
+            }
+        }
+
+        function activateDayTab(activeTab) {
+            $('#pres-day-status').removeClass('active');
+            $('#pres-day-trades').removeClass('active');
+            $('#pres-day-orders').removeClass('active');
+            $('#pres-day-positions').removeClass('active');
+
+            $('#pres-day-' + activeTab).addClass('active');
         }
     </script>
 }

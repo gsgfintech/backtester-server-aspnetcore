@@ -1,3 +1,11 @@
 ﻿@model Backtester.Server.Models.BacktestJobModel
 
-<h1>Test @Model.Name</h1>
+<ul class="nav nav-tabs" style="margin-bottom: 15px">
+    <li role="presentation" id="pres-day-status"><a onclick="changeDayContent('status', '@Model.Name')">Info</a></li>
+    <li role="presentation" id="pres-day-orders"><a onclick="changeDayContent('orders', '@Model.Name')">Orders</a></li>
+    <li role="presentation" id="pres-day-trades"><a onclick="changeDayContent('trades', '@Model.Name')">Trades</a></li>
+    <li role="presentation" id="pres-day-positions"><a onclick="changeDayContent('positions', '@Model.Name')">Positions</a></li>
+</ul>
+
+<div id="daycontentholder">
+</div>

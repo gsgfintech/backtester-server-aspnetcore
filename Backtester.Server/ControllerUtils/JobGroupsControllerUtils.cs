@@ -1,4 +1,5 @@
-﻿using Capital.GSG.FX.Backtest.DataTypes;
+﻿using Backtester.Server.Models;
+using Capital.GSG.FX.Backtest.DataTypes;
 using Capital.GSG.FX.Backtest.MongoConnector.Actioner;
 using Capital.GSG.FX.Utils.Core;
 using Capital.GSG.FX.Utils.Core.Logging;
@@ -83,6 +84,13 @@ namespace Backtester.Server.ControllerUtils
 
                 return await actioner.Get(groupId, cts.Token);
             }
+        }
+
+        internal async Task<List<BacktestTradeModel>> GetTrades(string groupId)
+        {
+            var jobGroup = await Get(groupId);
+
+            return jobGroup?.Trades.ToTradeModels();
         }
 
         private async Task LoadActiveJobGroups()

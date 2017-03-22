@@ -1,0 +1,36 @@
+﻿@model Backtester.Server.Models.BacktestStatusModel
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <h4>Status</h4>
+    </div>
+    <table class="table">
+        <tr>
+            <th>@Html.DisplayNameFor(m => Model.Progress)</th>
+            <td>@Html.DisplayFor(m => Model.Progress)</td>
+        </tr>
+        <tr>
+            <th>@Html.DisplayNameFor(m => Model.Message)</th>
+            <td>@Html.DisplayFor(m => Model.Message)</td>
+        </tr>
+        <tr>
+            <th>@Html.DisplayNameFor(m => Model.Timestamp)</th>
+            <td>@Html.DisplayFor(m => Model.Timestamp)</td>
+        </tr>
+    </table>
+</div>
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <h4>Attributes</h4>
+    </div>
+    <table class="table">
+        @foreach(var attribute in Model.Attributes)
+        {
+            <tr>
+                <th>@Html.DisplayFor(m => attribute.Name)</th>
+                <td>@Html.DisplayFor(m => attribute.Value)</td>
+            </tr>
+        }
+
+    </table>
+</div>

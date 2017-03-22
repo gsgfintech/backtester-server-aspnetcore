@@ -22,5 +22,10 @@ namespace Backtester.Server.Controllers.Jobs
         {
             return ViewComponent("Job", jobId);
         }
+
+        public IActionResult Status(string jobId)
+        {
+            return ViewComponent("JobStatus", jobId);
+        }
     }
 }

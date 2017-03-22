@@ -1,0 +1,12 @@
+﻿@model Backtester.Server.Models.BacktestJobGroupModel
+
+<div class="row">
+    <div class="col-xs-12">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4>Trades <small>@Model.GroupId</small></h4>
+            </div>
+            @Html.Partial("TradesListPartial", Model.Trades)
+        </div>
+    </div>
+</div>
