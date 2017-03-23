@@ -1,0 +1,59 @@
+﻿@model Backtester.Server.Models.BacktestTradeModel
+
+<table class="table">
+    <tr>
+        <td><label>@Html.DisplayNameFor(m => Model.TradeId)</label></td>
+        <td>@Html.DisplayFor(m => Model.TradeId)</td>
+    </tr>
+    <tr>
+        <td><label>@Html.DisplayNameFor(m => Model.OrderId)</label></td>
+        <td>@Html.DisplayFor(m => Model.OrderId)</td>
+    </tr>
+    <tr>
+        <td><label>@Html.DisplayNameFor(m => Model.Timestamp)</label></td>
+        <td>@Html.DisplayFor(m => Model.Timestamp)</td>
+    </tr>
+    <tr>
+        <td><label>@Html.DisplayNameFor(m => Model.OrderOrigin)</label></td>
+        <td>@Html.DisplayFor(m => Model.OrderOrigin)</td>
+    </tr>
+    <tr>
+        <td><label>@Html.DisplayNameFor(m => Model.Side)</label></td>
+        <td>@Html.DisplayFor(m => Model.Side)</td>
+    </tr>
+    <tr>
+        <td><label>@Html.DisplayNameFor(m => Model.Cross)</label></td>
+        <td>@Html.DisplayFor(m => Model.Cross)</td>
+    </tr>
+    <tr>
+        <td><label>@Html.DisplayNameFor(m => Model.Size)</label></td>
+        <td>@Html.DisplayFor(m => Model.Size)</td>
+    </tr>
+    <tr>
+        <td><label>@Html.DisplayNameFor(m => Model.Price)</label></td>
+        <td>@Html.DisplayFor(m => Model.Price)</td>
+    </tr>
+    <tr>
+        <td><label>@Html.DisplayNameFor(m => Model.RealizedPnlUsd)</label></td>
+        <td class="@(Model.RealizedPnlUsd > 0 ? "bg-success" : Model.RealizedPnlUsd < 0 ? "bg-danger" : "")">
+            @Html.DisplayFor(m => Model.RealizedPnlUsd)
+
+            @if (Model.RealizedPnlPips.HasValue)
+            {
+                <small>(@Html.DisplayFor(m => Model.RealizedPnlPips))</small>
+            }
+        </td>
+    </tr>
+    <tr>
+        <td><label>@Html.DisplayNameFor(m => Model.CommissionUsd)</label></td>
+        <td>@Html.DisplayFor(m => Model.CommissionUsd)</td>
+    </tr>
+    <tr>
+        <td><label>@Html.DisplayNameFor(m => Model.Duration)</label></td>
+        <td>@Html.DisplayFor(m => Model.Duration)</td>
+    </tr>
+    <tr>
+        <td><label>@Html.DisplayNameFor(m => Model.TradeString)</label></td>
+        <td>@Html.DisplayFor(m => Model.TradeString)</td>
+    </tr>
+</table>

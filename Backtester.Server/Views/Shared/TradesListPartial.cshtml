@@ -1,21 +1,22 @@
 ﻿@using static Backtester.Server.Utils.FormatUtils
 
-@model IEnumerable<Backtester.Server.Models.BacktestTradeModel>
+@model Backtester.Server.ViewModels.Trades.TradesListPartialViewModel
 
 <table class="table table-hover">
     <tr>
-        <th>@Html.DisplayNameFor(m => Model.First().Timestamp)</th>
-        <th>@Html.DisplayNameFor(m => Model.First().OrderOrigin)</th>
-        <th>@Html.DisplayNameFor(m => Model.First().Side)</th>
-        <th>@Html.DisplayNameFor(m => Model.First().Size)</th>
-        <th>@Html.DisplayNameFor(m => Model.First().Cross)</th>
-        <th>@Html.DisplayNameFor(m => Model.First().Price)</th>
-        <th>@Html.DisplayNameFor(m => Model.First().RealizedPnlUsd)</th>
-        <th>@Html.DisplayNameFor(m => Model.First().RealizedPnlPips)</th>
-        <th>@Html.DisplayNameFor(m => Model.First().Duration)</th>
-        <th>@Html.DisplayNameFor(m => Model.First().CommissionUsd)</th>
+        <th>@Html.DisplayNameFor(m => Model.Trades.First().Timestamp)</th>
+        <th>@Html.DisplayNameFor(m => Model.Trades.First().OrderOrigin)</th>
+        <th>@Html.DisplayNameFor(m => Model.Trades.First().Side)</th>
+        <th>@Html.DisplayNameFor(m => Model.Trades.First().Size)</th>
+        <th>@Html.DisplayNameFor(m => Model.Trades.First().Cross)</th>
+        <th>@Html.DisplayNameFor(m => Model.Trades.First().Price)</th>
+        <th>@Html.DisplayNameFor(m => Model.Trades.First().RealizedPnlUsd)</th>
+        <th>@Html.DisplayNameFor(m => Model.Trades.First().RealizedPnlPips)</th>
+        <th>@Html.DisplayNameFor(m => Model.Trades.First().Duration)</th>
+        <th>@Html.DisplayNameFor(m => Model.Trades.First().CommissionUsd)</th>
+        <th></th>
     </tr>
-    @foreach (var trade in Model)
+    @foreach (var trade in Model.Trades)
     {
         <tr>
             <td>@Html.DisplayFor(m => trade.Timestamp)</td>
@@ -65,6 +66,29 @@
 
             <td>@Html.DisplayFor(m => trade.Duration)</td>
             <td>@Html.DisplayFor(m => trade.CommissionUsd)</td>
+            <td><button type="button" class="btn btn-primary btn-xs" data-toggle="modal" data-target="#tradeModal-@trade.TradeId"><span class="glyphicon glyphicon-plus"></span></button></td>
         </tr>
     }
 </table>
+
+<!-- Modals -->
+@foreach (var trade in Model.Trades)
+{
+    <div class="modal fade" id="tradeModal-@trade.TradeId" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title pull-left">Trade</h4>
+                    <div class="btn-group btn-group-sm pull-right">
+                        <a class="btn btn-primary" asp-controller="Trades" asp-action="Index" asp-route-jobgroupid="@Model.JobGroupId" asp-route-tradeid="@trade.TradeId" target="_blank"><span class="glyphicon glyphicon-share"></span> Open</a>
+                    </div>
+                </div>
+                @Html.Partial("TradePartial", trade)
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+<!-- End Modals -->

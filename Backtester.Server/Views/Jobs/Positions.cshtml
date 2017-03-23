@@ -1,0 +1,64 @@
+﻿@using Backtester.Server.ViewModels.Jobs
+
+@model JobPositionsViewModel
+
+@{
+    ViewBag.Title = "Positions";
+    ViewBag.ActiveTab = Model.JobId;
+}
+
+@await Component.InvokeAsync("JobGroupTabs", new { jobGroupId = Model.JobGroupId })
+
+@Html.Partial("JobTabsPartial", new JobTabsPartialViewModel(Model.JobGroupId, Model.JobId))
+
+@foreach (var kvp in Model.Positions)
+{
+    <div class="row">
+        <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h4>@Html.DisplayFor(m => kvp.Key)</h4>
+                </div>
+                <div class="table-responsive" style="max-height: 400px;overflow-y: scroll;">
+                    <table class="table">
+                        <tr>
+                            <th>@Html.DisplayNameFor(m => kvp.Value.First().LastUpdate)</th>
+                            <th style="text-align:end">@Html.DisplayNameFor(m => kvp.Value.First().PositionQuantity)</th>
+                            <th style="text-align:end">@Html.DisplayNameFor(m => kvp.Value.First().GrossCumulativePnlUsd)</th>
+                            <th style="text-align:end">@Html.DisplayNameFor(m => kvp.Value.First().CumulativeCommissionUsd)</th>
+                            <th style="text-align:end">@Html.DisplayNameFor(m => kvp.Value.First().NetCumulativePnlUsd)</th>
+                        </tr>
+                        @foreach (var position in kvp.Value)
+                        {
+                            <tr>
+                                <td>@Html.DisplayFor(m => position.LastUpdate)</td>
+                                <td style="text-align:end">@Html.DisplayFor(m => position.PositionQuantity)</td>
+                                <td style="text-align:end">@Html.DisplayFor(m => position.GrossCumulativePnlUsd)</td>
+                                <td style="text-align:end">@Html.DisplayFor(m => position.CumulativeCommissionUsd)</td>
+                                <td style="text-align:end">@Html.DisplayFor(m => position.NetCumulativePnlUsd)</td>
+                            </tr>
+                        }
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6 col-md-6 hidden-sm hidden-xs">
+            <div class="panel panel-default">
+                <div class="panel-body" id="chartDiv">
+                    <ej-chart id="chartDiv">
+                        <e-chart-series>
+                            <e-series name="@Html.DisplayNameFor(m => kvp.Value.First().PositionQuantity)" datasource="@kvp.Value" x-name="LastUpdate" y-name="PositionQuantity" type="StepLine">
+                                <e-chart-tooltip visible="true"></e-chart-tooltip>
+                                <e-marker shape="Rectangle" visible="true"></e-marker>
+                            </e-series>
+                            <e-series name="@Html.DisplayNameFor(m => kvp.Value.First().NetCumulativePnlUsd)" datasource="@kvp.Value" x-name="LastUpdate" y-name="NetCumulativePnlUsd" type="Line">
+                                <e-chart-tooltip visible="true"></e-chart-tooltip>
+                                <e-marker shape="Circle" visible="true"></e-marker>
+                            </e-series>
+                        </e-chart-series>
+                    </ej-chart>
+                </div>
+            </div>
+        </div>
+    </div>
+}

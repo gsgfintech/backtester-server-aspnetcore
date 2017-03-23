@@ -1,0 +1,30 @@
+﻿@using Backtester.Server.ViewModels.Trades
+
+@model Backtester.Server.ViewModels.JobGroups.JobGroupAllTradesViewModel
+
+@{
+    ViewBag.Title = "All Trades";
+}
+
+@await Component.InvokeAsync("JobGroupTabs", new { jobGroupId = Model.JobGroupId })
+
+<div class="row">
+    <div class="col-xs-12">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4>Trades <small>@Model.JobGroupId</small></h4>
+            </div>
+            @Html.Partial("TradesListPartial", new TradesListPartialViewModel(Model.JobGroupId, Model.Trades))
+        </div>
+    </div>
+</div>
+
+@section Scripts
+{
+    <script>
+        $('#tradeModal').on('show.bs.modal', function (event) {
+            var button = $(event.relatedTarget) // Button that triggered the modal
+            @ViewBag.ActiveTradeId = button.data('tradeid') // Extract info from data-* attributes
+        })
+    </script>
+}

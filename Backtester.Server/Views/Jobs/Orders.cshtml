@@ -1,4 +1,15 @@
-﻿@model Backtester.Server.ViewModels.JobOrdersViewModel
+﻿@using Backtester.Server.ViewModels.Jobs
+
+@model JobOrdersViewModel
+
+@{
+    ViewBag.Title = "Orders";
+    ViewBag.ActiveTab = Model.JobId;
+}
+
+@await Component.InvokeAsync("JobGroupTabs", new { jobGroupId = Model.JobGroupId })
+
+@Html.Partial("JobTabsPartial", new JobTabsPartialViewModel(Model.JobGroupId, Model.JobId))
 
 <div class="panel panel-default">
     <div class="panel-heading">

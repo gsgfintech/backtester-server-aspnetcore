@@ -1,0 +1,9 @@
+﻿@model Backtester.Server.ViewModels.Jobs.JobTabsPartialViewModel
+
+<ul class="nav nav-tabs" style="margin-bottom: 15px">
+    <li role="presentation" class=@(Url.ActionContext.ActionDescriptor.DisplayName.Contains("Status") ? "active" : "")><a asp-action="Status" asp-route-jobgroupid="@Model.JobGroupId" asp-route-jobid="@Model.JobId">Status</a></li>
+    <li role="presentation" class=@(Url.ActionContext.ActionDescriptor.DisplayName.Contains("Alerts") ? "active" : "")><a asp-action="Alerts" asp-route-jobgroupid="@Model.JobGroupId" asp-route-jobid="@Model.JobId">Alerts</a></li>
+    <li role="presentation" class=@(Url.ActionContext.ActionDescriptor.DisplayName.Contains("Orders") ? "active" : "")><a asp-action="Orders" asp-route-jobgroupid="@Model.JobGroupId" asp-route-jobid="@Model.JobId">Orders</a></li>
+    <li role="presentation" class=@(Url.ActionContext.ActionDescriptor.DisplayName.Contains("Trades") ? "active" : "")><a asp-action="Trades" asp-route-jobgroupid="@Model.JobGroupId" asp-route-jobid="@Model.JobId">Trades</a></li>
+    <li role="presentation" class=@(Url.ActionContext.ActionDescriptor.DisplayName.Contains("Positions") ? "active" : "")><a asp-action="Positions" asp-route-jobgroupid="@Model.JobGroupId" asp-route-jobid="@Model.JobId">Positions</a></li>
+</ul>

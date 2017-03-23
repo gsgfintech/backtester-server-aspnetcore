@@ -1,0 +1,28 @@
+﻿@using Backtester.Server.ViewModels.Jobs
+
+@model JobAlertsViewModel
+
+@{
+    ViewBag.Title = "Alerts";
+    ViewBag.ActiveTab = Model.JobId;
+}
+
+@await Component.InvokeAsync("JobGroupTabs", new { jobGroupId = Model.JobGroupId })
+
+@Html.Partial("JobTabsPartial", new JobTabsPartialViewModel(Model.JobGroupId, Model.JobId))
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <h4>Alerts</h4>
+    </div>
+    @if (Model.Alerts.Count > 0)
+    {
+        @Html.Partial("AlertsListPartial", Model.Alerts)
+    }
+    else
+    {
+        <div class="panel-body">
+            <p>No alert for this job</p>
+        </div>
+    }
+</div>

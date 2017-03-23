@@ -1,5 +1,7 @@
 ﻿using Backtester.Server.ControllerUtils;
 using Backtester.Server.Models;
+using Backtester.Server.ViewModels;
+using Backtester.Server.ViewModels.JobGroups;
 using Capital.GSG.FX.Utils.Core.Logging;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -14,10 +16,12 @@ namespace Backtester.Server.Controllers.JobGroups
         private readonly ILogger logger = GSGLoggerFactory.Instance.CreateLogger<JobGroupsController>();
 
         private readonly JobGroupsControllerUtils utils;
+        private readonly UnrealizedPnlSeriesControllerUtils unrealizedPnlSeriesControllerUtils;
 
-        public JobGroupsController(JobGroupsControllerUtils utils)
+        public JobGroupsController(JobGroupsControllerUtils utils, UnrealizedPnlSeriesControllerUtils unrealizedPnlSeriesControllerUtils)
         {
             this.utils = utils;
+            this.unrealizedPnlSeriesControllerUtils = unrealizedPnlSeriesControllerUtils;
         }
 
         public async Task<IActionResult> Index(string groupId)
@@ -27,17 +31,23 @@ namespace Backtester.Server.Controllers.JobGroups
 
         public async Task<IActionResult> Info(string groupId)
         {
-            return PartialView("JobGroupInfoPartial", await LoadJobGroup(groupId));
+            var group = await utils.Get(groupId);
+
+            return View(new JobGroupInfoViewModel(group));
         }
 
-        public IActionResult AllTrades(string groupId)
+        public async Task<IActionResult> AllTrades(string groupId)
         {
-            return ViewComponent("AllTrades", groupId);
+            var group = await utils.Get(groupId);
+
+            return View(new JobGroupAllTradesViewModel(groupId, group?.Trades));
         }
 
-        public IActionResult UnrealizedPnls(string groupId)
+        public async Task<IActionResult> UnrealizedPnls(string groupId)
         {
-            return ViewComponent("UnrealizedPnlSeries", new { jobGroupId = groupId });
+            var unrealizedPnlSeries = await unrealizedPnlSeriesControllerUtils.GetForJobGroup(groupId);
+
+            return View(new UnrealizedPnlSeriesViewModel(groupId, unrealizedPnlSeries));
         }
 
         //public IActionResult Create()

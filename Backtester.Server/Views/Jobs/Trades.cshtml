@@ -1,0 +1,31 @@
+﻿@using Backtester.Server.ViewModels.Jobs
+@using Backtester.Server.ViewModels.Trades
+
+@model JobTradesViewModel
+
+@{
+    ViewBag.Title = "Trades";
+    ViewBag.ActiveTab = Model.JobId;
+}
+
+@await Component.InvokeAsync("JobGroupTabs", new { jobGroupId = Model.JobGroupId })
+
+@Html.Partial("JobTabsPartial", new JobTabsPartialViewModel(Model.JobGroupId, Model.JobId))
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <h4>Trades</h4>
+    </div>
+    @if (Model.Trades.Count > 0)
+    {
+        <div class="table-responsive">
+            @Html.Partial("TradesListPartial", new TradesListPartialViewModel(Model.JobGroupId, Model.Trades))
+        </div>
+    }
+    else
+    {
+        <div class="panel-body">
+            <p>No trade for this job</p>
+        </div>
+    }
+</div>

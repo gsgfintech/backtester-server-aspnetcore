@@ -1,0 +1,115 @@
+﻿@model Backtester.Server.ViewModels.JobGroups.JobGroupInfoViewModel
+
+@{
+    ViewBag.Title = "Info";
+}
+
+@await Component.InvokeAsync("JobGroupTabs", new { jobGroupId = Model.JobGroup.GroupId })
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <h4>Job @Html.DisplayFor(m => Model.JobGroup.GroupId)</h4>
+    </div>
+    <div class="table-responsive">
+        <table class="table">
+            <tr>
+                <th>@Html.DisplayNameFor(m => Model.JobGroup.GroupId)</th>
+                <td>@Html.DisplayFor(m => Model.JobGroup.GroupId)</td>
+            </tr>
+            <tr>
+                <th>@Html.DisplayNameFor(m => Model.JobGroup.Status)</th>
+                <td>
+                    @Html.DisplayFor(m => Model.JobGroup.Status)
+                    @if (Model.JobGroup.Progress.HasValue)
+                    {
+                        <span>(@Html.DisplayFor(m => Model.JobGroup.Progress))</span>
+                    }
+                </td>
+            </tr>
+            <tr>
+                <th>@Html.DisplayNameFor(m => Model.JobGroup.CreateTime)</th>
+                <td>@Html.DisplayFor(m => Model.JobGroup.CreateTime)</td>
+            </tr>
+            <tr>
+                <th>@Html.DisplayNameFor(m => Model.JobGroup.ActualStartTime)</th>
+                <td>@Html.DisplayFor(m => Model.JobGroup.ActualStartTime)</td>
+            </tr>
+            <tr>
+                <th>@Html.DisplayNameFor(m => Model.JobGroup.CompletionTime)</th>
+                <td>@Html.DisplayFor(m => Model.JobGroup.CompletionTime)</td>
+            </tr>
+            <tr>
+                <th>@Html.DisplayNameFor(m => Model.JobGroup.Duration)</th>
+                <td>@Html.DisplayFor(m => Model.JobGroup.Duration)</td>
+            </tr>
+        </table>
+    </div>
+</div>
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <h4>Timeframe</h4>
+    </div>
+    <div class="table-responsive">
+        <table class="table">
+            <tr>
+                <th>@Html.DisplayNameFor(m => Model.JobGroup.StartDate)</th>
+                <td>@Html.DisplayFor(m => Model.JobGroup.StartDate)</td>
+            </tr>
+            <tr>
+                <th>@Html.DisplayNameFor(m => Model.JobGroup.EndDate)</th>
+                <td>@Html.DisplayFor(m => Model.JobGroup.EndDate)</td>
+            </tr>
+            <tr>
+                <th>@Html.DisplayNameFor(m => Model.JobGroup.StartTime)</th>
+                <td>@Html.DisplayFor(m => Model.JobGroup.StartTime)</td>
+            </tr>
+            <tr>
+                <th>@Html.DisplayNameFor(m => Model.JobGroup.EndTime)</th>
+                <td>@Html.DisplayFor(m => Model.JobGroup.EndTime)</td>
+            </tr>
+        </table>
+    </div>
+</div>
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <h4>Strategy</h4>
+    </div>
+    <div class="table-responsive">
+        <table class="table">
+            <tr>
+                <th>@Html.DisplayNameFor(m => Model.JobGroup.Strategy.Name)</th>
+                <td>@Html.DisplayFor(m => Model.JobGroup.Strategy.Name)</td>
+            </tr>
+            <tr>
+                <th>@Html.DisplayNameFor(m => Model.JobGroup.Strategy.Version)</th>
+                <td>@Html.DisplayFor(m => Model.JobGroup.Strategy.Version)</td>
+            </tr>
+            <tr>
+                <th>@Html.DisplayNameFor(m => Model.JobGroup.Strategy.DllPath)</th>
+                <td>@Html.DisplayFor(m => Model.JobGroup.Strategy.DllPath)</td>
+            </tr>
+            <tr>
+                <th>@Html.DisplayNameFor(m => Model.JobGroup.Strategy.StrategyTypeName)</th>
+                <td>@Html.DisplayFor(m => Model.JobGroup.Strategy.StrategyTypeName)</td>
+            </tr>
+            <tr>
+                <th>@Html.DisplayNameFor(m => Model.JobGroup.Strategy.AlgoTypeName)</th>
+                <td>@Html.DisplayFor(m => Model.JobGroup.Strategy.AlgoTypeName)</td>
+            </tr>
+            <tr>
+                <th>@Html.DisplayNameFor(m => Model.JobGroup.Strategy.Crosses)</th>
+                <td>@Html.DisplayFor(m => Model.JobGroup.Strategy.Crosses)</td>
+            </tr>
+            <tr>
+                <th colspan="2">Parameters</th>
+            </tr>
+            @foreach (var parameter in Model.JobGroup.Strategy.Parameters)
+            {
+                <tr>
+                    <th>@Html.DisplayFor(m => parameter.Name)</th>
+                    <td>@Html.DisplayFor(m => parameter.Value)</td>
+                </tr>
+            }
+        </table>
+    </div>
+</div>

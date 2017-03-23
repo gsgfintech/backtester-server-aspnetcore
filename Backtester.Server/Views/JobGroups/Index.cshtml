@@ -7,7 +7,8 @@
 <ul class="nav nav-tabs" style="margin-bottom: 15px">
     <li role="presentation" id="presinfo"><a onclick="changeContent('info')">Info</a></li>
     <li role="presentation" id="prestrades"><a onclick="changeContent('trades')">All Trades</a></li>
-    <li role="presentation" id="prespnls"><a onclick="changeContent('pnls')">Unr PnLs</a></li>
+    @*<li role="presentation" id="prespnls"><a onclick="changeContent('pnls')">Unr PnLs</a></li>*@
+    <li role="presentation" id="prespnls"><a asp-action="UnrealizedPnls" asp-route-groupid="@Model.GroupId">Unr PnLs</a></li>
 
     @foreach (var item in Model.JobIds)
     {
@@ -61,7 +62,7 @@
             } else if (contentTitle === 'orders') {
                 $('#daycontentholder').load('/Jobs/Orders?jobId=' + jobId);
             } else if (contentTitle === 'positions') {
-                $('#contentholder').load('/Jobs/Positions?jobId=' + jobId);
+                $('#daycontentholder').load('/Jobs/Positions?jobId=' + jobId);
             } else {
                 console.error('error');
             }

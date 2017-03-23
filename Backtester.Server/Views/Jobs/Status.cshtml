@@ -1,0 +1,55 @@
+﻿@using Backtester.Server.ViewModels.Jobs
+
+@model JobStatusViewModel
+
+@{
+    ViewBag.Title = "Status";
+    ViewBag.ActiveTab = Model.JobId;
+}
+
+@await Component.InvokeAsync("JobGroupTabs", new { jobGroupId = Model.JobGroupId })
+
+@Html.Partial("JobTabsPartial", new JobTabsPartialViewModel(Model.JobGroupId, Model.JobId))
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <h4>Status</h4>
+    </div>
+    <table class="table">
+        <tr>
+            <th>@Html.DisplayNameFor(m => Model.Status.Progress)</th>
+            <td>@Html.DisplayFor(m => Model.Status.Progress)</td>
+        </tr>
+        <tr>
+            <th>@Html.DisplayNameFor(m => Model.Status.Message)</th>
+            <td>@Html.DisplayFor(m => Model.Status.Message)</td>
+        </tr>
+        <tr>
+            <th>@Html.DisplayNameFor(m => Model.Status.Timestamp)</th>
+            <td>@Html.DisplayFor(m => Model.Status.Timestamp)</td>
+        </tr>
+    </table>
+</div>
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <h4>Attributes</h4>
+    </div>
+    @if (Model?.Status?.Attributes?.Count > 0)
+    {
+        <table class="table">
+            @foreach (var attribute in Model.Status.Attributes)
+            {
+                <tr>
+                    <th>@Html.DisplayFor(m => attribute.Name)</th>
+                    <td>@Html.DisplayFor(m => attribute.Value)</td>
+                </tr>
+            }
+        </table>
+    }
+    else
+    {
+        <div class="panel-body">
+            <p>No sttribute</p>
+        </div>
+    }
+</div>

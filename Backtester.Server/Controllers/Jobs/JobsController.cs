@@ -1,8 +1,10 @@
 ﻿using Backtester.Server.ControllerUtils;
+using Backtester.Server.ViewModels.Jobs;
 using Capital.GSG.FX.Utils.Core.Logging;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using System.Threading.Tasks;
 
 namespace Backtester.Server.Controllers.Jobs
 {
@@ -18,29 +20,39 @@ namespace Backtester.Server.Controllers.Jobs
             this.utils = utils;
         }
 
-        public IActionResult Index(string jobId)
+        public async Task<IActionResult> Status(string jobGroupId, string jobId)
         {
-            return ViewComponent("Job", jobId);
+            var job = await utils.Get(jobId);
+
+            return View(new JobStatusViewModel(jobGroupId, jobId, job?.Output?.Status));
         }
 
-        public IActionResult Status(string jobId)
+        public async Task<IActionResult> Alerts(string jobGroupId, string jobId)
         {
-            return ViewComponent("JobStatus", jobId);
+            var job = await utils.Get(jobId);
+
+            return View(new JobAlertsViewModel(jobGroupId, jobId, job?.Output?.Alerts));
         }
 
-        public IActionResult Orders(string jobId)
+        public async Task<IActionResult> Orders(string jobGroupId, string jobId)
         {
-            return ViewComponent("JobOrders", jobId);
+            var job = await utils.Get(jobId);
+
+            return View(new JobOrdersViewModel(jobGroupId, jobId, job?.Output?.Orders?.Values));
         }
 
-        public IActionResult Trades(string jobId)
+        public async Task<IActionResult> Trades(string jobGroupId, string jobId)
         {
-            return ViewComponent("JobTrades", jobId);
+            var job = await utils.Get(jobId);
+
+            return View(new JobTradesViewModel(jobGroupId, jobId, job?.Output?.Trades?.Values));
         }
 
-        public IActionResult Positions(string jobId)
+        public async Task<IActionResult> Positions(string jobGroupId, string jobId)
         {
-            return ViewComponent("JobPositions", jobId);
+            var job = await utils.Get(jobId);
+
+            return View(new JobPositionsViewModel(jobGroupId, jobId, job?.Output?.Positions));
         }
     }
 }

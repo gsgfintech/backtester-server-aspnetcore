@@ -1,0 +1,18 @@
+﻿@using static Capital.GSG.FX.Data.Core.SystemData.AlertLevel
+
+@model IEnumerable<Backtester.Server.Models.AlertModel>
+
+<div class="table-responsive">
+    <table class="table table-hover">
+        @foreach (var alert in Model)
+        {
+            <tr class="@(alert.Level >= ERROR ? "danger" : alert.Level == WARNING ? "warning" : "info")">
+                <td>@Html.DisplayFor(m => alert.Timestamp)</td>
+                <td>@Html.DisplayFor(m => alert.Level)</td>
+                <td>@Html.DisplayFor(m => alert.Status)</td>
+                <td>@Html.DisplayFor(m => alert.Source)</td>
+                <td>@Html.DisplayFor(m => alert.Subject)</td>
+            </tr>
+        }
+    </table>
+</div>

@@ -32,11 +32,11 @@ namespace Backtester.Server.Models
         public double? RealizedPnL { get; set; }
 
         [Display(Name = "Realized PnL (pips)")]
-        [DisplayFormat(DataFormatString = "{0:N1}")]
+        [DisplayFormat(DataFormatString = "{0:N1} pips")]
         public double? RealizedPnlPips { get; set; }
 
         [Display(Name = "Realized PnL (USD)")]
-        [DisplayFormat(DataFormatString = "{0:N2}")]
+        [DisplayFormat(DataFormatString = "{0:N2} USD")]
         public double? RealizedPnlUsd { get; set; }
 
         [Display(Name = "Quantity")]
@@ -54,6 +54,9 @@ namespace Backtester.Server.Models
 
         [Display(Name = "Origin")]
         public OrderOrigin OrderOrigin { get; set; }
+
+        [Display(Name = "Trade String")]
+        public string TradeString => $"{Side} {Size:N0} {Cross} @ {Price:N5} ({Timestamp:dd/MM/yy HH:mm:ss zzz})";
     }
 
     public static class BacktestTradeModelExtensions
@@ -76,7 +79,7 @@ namespace Backtester.Server.Models
                     RealizedPnlUsd = trade.RealizedPnlUsd,
                     Side = trade.Side,
                     Size = trade.Size / 1000,
-                    Timestamp = trade.Timestamp,
+                    Timestamp = trade.Timestamp.ToLocalTime(),
                     TradeId = trade.TradeId
                 };
         }

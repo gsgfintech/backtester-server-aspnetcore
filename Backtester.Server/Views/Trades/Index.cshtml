@@ -1,0 +1,16 @@
+﻿@model Backtester.Server.Models.BacktestTradeModel
+
+@{
+    ViewBag.Title = $"Trade {Model.TradeId}";
+}
+
+<div class="row">
+    <div class="col-lg-6 col-md-12 col-sm-12 col-xs-12 col-lg-offset-3">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4>Trade @Html.DisplayFor(m => Model.TradeId)</h4>
+            </div>
+            @Html.Partial("TradePartial", Model)
+        </div>
+    </div>
+</div>

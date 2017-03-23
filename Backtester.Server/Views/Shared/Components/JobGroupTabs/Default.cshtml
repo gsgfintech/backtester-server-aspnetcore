@@ -1,0 +1,12 @@
+﻿@model Backtester.Server.ViewModels.JobGroupTabsViewModel
+
+<ul class="nav nav-tabs" style="margin-bottom: 15px">
+    <li role="presentation" class=@(Url.ActionContext.ActionDescriptor.DisplayName.Contains("Info") ? "active" : "")><a asp-controller="JobGroups" asp-action="Info" asp-route-groupid="@Model.JobGroupId">Info</a></li>
+    <li role="presentation" class=@(Url.ActionContext.ActionDescriptor.DisplayName.Contains("AllTrades") ? "active" : "")><a asp-controller="JobGroups" asp-action="AllTrades" asp-route-groupid="@Model.JobGroupId">All Trades</a></li>
+    <li role="presentation" class=@(Url.ActionContext.ActionDescriptor.DisplayName.Contains("UnrealizedPnls") ? "active" : "")><a asp-controller="JobGroups" asp-action="UnrealizedPnls" asp-route-groupid="@Model.JobGroupId">Unr PnLs</a></li>
+
+    @foreach (var item in Model.JobIds)
+    {
+        <li role="presentation" class=@(ViewBag.ActiveTab == item.Value ? "active" : "")><a asp-controller="Jobs" asp-action="Status" asp-route-jobgroupid="@Model.JobGroupId" asp-route-jobid="@item.Value">@item.Key</a></li>
+    }
+</ul>
