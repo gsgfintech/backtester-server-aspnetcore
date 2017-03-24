@@ -1,17 +1,14 @@
 ﻿using Backtester.Server.Models;
 using Backtester.Server.ViewModels.CreateJob;
-using Capital.GSG.FX.Backtest.DataTypes;
 using Capital.GSG.FX.Trading.Strategy;
 using Capital.GSG.FX.Utils.Core;
 using Capital.GSG.FX.Utils.Core.Logging;
-using Microsoft.Extensions.DependencyModel;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.Loader;
 
 namespace Backtester.Server.ControllerUtils
 {
@@ -50,8 +47,7 @@ namespace Backtester.Server.ControllerUtils
             {
                 logger.Debug($"Loading DLL from {dllPath}");
 
-                AssemblyLoader assemblyLoader = new AssemblyLoader();
-                Assembly assembly = assemblyLoader.LoadFromAssemblyPath(dllPath);
+                Assembly assembly = Assembly.LoadFile(dllPath);
 
                 // 1. Strategy
                 Type strategyType = assembly.GetTypes()?.Where(t => t.Name.EndsWith(StrategySuffix)).FirstOrDefault();
@@ -177,17 +173,6 @@ namespace Backtester.Server.ControllerUtils
 
                 return result;
             }
-        }
-    }
-
-    public class AssemblyLoader : AssemblyLoadContext
-    {
-        protected override Assembly Load(AssemblyName assemblyName)
-        {
-            var deps = DependencyContext.Default;
-            var res = deps.CompileLibraries.Where(d => d.Name.Contains(assemblyName.Name)).ToList();
-            var assembly = Assembly.Load(new AssemblyName(res.First().Name));
-            return assembly;
         }
     }
 }
