@@ -1,0 +1,80 @@
+﻿@using static Capital.GSG.FX.Data.Core.OrderData.OrderStatusCode
+
+@model Backtester.Server.Models.BacktestOrderModel
+
+<table class="table">
+    <tr>
+        <td><label>@Html.DisplayNameFor(m => Model.OrderId)</label></td>
+        <td>@Html.DisplayFor(m => Model.OrderId)</td>
+    </tr>
+    <tr>
+        <td><label>@Html.DisplayNameFor(m => Model.PlacedTime)</label></td>
+        <td>@Html.DisplayFor(m => Model.PlacedTime)</td>
+    </tr>
+    <tr>
+        <td><label>@Html.DisplayNameFor(m => Model.LastUpdateTime)</label></td>
+        <td>@Html.DisplayFor(m => Model.LastUpdateTime)</td>
+    </tr>
+    <tr>
+        <td><label>@Html.DisplayNameFor(m => Model.Status)</label></td>
+        <td class="@(Model.Status == Filled ? "success" : (Model.Status == Cancelled || Model.Status == ApiCanceled) ? "danger" : "")">
+            @Html.DisplayFor(m => Model.Status)
+        </td>
+    </tr>
+    <tr>
+        <td><label>@Html.DisplayNameFor(m => Model.Type)</label></td>
+        <td>@Html.DisplayFor(m => Model.Type)</td>
+    </tr>
+    <tr>
+        <td><label>@Html.DisplayNameFor(m => Model.Side)</label></td>
+        <td>@Html.DisplayFor(m => Model.Side)</td>
+    </tr>
+    <tr>
+        <td><label>@Html.DisplayNameFor(m => Model.Cross)</label></td>
+        <td>@Html.DisplayFor(m => Model.Cross)</td>
+    </tr>
+    <tr>
+        <td><label>@Html.DisplayNameFor(m => Model.Origin)</label></td>
+        <td>@Html.DisplayFor(m => Model.Origin)</td>
+    </tr>
+    <tr>
+        <td><label>@Html.DisplayNameFor(m => Model.Quantity)</label></td>
+        <td>@Html.DisplayFor(m => Model.Quantity)</td>
+    </tr>
+    <tr>
+        <td><label>@Html.DisplayNameFor(m => Model.LimitPrice)</label></td>
+        <td>@Html.DisplayFor(m => Model.LimitPrice)</td>
+    </tr>
+    <tr>
+        <td><label>@Html.DisplayNameFor(m => Model.StopPrice)</label></td>
+        <td>@Html.DisplayFor(m => Model.StopPrice)</td>
+    </tr>
+    <tr>
+        <td><label>@Html.DisplayNameFor(m => Model.TrailingAmount)</label></td>
+        <td>@Html.DisplayFor(m => Model.TrailingAmount)</td>
+    </tr>
+    <tr>
+        <td><label>@Html.DisplayNameFor(m => Model.FillPrice)</label></td>
+        <td>@Html.DisplayFor(m => Model.FillPrice)</td>
+    </tr>
+    <tr>
+        <td><label>@Html.DisplayNameFor(m => Model.History)</label></td>
+        <td></td>
+    </tr>
+    @if (Model.History?.Count > 0)
+    {
+        @foreach (var historyPoint in Model.History)
+        {
+            <tr>
+                <td>@Html.DisplayFor(m => historyPoint.Timestamp)</td>
+                <td>@Html.DisplayFor(m => historyPoint.Status)</td>
+            </tr>
+        }
+    }
+    else
+    {
+        <tr>
+            <td>No history to display</td>
+        </tr>
+    }
+</table>

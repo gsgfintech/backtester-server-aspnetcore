@@ -1,4 +1,5 @@
 ﻿@using Backtester.Server.ViewModels.Jobs
+@using Backtester.Server.ViewModels.Orders
 
 @model JobOrdersViewModel
 
@@ -17,7 +18,7 @@
     </div>
     @if (Model.ActiveOrders.Count > 0)
     {
-        @Html.Partial("OrdersListPartial", Model.ActiveOrders)
+        @Html.Partial("OrdersListPartial", new OrdersListPartialViewModel(Model.JobId, Model.ActiveOrders))
     }
     else
     {
@@ -32,7 +33,7 @@
     </div>
     @if (Model.InactiveOrders.Count > 0)
     {
-        @Html.Partial("OrdersListPartial", Model.InactiveOrders)
+        @Html.Partial("OrdersListPartial", new OrdersListPartialViewModel(Model.JobId, Model.InactiveOrders))
     }
     else
     {
