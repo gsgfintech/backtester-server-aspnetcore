@@ -12,33 +12,14 @@
 
 @Html.Partial("JobTabsPartial", new JobTabsPartialViewModel(Model.JobGroupId, Model.JobId))
 
-<div class="panel panel-default">
-    <div class="panel-heading">
-        <h4>Active Orders</h4>
-    </div>
-    @if (Model.ActiveOrders.Count > 0)
-    {
-        @Html.Partial("OrdersListPartial", new OrdersListPartialViewModel(Model.JobId, Model.ActiveOrders))
-    }
-    else
-    {
-        <div class="panel-body">
-            <p>No active order for this job</p>
-        </div>
-    }
-</div>
-<div class="panel panel-default">
-    <div class="panel-heading">
-        <h4>Inactive Orders</h4>
-    </div>
-    @if (Model.InactiveOrders.Count > 0)
-    {
-        @Html.Partial("OrdersListPartial", new OrdersListPartialViewModel(Model.JobId, Model.InactiveOrders))
-    }
-    else
-    {
-        <div class="panel-body">
-            <p>No inactive order for this job</p>
-        </div>
-    }
-</div>
+@Html.Partial("OrdersListPartial", new OrdersListPartialViewModel(Model.JobId, Model.ActiveOrders))
+@Html.Partial("OrdersListPartial", new OrdersListPartialViewModel(Model.JobId, Model.InactiveOrders))
+
+@section Scripts
+{
+    <script>
+        $(document).ready(function () {
+            new Clipboard('#copybtn');
+        });
+    </script>
+}

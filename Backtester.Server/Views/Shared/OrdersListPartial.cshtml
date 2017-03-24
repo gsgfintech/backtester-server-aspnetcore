@@ -3,64 +3,84 @@
 
 @model Backtester.Server.ViewModels.Orders.OrdersListPartialViewModel
 
-<div class="table-responsive">
-    <table class="table table-hover">
-        <tr>
-            <th>@Html.DisplayNameFor(m => Model.Orders.First().OrderId)</th>
-            <th>@Html.DisplayNameFor(m => Model.Orders.First().PlacedTime)</th>
-            <th>@Html.DisplayNameFor(m => Model.Orders.First().LastUpdateTime)</th>
-            <th>@Html.DisplayNameFor(m => Model.Orders.First().Origin)</th>
-            <th>@Html.DisplayNameFor(m => Model.Orders.First().Status)</th>
-            <th>@Html.DisplayNameFor(m => Model.Orders.First().Type)</th>
-            <th>@Html.DisplayNameFor(m => Model.Orders.First().Side)</th>
-            <th>@Html.DisplayNameFor(m => Model.Orders.First().Quantity)</th>
-            <th>@Html.DisplayNameFor(m => Model.Orders.First().Cross)</th>
-            <th>@Html.DisplayNameFor(m => Model.Orders.First().FillPrice)</th>
-            <th>@Html.DisplayNameFor(m => Model.Orders.First().LimitPrice)</th>
-            <th>@Html.DisplayNameFor(m => Model.Orders.First().StopPrice)</th>
-            <th>@Html.DisplayNameFor(m => Model.Orders.First().TrailingAmount)</th>
-            <th></th>
-        </tr>
-        @foreach (var order in Model.Orders)
-        {
-            <tr class="@(order.Status == Filled ? "success" : (order.Status == Cancelled || order.Status == ApiCanceled) ? "danger" : "")">
-                <td>@Html.DisplayFor(m => order.OrderId)</td>
-                <td>@Html.DisplayFor(m => order.PlacedTime)</td>
-                <td>@Html.DisplayFor(m => order.LastUpdateTime)</td>
-                <td>@ShortenOrigin(order.Origin)</td>
-                <td>@Html.DisplayFor(m => order.Status)</td>
-                <td>@Html.DisplayFor(m => order.Type)</td>
-                <td>@Html.DisplayFor(m => order.Side)</td>
-                <td>@Html.DisplayFor(m => order.Quantity)</td>
-                <td>@Html.DisplayFor(m => order.Cross)</td>
-                <td>@Html.DisplayFor(m => order.FillPrice)</td>
-                <td>@Html.DisplayFor(m => order.LimitPrice)</td>
-                <td>@Html.DisplayFor(m => order.StopPrice)</td>
-                <td>@Html.DisplayFor(m => order.TrailingAmount)</td>
-                <td><button type="button" class="btn btn-primary btn-xs" data-toggle="modal" data-target="#orderModal-@order.OrderId"><span class="glyphicon glyphicon-plus"></span></button></td>
-            </tr>
-        }
-    </table>
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <h4>
+            <button id="copybtn" class="btn" data-clipboard-text="@Model.ClipboardContent"><span class="glyphicon glyphicon-copy"></span></button>
+            Orders
+        </h4>
+    </div>
+    @if (Model.Orders.Count > 0)
+    {
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <tr>
+                    <th>@Html.DisplayNameFor(m => Model.Orders.First().OrderId)</th>
+                    <th>@Html.DisplayNameFor(m => Model.Orders.First().PlacedTime)</th>
+                    <th>@Html.DisplayNameFor(m => Model.Orders.First().LastUpdateTime)</th>
+                    <th>@Html.DisplayNameFor(m => Model.Orders.First().Origin)</th>
+                    <th>@Html.DisplayNameFor(m => Model.Orders.First().Status)</th>
+                    <th>@Html.DisplayNameFor(m => Model.Orders.First().Type)</th>
+                    <th>@Html.DisplayNameFor(m => Model.Orders.First().Side)</th>
+                    <th>@Html.DisplayNameFor(m => Model.Orders.First().Quantity)</th>
+                    <th>@Html.DisplayNameFor(m => Model.Orders.First().Cross)</th>
+                    <th>@Html.DisplayNameFor(m => Model.Orders.First().FillPrice)</th>
+                    <th>@Html.DisplayNameFor(m => Model.Orders.First().LimitPrice)</th>
+                    <th>@Html.DisplayNameFor(m => Model.Orders.First().StopPrice)</th>
+                    <th>@Html.DisplayNameFor(m => Model.Orders.First().TrailingAmount)</th>
+                    <th></th>
+                </tr>
+                @foreach (var order in Model.Orders)
+                {
+                    <tr class="@(order.Status == Filled ? "success" : (order.Status == Cancelled || order.Status == ApiCanceled) ? "danger" : "")">
+                        <td>@Html.DisplayFor(m => order.OrderId)</td>
+                        <td>@Html.DisplayFor(m => order.PlacedTime)</td>
+                        <td>@Html.DisplayFor(m => order.LastUpdateTime)</td>
+                        <td>@ShortenOrigin(order.Origin)</td>
+                        <td>@Html.DisplayFor(m => order.Status)</td>
+                        <td>@Html.DisplayFor(m => order.Type)</td>
+                        <td>@Html.DisplayFor(m => order.Side)</td>
+                        <td>@Html.DisplayFor(m => order.Quantity)</td>
+                        <td>@Html.DisplayFor(m => order.Cross)</td>
+                        <td>@Html.DisplayFor(m => order.FillPrice)</td>
+                        <td>@Html.DisplayFor(m => order.LimitPrice)</td>
+                        <td>@Html.DisplayFor(m => order.StopPrice)</td>
+                        <td>@Html.DisplayFor(m => order.TrailingAmount)</td>
+                        <td><button type="button" class="btn btn-primary btn-xs" data-toggle="modal" data-target="#orderModal-@order.OrderId"><span class="glyphicon glyphicon-plus"></span></button></td>
+                    </tr>
+                }
+            </table>
+        </div>
+    }
+    else
+    {
+        <div class="panel-body">
+            <p>No order to display</p>
+        </div>
+    }
 </div>
 
-<!-- Modals -->
-@foreach (var order in Model.Orders)
+@if (Model.Orders.Count > 0)
 {
-    <div class="modal fade" id="orderModal-@order.OrderId" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h4 class="modal-title pull-left">Order</h4>
-                    <div class="btn-group btn-group-sm pull-right">
-                        <a class="btn btn-primary" asp-controller="Trades" asp-action="Index" asp-route-jobid="@Model.JobId" asp-route-orderid="@order.OrderId" target="_blank"><span class="glyphicon glyphicon-share"></span> Open</a>
+    <!-- Modals -->
+    @foreach (var order in Model.Orders)
+    {
+        <div class="modal fade" id="orderModal-@order.OrderId" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title pull-left">Order</h4>
+                        <div class="btn-group btn-group-sm pull-right">
+                            <a class="btn btn-primary" asp-controller="Trades" asp-action="Index" asp-route-jobid="@Model.JobId" asp-route-orderid="@order.OrderId" target="_blank"><span class="glyphicon glyphicon-share"></span> Open</a>
+                        </div>
                     </div>
-                </div>
-                @Html.Partial("OrderPartial", order)
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+                    @Html.Partial("OrderPartial", order)
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
+    }
+    <!-- End Modals -->
 }
-<!-- End Modals -->

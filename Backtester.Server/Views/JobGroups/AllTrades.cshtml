@@ -10,18 +10,17 @@
 
 <div class="row">
     <div class="col-xs-12">
-        <div class="panel panel-default">
-            <div class="panel-heading">
-                <h4>Trades <small>@Model.JobGroupId</small></h4>
-            </div>
-            @Html.Partial("TradesListPartial", new TradesListPartialViewModel(Model.JobGroupId, Model.Trades))
-        </div>
+        @Html.Partial("TradesListPartial", new TradesListPartialViewModel(Model.JobGroupId, Model.Trades))
     </div>
 </div>
 
 @section Scripts
 {
     <script>
+        $(document).ready(function () {
+            new Clipboard('#copybtn');
+        });
+
         $('#tradeModal').on('show.bs.modal', function (event) {
             var button = $(event.relatedTarget) // Button that triggered the modal
             @ViewBag.ActiveTradeId = button.data('tradeid') // Extract info from data-* attributes
