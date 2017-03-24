@@ -8,6 +8,7 @@ using Capital.GSG.FX.Backtest.MongoConnector;
 using Capital.GSG.FX.Backtest.MongoConnector.Actioner;
 using Backtester.Server.ControllerUtils;
 using Capital.GSG.FX.Utils.Core.Logging;
+using System.IO;
 
 namespace Backtester.Server
 {
@@ -36,7 +37,7 @@ namespace Backtester.Server
         {
             services.AddBacktestDBServer(Configuration.GetSection("BacktestDBServer"));
 
-            services.AddControllerUtils();
+            services.AddControllerUtils(Configuration);
 
             // Add framework services.
             services.AddMvc();
@@ -115,7 +116,7 @@ namespace Backtester.Server
             });
         }
 
-        public static void AddControllerUtils(this IServiceCollection services)
+        public static void AddControllerUtils(this IServiceCollection services, IConfigurationRoot config)
         {
             services.AddSingleton((serviceProvider) =>
             {
@@ -136,6 +137,13 @@ namespace Backtester.Server
                 var actioner = serviceProvider.GetService<UnrealizedPnlSerieActioner>();
 
                 return new UnrealizedPnlSeriesControllerUtils(actioner);
+            });
+
+            services.AddSingleton((serviceProvider) =>
+            {
+                string stratFilesUploadDirectory = config.GetValue<string>("StratFileDropDir") ?? Path.GetTempPath();
+
+                return new StratFileControllerUtils(stratFilesUploadDirectory);
             });
         }
     }

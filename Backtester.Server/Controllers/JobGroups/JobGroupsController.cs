@@ -50,10 +50,10 @@ namespace Backtester.Server.Controllers.JobGroups
             return View(new UnrealizedPnlSeriesViewModel(groupId, unrealizedPnlSeries));
         }
 
-        //public IActionResult Create()
-        //{
-        //    return View();
-        //}
+        public IActionResult Create()
+        {
+            return View(new BacktestJobSettingsModel());
+        }
 
         private async Task<BacktestJobGroupModel> LoadJobGroup(string groupId)
         {
