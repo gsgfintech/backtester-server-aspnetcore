@@ -7,7 +7,7 @@
 <div class="row">
     <div class="col-xs-12">
         <div style="margin-top: 0.8em; margin-bottom: 0.8em">
-            <a class="btn btn-success" asp-controller="JobGroups" asp-action="Create"><span class="glyphicon glyphicon-plus-sign"></span> Create A New Job</a>
+            <a class="btn btn-success" asp-controller="CreateJob" asp-action="Step1"><span class="glyphicon glyphicon-plus-sign"></span> Create A New Job</a>
         </div>
         @await Component.InvokeAsync("JobGroupsList", new { listType = Active })
         @await Component.InvokeAsync("JobGroupsList", new { listType = Inactive })
