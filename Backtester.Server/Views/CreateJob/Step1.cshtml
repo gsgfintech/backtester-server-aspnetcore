@@ -8,13 +8,110 @@
 
 <div class="row">
     <div class="col-lg-12">
-        <div class="panel panel-default">
-            <div class="panel-heading">
-                <h4>1. Select Strategy Assembly File</h4>
+        @if (!Model.Success)
+        {
+            @if (string.IsNullOrEmpty(Model.Message))
+            {
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h4>
+                            1. Select Strategy Assembly File
+                        </h4>
+                    </div>
+                    <div class="panel-body">
+                        <form class="form-inline" method="post" enctype="multipart/form-data" asp-controller="CreateJob" asp-action="Step1Submit">
+                            <div class="form-group">
+                                <input class="form-control" type="file" name="files" />
+                                <button class="btn btn-primary" type="submit">Upload Strategy DLL File</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="panel panel-danger">
+                    <div class="panel-heading">
+                        <h4>
+                            1. Select Strategy Assembly File - FAILED
+                        </h4>
+                    </div>
+                    <div class="panel-body">
+                        <p>Failed to upload file: @Model.Message</p>
+                        <form class="form-inline" method="post" enctype="multipart/form-data" asp-controller="CreateJob" asp-action="Step1Submit">
+                            <div class="form-group">
+                                <input class="form-control" type="file" name="files" />
+                                <button class="btn btn-primary" type="submit">Upload Strategy DLL File</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="panel panel-success">
+                <div class="panel-heading">
+                    <h4>
+                        1. Select Strategy Assembly File - SUCCESS
+                        <span class="glyphicon glyphicon-ok-sign text-success pull-right"></span>
+                    </h4>
+                </div>
+                <table class="table">
+                    <tr>
+                        <td colspan="2">
+                            Successfully uploaded file <strong>@Html.DisplayFor(m => Model.Settings.OriginalFileName)</strong>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>@Html.DisplayNameFor(m => Model.Settings.JobName)</th>
+                        <td>@Html.DisplayFor(m => Model.Settings.JobName)</td>
+                    </tr>
+                    <tr>
+                        <th>@Html.DisplayNameFor(m => Model.Settings.CrossesStr)</th>
+                        <td>@Html.DisplayFor(m => Model.Settings.CrossesStr)</td>
+                    </tr>
+                    <tr>
+                        <th colspan="2">Strategy</th>
+                    </tr>
+                    <tr>
+                        <td>@Html.DisplayNameFor(m => Model.Settings.StrategyName)</td>
+                        <td>@Html.DisplayFor(m => Model.Settings.StrategyName)</td>
+                    </tr>
+                    <tr>
+                        <td>@Html.DisplayNameFor(m => Model.Settings.StrategyVersion)</td>
+                        <td>@Html.DisplayFor(m => Model.Settings.StrategyVersion)</td>
+                    </tr>
+                    <tr>
+                        <td>@Html.DisplayNameFor(m => Model.Settings.StrategyClass)</td>
+                        <td>@Html.DisplayFor(m => Model.Settings.StrategyClass)</td>
+                    </tr>
+                    <tr>
+                        <th colspan="2">Algorithm</th>
+                    </tr>
+                    <tr>
+                        <td>@Html.DisplayNameFor(m => Model.Settings.AlgorithmClass)</td>
+                        <td>@Html.DisplayFor(m => Model.Settings.AlgorithmClass)</td>
+                    </tr>
+                    <tr>
+                        <th colspan="2">DLL</th>
+                    </tr>
+                    <tr>
+                        <td>@Html.DisplayNameFor(m => Model.Settings.OriginalFileName)</td>
+                        <td>@Html.DisplayFor(m => Model.Settings.OriginalFileName)</td>
+                    </tr>
+                    <tr>
+                        <td>@Html.DisplayNameFor(m => Model.Settings.NewFileName)</td>
+                        <td>@Html.DisplayFor(m => Model.Settings.NewFileName)</td>
+                    </tr>
+                </table>
+                <div class="panel-footer">
+                    <div class="btn-group">
+                        <a asp-action="Step1" class="btn btn-danger">Reset</a>
+                        <a asp-action="Step2" class="btn btn-success" asp-route-jobname="@Model.Settings.JobName">Next</a>
+                    </div>
+                </div>
             </div>
-            <div class="panel-body">
-                <p>TODO</p>
-            </div>
-        </div>
+        }
     </div>
 </div>

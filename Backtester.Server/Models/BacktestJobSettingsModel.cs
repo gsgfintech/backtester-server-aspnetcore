@@ -1,4 +1,5 @@
 ﻿using Capital.GSG.FX.Data.Core.ContractData;
+using Capital.GSG.FX.Utils.Core;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -7,6 +8,9 @@ namespace Backtester.Server.Models
 {
     public class BacktestJobSettingsModel
     {
+        [Display(Name = "Job")]
+        public string JobName { get; set; }
+
         [Display(Name = "Original File Name")]
         public string OriginalFileName { get; set; }
 
@@ -27,8 +31,10 @@ namespace Backtester.Server.Models
         [Display(Name = "Algo Class")]
         public string AlgorithmClass { get; set; }
 
-        [Display(Name = "Pairs")]
         public List<Cross> Crosses { get; set; }
+
+        [Display(Name = "Pairs")]
+        public string CrossesStr => !Crosses.IsNullOrEmpty() ? string.Join(", ", Crosses) : string.Empty;
 
         [Display(Name = "Begin Date")]
         [DisplayFormat(DataFormatString = "dd/MM/yy")]

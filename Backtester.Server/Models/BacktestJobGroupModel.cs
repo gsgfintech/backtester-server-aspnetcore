@@ -84,8 +84,6 @@ namespace Backtester.Server.Models
     {
         public string Name { get; set; }
         public string Value { get; set; }
-        public string DefaultValue { get; set; }
-        public string Type { get; set; }
         public string Tooltip { get; set; }
     }
 
@@ -100,7 +98,6 @@ namespace Backtester.Server.Models
             {
                 Name = parameter.Name,
                 Tooltip = parameter.Tooltip,
-                Type = parameter.Type,
                 Value = parameter.Value
             };
         }

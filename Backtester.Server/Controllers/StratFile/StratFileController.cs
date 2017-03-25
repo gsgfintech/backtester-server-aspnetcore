@@ -17,9 +17,9 @@ namespace Backtester.Server.Controllers.StratFile
     {
         private readonly ILogger logger = GSGLoggerFactory.Instance.CreateLogger<StratFileController>();
 
-        private StratFileControllerUtils utils;
+        private CreateJobControllerUtils utils;
 
-        public StratFileController(StratFileControllerUtils utils)
+        public StratFileController(CreateJobControllerUtils utils)
         {
             this.utils = utils;
         }

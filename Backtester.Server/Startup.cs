@@ -143,7 +143,7 @@ namespace Backtester.Server
             {
                 string stratFilesUploadDirectory = config.GetValue<string>("StratFileDropDir") ?? Path.GetTempPath();
 
-                return new StratFileControllerUtils(stratFilesUploadDirectory);
+                return new CreateJobControllerUtils(stratFilesUploadDirectory);
             });
         }
     }

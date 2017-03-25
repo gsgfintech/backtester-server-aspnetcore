@@ -8,13 +8,54 @@
 
 <div class="row">
     <div class="col-lg-12">
-        <div class="panel panel-default">
-            <div class="panel-heading">
-                <h4>3. Select Time Range</h4>
+        <form name="form-step-3" role="form" class="form-horizontal" asp-controller="CreateJob" asp-action="Step4" asp-route-jobname="@Model.Settings.JobName" method="post">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h4>3. Select Time Range</h4>
+                </div>
+                <div class="panel-body">
+                    <div class="row">
+                        <div class="col-sm-6 form-group">
+                            <label class="col-sm-6 col-md-4 control-label">@(Html.DisplayNameFor(m => Model.Settings.StartDate)):</label>
+                            <p class="input-group col-sm-6 col-md-8">
+                                <input name="start-date" type="date" class="form-control" uib-datepicker-popup ng-model="jobsCtrl.lowerBoundDate" is-open="jobsCtrl.lowerBoundDateOpen" datepicker-options="jobsCtrl.dateOptions" ng-required="true" close-text="Close" />
+                                <span class="input-group-btn">
+                                    <button type="button" class="btn btn-default" ng-click="jobsCtrl.openDatePicker('lowerDate')"><i class="glyphicon glyphicon-calendar"></i></button>
+                                </span>
+                            </p>
+                        </div>
+                        <div class="col-sm-6 form-group">
+                            <label for="start-time" class="col-sm-6 col-md-4 control-label">@(Html.DisplayNameFor(m => Model.Settings.StartTime)):</label>
+                            <p title="start-time" class="input-group col-sm-6 col-md-8">
+                                <uib-timepicker ng-model="jobsCtrl.lowerBoundTime" show-meridian="false" show-spinners="false" ng-required="true"></uib-timepicker>
+                            </p>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-6 form-group">
+                            <label for="end-date" class="col-sm-6 col-md-4 control-label">@(Html.DisplayNameFor(m => Model.Settings.EndDate)):</label>
+                            <p class="input-group col-sm-6 col-md-8">
+                                <input name="end-date" type="date" class="form-control" uib-datepicker-popup ng-model="jobsCtrl.upperBoundDate" is-open="jobsCtrl.upperBoundDateOpen" datepicker-options="jobsCtrl.dateOptions" ng-required="true" close-text="Close" />
+                                <span class="input-group-btn">
+                                    <button type="button" class="btn btn-default" ng-click="jobsCtrl.openDatePicker('upperDate')"><i class="glyphicon glyphicon-calendar"></i></button>
+                                </span>
+                            </p>
+                        </div>
+                        <div class="col-sm-6 form-group">
+                            <label for="end-time" class="col-sm-6 col-md-4 control-label">@(Html.DisplayNameFor(m => Model.Settings.EndTime)):</label>
+                            <p title="end-time" class="input-group col-sm-6 col-md-8">
+                                <uib-timepicker ng-model="jobsCtrl.upperBoundTime" show-meridian="false" show-spinners="false" ng-required="true"></uib-timepicker>
+                            </p>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="panel-body">
-                <p>TODO</p>
+            <div class="panel-footer">
+                <div class="btn-group">
+                    <a class="btn btn-danger" asp-action="Step2" asp-route-jobname="@Model.Settings.JobName">Back</a>
+                    <button type="submit" class="btn btn-success">Next</button>
+                </div>
             </div>
-        </div>
+        </form>
     </div>
 </div>
