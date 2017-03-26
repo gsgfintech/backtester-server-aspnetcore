@@ -1,9 +1,7 @@
-﻿@using Backtester.Server.ViewModels.CreateJob
-
-@model Backtester.Server.ViewModels.CreateJob.CreateJobStep4ViewModel
+﻿@model Backtester.Server.ViewModels.CreateJob.CreateJobStep4ViewModel
 
 @{
-    ViewData["Title"] = "Step 4";
+    ViewData["Title"] = "Review";
 }
 
 <div class="row">
@@ -13,7 +11,77 @@
                 <h4>4. Review And Submit</h4>
             </div>
             <div class="panel-body">
-                <p>TODO</p>
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        Strategy
+                    </div>
+                    <table class="table">
+                        <tr>
+                            <th>@Html.DisplayNameFor(m => Model.Settings.OriginalFileName)</th>
+                            <td>@Html.DisplayFor(m => Model.Settings.OriginalFileName)</td>
+                        </tr>
+                        <tr>
+                            <th>@Html.DisplayNameFor(m => Model.Settings.StrategyName)</th>
+                            <td>@Html.DisplayFor(m => Model.Settings.StrategyName)</td>
+                        </tr>
+                        <tr>
+                            <th>@Html.DisplayNameFor(m => Model.Settings.StrategyVersion)</th>
+                            <td>@Html.DisplayFor(m => Model.Settings.StrategyVersion)</td>
+                        </tr>
+                        <tr>
+                            <th>@Html.DisplayNameFor(m => Model.Settings.CrossesStr)</th>
+                            <td>@Html.DisplayFor(m => Model.Settings.CrossesStr)</td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        @Html.DisplayNameFor(m => Model.Settings.Parameters)
+                    </div>
+                    @if (Model.Settings.Parameters?.Count > 0)
+                    {
+                        <table class="table">
+                            @foreach (var parameter in Model.Settings.Parameters)
+                            {
+                                <tr>
+                                    <th>@Html.DisplayFor(m => parameter.Name)</th>
+                                    <td>@Html.DisplayFor(m => parameter.Value)</td>
+                                </tr>
+                            }
+                        </table>
+                    }
+                </div>
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        Time Range
+                    </div>
+                    <table class="table">
+                        <tr>
+                            <th>@Html.DisplayNameFor(m => Model.Settings.StartDate)</th>
+                            <td>@Html.DisplayFor(m => Model.Settings.StartDate)</td>
+                        </tr>
+                        <tr>
+                            <th>@Html.DisplayNameFor(m => Model.Settings.EndDate)</th>
+                            <td>@Html.DisplayFor(m => Model.Settings.EndDate)</td>
+                        </tr>
+                        <tr>
+                            <th>@Html.DisplayNameFor(m => Model.TotalDays)</th>
+                            <td>@Html.DisplayFor(m => Model.TotalDays)</td>
+                        </tr>
+                        <tr>
+                            <th>@Html.DisplayNameFor(m => Model.Settings.StartTime)</th>
+                            <td>@Html.DisplayFor(m => Model.Settings.StartTime)</td>
+                        </tr>
+                        <tr>
+                            <th>@Html.DisplayNameFor(m => Model.Settings.EndTime)</th>
+                            <td>@Html.DisplayFor(m => Model.Settings.EndTime)</td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="btn-group" style="margin-top: 16px">
+                    <a class="btn btn-danger" asp-action="Step1">Reset</a>
+                    <a class="btn btn-success" asp-action="Submit" asp-route-jobname="@Model.Settings.JobName">Create Job</a>
+                </div>
             </div>
         </div>
     </div>

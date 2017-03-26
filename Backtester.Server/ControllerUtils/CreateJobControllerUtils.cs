@@ -1,8 +1,11 @@
 ﻿using Backtester.Server.Models;
 using Backtester.Server.ViewModels.CreateJob;
+using Capital.GSG.FX.Backtest.DataTypes;
+using Capital.GSG.FX.Data.Core.WebApi;
 using Capital.GSG.FX.Trading.Strategy;
 using Capital.GSG.FX.Utils.Core;
 using Capital.GSG.FX.Utils.Core.Logging;
+using DataTypes.Core;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Concurrent;
@@ -10,6 +13,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Backtester.Server.ControllerUtils
 {
@@ -23,15 +28,19 @@ namespace Backtester.Server.ControllerUtils
         private const string TooltipKey = "Tooltip";
 
         private readonly string stratFilesUploadDirectory;
+        private readonly JobsControllerUtils jobsControllerUtils;
+        private readonly JobGroupsControllerUtils jobGroupsControllerUtils;
 
         private ConcurrentDictionary<string, BacktestJobSettingsModel> jobs = new ConcurrentDictionary<string, BacktestJobSettingsModel>();
 
         private int newJobCounter = 1;
         private object newJobCounterLocker = new object();
 
-        public CreateJobControllerUtils(string stratFilesUploadDirectory)
+        public CreateJobControllerUtils(string stratFilesUploadDirectory, JobsControllerUtils jobsControllerUtils, JobGroupsControllerUtils jobGroupsControllerUtils)
         {
             this.stratFilesUploadDirectory = !string.IsNullOrEmpty(stratFilesUploadDirectory) ? stratFilesUploadDirectory : Path.GetTempPath();
+            this.jobsControllerUtils = jobsControllerUtils;
+            this.jobGroupsControllerUtils = jobGroupsControllerUtils;
         }
 
         public string GetFilePath(string uploadedFileName)
@@ -146,12 +155,7 @@ namespace Backtester.Server.ControllerUtils
 
                         do
                         {
-                            result.Settings.JobName = $"job_{newJobCounter}_{result.Settings.StrategyName}_{result.Settings.StrategyVersion}_{DateTimeOffset.Now:yyyyMMddHHmmss}".Replace(" ", "").Replace(".", "");
-
-                            lock (newJobCounterLocker)
-                            {
-                                newJobCounter++;
-                            }
+                            result.Settings.JobName = GetNextJobName(result.Settings.StrategyName, result.Settings.StrategyVersion);
                         } while (!jobs.TryAdd(result.Settings.JobName, result.Settings));
 
                         return result;
@@ -191,6 +195,69 @@ namespace Backtester.Server.ControllerUtils
             }
         }
 
+        private string GetNextJobName(string stratName, string stratVersion)
+        {
+            lock (newJobCounterLocker)
+            {
+                newJobCounter++;
+            };
+
+            return $"job_{newJobCounter}_{stratName}_{stratVersion}_{DateTimeOffset.Now:yyyyMMddHHmmss}".Replace(" ", "").Replace(".", "");
+        }
+
+        internal async Task<CreateJobStep1ViewModel> DuplicateJob(string jobNameToDuplicate)
+        {
+            logger.Info($"Will attempt to duplicate job {jobNameToDuplicate}");
+
+            var jobGroup = await jobGroupsControllerUtils.Get(jobNameToDuplicate);
+
+            if (jobGroup != null && jobGroup.Strategy != null)
+            {
+                string dllPath = jobGroup.Strategy.StrategyDllPath;
+
+                if (File.Exists(dllPath))
+                {
+                    var result = new CreateJobStep1ViewModel()
+                    {
+                        Message = $"Duplicate of {jobNameToDuplicate}",
+                        Settings = new BacktestJobSettingsModel()
+                        {
+                            AlgorithmClass = jobGroup.Strategy?.AlgoTypeName,
+                            Crosses = jobGroup.Strategy.Crosses,
+                            EndDate = jobGroup.EndDate.LocalDateTime,
+                            EndTime = jobGroup.EndTime.LocalDateTime,
+                            NewFileName = dllPath,
+                            OriginalFileName = jobGroup.Strategy.StrategyDllPath,
+                            Parameters = jobGroup.Strategy.Parameters.ToBacktestJobStrategyParameterModels("Param"),
+                            StartDate = jobGroup.StartDate.LocalDateTime,
+                            StartTime = jobGroup.StartTime.LocalDateTime,
+                            StrategyClass = jobGroup.Strategy.StrategyTypeName,
+                            StrategyName = jobGroup.Strategy.Name,
+                            StrategyVersion = jobGroup.Strategy.Version
+                        },
+                        Success = true
+                    };
+
+                    do
+                    {
+                        result.Settings.JobName = GetNextJobName(result.Settings.StrategyName, result.Settings.StrategyVersion);
+                    } while (!jobs.TryAdd(result.Settings.JobName, result.Settings));
+
+                    return result;
+                }
+                else
+                {
+                    logger.Error($"Unable to the DLL file used for previous job {jobNameToDuplicate} ({dllPath}). Will create a new job instead");
+                    return new CreateJobStep1ViewModel();
+                }
+            }
+            else
+            {
+                logger.Error($"Unable to retrieve details of job {jobNameToDuplicate}. Will create a new one instead");
+                return new CreateJobStep1ViewModel();
+            }
+        }
+
         public BacktestJobSettingsModel GetJobSettings(string jobName)
         {
             BacktestJobSettingsModel settings;
@@ -200,7 +267,8 @@ namespace Backtester.Server.ControllerUtils
                 logger.Error($"Failed to retrieve settings for job {jobName}");
                 settings = new BacktestJobSettingsModel()
                 {
-                    JobName = jobName
+                    JobName = jobName,
+                    Parameters = new List<BacktestJobStrategyParameterModel>()
                 };
             }
 
@@ -215,6 +283,117 @@ namespace Backtester.Server.ControllerUtils
 
                 return oldValue;
             });
+        }
+
+        public BacktestJobSettingsModel SetTimeRange(string jobName, DateTime startDate, DateTime endDate, DateTime startTime, DateTime endTime)
+        {
+            return jobs.AddOrUpdate(jobName, (key) => null, (key, oldValue) =>
+            {
+                oldValue.StartDate = startDate;
+                oldValue.EndDate = endDate;
+                oldValue.StartTime = startTime;
+                oldValue.EndTime = endTime;
+
+                return oldValue;
+            });
+        }
+
+        internal async Task<CreateJobSubmitViewModel> CreateJob(string jobName)
+        {
+            try
+            {
+                var jobSettings = GetJobSettings(jobName);
+
+                if (jobSettings == null)
+                    return new CreateJobSubmitViewModel(jobName, false, $"Failed to get settings for job {jobName}");
+
+                if (string.IsNullOrEmpty(jobSettings?.StrategyName))
+                    throw new ArgumentNullException("StrategyName");
+
+                if (string.IsNullOrEmpty(jobSettings?.StrategyVersion))
+                    throw new ArgumentNullException("StrategyVersion");
+
+                if (string.IsNullOrEmpty(jobSettings?.StrategyClass))
+                    throw new ArgumentNullException("StrategyClass");
+
+                if (jobSettings.Crosses.IsNullOrEmpty())
+                    throw new ArgumentNullException("Crosses");
+
+                if (jobSettings.Parameters.IsNullOrEmpty())
+                    throw new ArgumentNullException("Parameters");
+
+                var days = DateTimeUtils.EachBusinessDay(jobSettings.StartDate, jobSettings.EndDate);
+
+                if (days.IsNullOrEmpty())
+                    throw new ArgumentOutOfRangeException(nameof(days), $"Invalid days interval: start {jobSettings.StartDate}, end: {jobSettings.EndDate}");
+
+                var jobGroup = new BacktestJobGroup(jobName)
+                {
+                    EndDate = jobSettings.EndDate,
+                    EndTime = jobSettings.EndTime,
+                    StartDate = jobSettings.StartDate,
+                    StartTime = jobSettings.StartTime,
+                    Strategy = new Strategy()
+                    {
+                        Crosses = jobSettings.Crosses,
+                        Name = jobSettings.StrategyName,
+                        Parameters = jobSettings.Parameters.ToStrategyParameters("Param"),
+                        StrategyDllPath = jobSettings.NewFileName,
+                        StrategyTypeName = jobSettings.StrategyClass,
+                        Version = jobSettings.StrategyVersion
+                    }
+                };
+
+                List<GenericActionResult> failed = new List<GenericActionResult>();
+
+                int dayCounter = 1;
+                foreach (var day in days)
+                {
+                    BacktestJob job = new BacktestJob(jobName, $"{jobName}_{dayCounter++}")
+                    {
+                        Day = day,
+                        EndTime = jobSettings.EndTime,
+                        StartTime = jobSettings.StartTime
+                    };
+
+                    logger.Info($"Inserting new backtest job {job.Name} in dictionary database");
+
+                    CancellationTokenSource cts = new CancellationTokenSource();
+                    cts.CancelAfter(TimeSpan.FromSeconds(5));
+
+                    var addResult = await jobsControllerUtils.AddJob(job);
+
+                    if (addResult.Success)
+                        jobGroup.JobIds.Add(day.ToString("yyyy-MM-dd"), job.Name);
+                    else
+                        failed.Add(addResult);
+                }
+
+                if (!jobGroup.JobIds.IsNullOrEmpty() && failed.IsNullOrEmpty())
+                {
+                    var result = await jobGroupsControllerUtils.AddJobGroup(jobGroup);
+
+                    if (result.Success)
+                        return new CreateJobSubmitViewModel(jobName, true, $"Successfully split backtest job {jobName} into {jobGroup.JobIds.Count} subjobs ({string.Join(", ", jobGroup.JobIds)}) and submitted.");
+                    else
+                        return new CreateJobSubmitViewModel(jobName, false, $"Failed to submit group job {jobName}: {result.Message}");
+                }
+                else
+                    return new CreateJobSubmitViewModel(jobName, false, $"Failed to submit one or more subjobs: {string.Join(", ", failed.Select(f => f.Message))}");
+            }
+            catch (ArgumentNullException ex)
+            {
+                string err = $"Failed to insert backtest job: missing or invalid parameter {ex.ParamName}";
+                logger.Error(err, ex);
+
+                return new CreateJobSubmitViewModel(jobName, false, err);
+            }
+            catch (Exception ex)
+            {
+                logger.Error("Failed to insert backtest job", ex);
+
+                return new CreateJobSubmitViewModel(jobName, false, $"Failed to insert backtest job: {ex.Message}");
+            }
         }
     }
 }

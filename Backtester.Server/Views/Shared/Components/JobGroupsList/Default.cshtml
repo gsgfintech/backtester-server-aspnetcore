@@ -28,10 +28,10 @@
                         <td>@Html.DisplayFor(m => jobGroup.Duration)</td>
                         <td>
                             <div class="btn-group btn-group-sm">
-                                <button class="btn btn-primary">
+                                <a class="btn btn-primary" asp-controller="CreateJob" asp-action="Step1" asp-route-jobNameToDuplicate="@jobGroup.GroupId">
                                     <span class="glyphicon glyphicon-plus"></span>
-                                </button>
-                                <button class="btn btn-danger">
+                                </a>
+                                <button class="btn btn-danger" onclick="deleteJobGroup('@jobGroup.GroupId')">
                                     <span class="glyphicon glyphicon-trash"></span>
                                 </button>
                             </div>

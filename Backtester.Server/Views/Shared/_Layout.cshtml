@@ -33,15 +33,14 @@
                     <span class="icon-bar"></span>
                 </button>
                 <a asp-area="" asp-controller="Home" asp-action="Index" class="navbar-brand">
-                    @*<img src="~/images/LogoGSG_300x893_transparent_bg.png" alt="GSG" />*@
-                    Home
+                    <img src="~/images/LogoGSG_300x893_transparent_bg.png" alt="GSG" />
                 </a>
             </div>
             <div class="navbar-collapse collapse">
                 <ul class="nav navbar-nav">
                     <li><a asp-area="" asp-controller="Home" asp-action="Index">Jobs</a></li>
-                    <li><a asp-area="" asp-controller="Home" asp-action="About">Search</a></li>
-                    <li><a asp-area="" asp-controller="Home" asp-action="Contact">Workers</a></li>
+                    <li><a asp-area="" asp-controller="Home" asp-action="Search">Search</a></li>
+                    <li><a asp-area="" asp-controller="Home" asp-action="Workers">Workers</a></li>
                 </ul>
                 @await Html.PartialAsync("_LoginPartial")
             </div>

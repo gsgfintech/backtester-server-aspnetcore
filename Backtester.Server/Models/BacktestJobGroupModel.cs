@@ -89,22 +89,22 @@ namespace Backtester.Server.Models
 
     public static class BacktestJobGroupModelExtensions
     {
-        private static BacktestJobStrategyParameterModel ToBacktestJobStrategyParameterModel(this StrategyParameter parameter)
+        private static BacktestJobStrategyParameterModel ToBacktestJobStrategyParameterModel(this StrategyParameter parameter, string namePrefix)
         {
             if (parameter == null)
                 return null;
 
             return new BacktestJobStrategyParameterModel()
             {
-                Name = parameter.Name,
+                Name = !string.IsNullOrEmpty(namePrefix) ? parameter.Name.Replace(namePrefix, "") : parameter.Name,
                 Tooltip = parameter.Tooltip,
                 Value = parameter.Value
             };
         }
 
-        private static List<BacktestJobStrategyParameterModel> ToBacktestJobStrategyParameterModels(this IEnumerable<StrategyParameter> parameters)
+        public static List<BacktestJobStrategyParameterModel> ToBacktestJobStrategyParameterModels(this IEnumerable<StrategyParameter> parameters, string namePrefix = "")
         {
-            return parameters?.Select(p => p.ToBacktestJobStrategyParameterModel()).ToList();
+            return parameters?.Select(p => p.ToBacktestJobStrategyParameterModel(namePrefix)).ToList();
         }
 
         private static BacktestJobStrategyModel ToBacktestJobStrategyModel(this Strategy strategy)
@@ -151,6 +151,24 @@ namespace Backtester.Server.Models
         public static List<BacktestJobGroupModel> ToBacktestJobGroupModels(this IEnumerable<BacktestJobGroup> groups)
         {
             return groups?.Select(g => g.ToBacktestJobGroupModel()).ToList();
+        }
+
+        private static StrategyParameter ToStrategyParameter(this BacktestJobStrategyParameterModel parameter, string namePrefix)
+        {
+            if (parameter == null)
+                return null;
+
+            return new StrategyParameter()
+            {
+                Name = (!string.IsNullOrEmpty(parameter.Name) && !string.IsNullOrEmpty(namePrefix) && !parameter.Name.StartsWith(namePrefix)) ? $"{namePrefix}{parameter.Name}" : parameter.Name,
+                Tooltip = parameter.Tooltip,
+                Value = parameter.Value
+            };
+        }
+
+        public static List<StrategyParameter> ToStrategyParameters(this IEnumerable<BacktestJobStrategyParameterModel> parameters, string namePrefix = "")
+        {
+            return parameters?.Select(p => p.ToStrategyParameter(namePrefix)).ToList();
         }
     }
 }

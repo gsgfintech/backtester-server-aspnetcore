@@ -1,0 +1,46 @@
+﻿@model Backtester.Server.ViewModels.CreateJob.CreateJobSubmitViewModel
+
+@{
+    ViewData["Title"] = "Job Submitted";
+}
+
+<div class="row">
+    <div class="col-lg-12">
+        @if (Model.Success)
+        {
+            <div class="panel panel-success">
+                <div class="panel-heading">
+                    <h4>Success</h4>
+                </div>
+                <div class="panel-body">
+                    @if (!string.IsNullOrEmpty(Model.Message))
+                    {
+                        <p>@Html.DisplayFor(m => Model.Message)</p>
+                    }
+                    else
+                    {
+                        <p>Job @Model.JobName was successfully submitted</p>
+                    }
+                </div>
+                <div class="panel-footer">
+                    <a class="btn btn-primary" asp-controller="Home" asp-action="Index">Home</a>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="panel panel-danger">
+                <div class="panel-heading">
+                    <h4>Failed</h4>
+                </div>
+                <div class="panel-body">
+                    <p>Failed to submit job @Model.JobName: <strong>@Model.Message</strong></p>
+                </div>
+                <div class="panel-footer">
+                    <a class="btn btn-danger" asp-action="Step1">Start Again</a>
+                    <a class="btn btn-primary" asp-controller="Home" asp-action="Index">Home</a>
+                </div>
+            </div>
+        }
+    </div>
+</div>

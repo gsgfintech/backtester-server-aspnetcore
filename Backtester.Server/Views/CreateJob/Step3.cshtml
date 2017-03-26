@@ -3,7 +3,7 @@
 @model Backtester.Server.ViewModels.CreateJob.CreateJobStep3ViewModel
 
 @{
-    ViewData["Title"] = "Step 3";
+    ViewData["Title"] = "Time Range";
 }
 
 <div class="row">
@@ -16,36 +16,30 @@
                 <div class="panel-body">
                     <div class="row">
                         <div class="col-sm-6 form-group">
-                            <label class="col-sm-6 col-md-4 control-label">@(Html.DisplayNameFor(m => Model.Settings.StartDate)):</label>
-                            <p class="input-group col-sm-6 col-md-8">
-                                <input name="start-date" type="date" class="form-control" uib-datepicker-popup ng-model="jobsCtrl.lowerBoundDate" is-open="jobsCtrl.lowerBoundDateOpen" datepicker-options="jobsCtrl.dateOptions" ng-required="true" close-text="Close" />
-                                <span class="input-group-btn">
-                                    <button type="button" class="btn btn-default" ng-click="jobsCtrl.openDatePicker('lowerDate')"><i class="glyphicon glyphicon-calendar"></i></button>
-                                </span>
-                            </p>
+                            <label class="col-sm-6 col-md-4 control-label" asp-for="Settings.StartDate"></label>
+                            <div class="col-sm-6 col-md-8">
+                                <input class="form-control" asp-for="Settings.StartDate" />
+                            </div>
                         </div>
                         <div class="col-sm-6 form-group">
-                            <label for="start-time" class="col-sm-6 col-md-4 control-label">@(Html.DisplayNameFor(m => Model.Settings.StartTime)):</label>
-                            <p title="start-time" class="input-group col-sm-6 col-md-8">
-                                <uib-timepicker ng-model="jobsCtrl.lowerBoundTime" show-meridian="false" show-spinners="false" ng-required="true"></uib-timepicker>
-                            </p>
+                            <label class="col-sm-6 col-md-4 control-label" asp-for="Settings.StartTime"></label>
+                            <div class="col-sm-6 col-md-8">
+                                <input class="form-control" asp-for="Settings.StartTime" />
+                            </div>
                         </div>
                     </div>
                     <div class="row">
                         <div class="col-sm-6 form-group">
-                            <label for="end-date" class="col-sm-6 col-md-4 control-label">@(Html.DisplayNameFor(m => Model.Settings.EndDate)):</label>
-                            <p class="input-group col-sm-6 col-md-8">
-                                <input name="end-date" type="date" class="form-control" uib-datepicker-popup ng-model="jobsCtrl.upperBoundDate" is-open="jobsCtrl.upperBoundDateOpen" datepicker-options="jobsCtrl.dateOptions" ng-required="true" close-text="Close" />
-                                <span class="input-group-btn">
-                                    <button type="button" class="btn btn-default" ng-click="jobsCtrl.openDatePicker('upperDate')"><i class="glyphicon glyphicon-calendar"></i></button>
-                                </span>
-                            </p>
+                            <label class="col-sm-6 col-md-4 control-label" asp-for="Settings.EndDate"></label>
+                            <div class="col-sm-6 col-md-8">
+                                <input class="form-control" asp-for="Settings.EndDate" />
+                            </div>
                         </div>
                         <div class="col-sm-6 form-group">
-                            <label for="end-time" class="col-sm-6 col-md-4 control-label">@(Html.DisplayNameFor(m => Model.Settings.EndTime)):</label>
-                            <p title="end-time" class="input-group col-sm-6 col-md-8">
-                                <uib-timepicker ng-model="jobsCtrl.upperBoundTime" show-meridian="false" show-spinners="false" ng-required="true"></uib-timepicker>
-                            </p>
+                            <label class="col-sm-6 col-md-4 control-label" asp-for="Settings.EndTime"></label>
+                            <div class="col-sm-6 col-md-8">
+                                <input class="form-control" asp-for="Settings.EndTime" />
+                            </div>
                         </div>
                     </div>
                 </div>

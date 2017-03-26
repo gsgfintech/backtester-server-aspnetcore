@@ -128,8 +128,9 @@ namespace Backtester.Server
             services.AddSingleton((serviceProvider) =>
             {
                 var actioner = serviceProvider.GetService<BacktestJobGroupActioner>();
+                JobsControllerUtils jobsControllerUtils = serviceProvider.GetService<JobsControllerUtils>();
 
-                return new JobGroupsControllerUtils(actioner);
+                return new JobGroupsControllerUtils(actioner, jobsControllerUtils);
             });
 
             services.AddSingleton((serviceProvider) =>
@@ -142,8 +143,10 @@ namespace Backtester.Server
             services.AddSingleton((serviceProvider) =>
             {
                 string stratFilesUploadDirectory = config.GetValue<string>("StratFileDropDir") ?? Path.GetTempPath();
+                JobsControllerUtils jobsControllerUtils = serviceProvider.GetService<JobsControllerUtils>();
+                JobGroupsControllerUtils jobGroupsControllerUtils = serviceProvider.GetService<JobGroupsControllerUtils>();
 
-                return new CreateJobControllerUtils(stratFilesUploadDirectory);
+                return new CreateJobControllerUtils(stratFilesUploadDirectory, jobsControllerUtils, jobGroupsControllerUtils);
             });
         }
     }

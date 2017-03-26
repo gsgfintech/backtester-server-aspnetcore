@@ -5,11 +5,59 @@
 }
 
 <div class="row">
+    <div class="col-xs-12" id="alertholder">
+    </div>
+</div>
+<div class="row">
     <div class="col-xs-12">
         <div style="margin-top: 0.8em; margin-bottom: 0.8em">
             <a class="btn btn-success" asp-controller="CreateJob" asp-action="Step1"><span class="glyphicon glyphicon-plus-sign"></span> Create A New Job</a>
         </div>
-        @await Component.InvokeAsync("JobGroupsList", new { listType = Active })
-        @await Component.InvokeAsync("JobGroupsList", new { listType = Inactive })
+        <div id="activeJobs">
+            @await Component.InvokeAsync("JobGroupsList", new { listType = Active })
+        </div>
+        <div id="inactiveJobs">
+            @await Component.InvokeAsync("JobGroupsList", new { listType = Inactive })
+        </div>
     </div>
 </div>
+
+@section Scripts
+{
+    <script>
+        $(function () {
+            setInterval(function () {
+                $('#activeJobs').load('/JobGroups/RefreshActiveJobGroups');
+                $('#inactiveJobs').load('/JobGroups/RefreshInactiveJobGroups');
+            }, 5000);
+        });
+
+        function showBootstrapAlert(level, subject) {
+            $('#alertholder').after(
+                '<div class="alert alert-' + level + ' alert-dismissable">' +
+                '<button type="button" class="close" data-dismiss="alert" aria-label="Close">' +
+                '<span aria-hidden="true">&times;</span>' +
+                '</button>' +
+                subject +
+                '</div>');
+        }
+
+        function deleteJobGroup(groupId) {
+            $.ajax({
+                type: 'DELETE',
+                url: '/api/jobgroups/' + groupId,
+                success: function (data) {
+                    console.log(data);
+                    if (data.success) {
+                        showBootstrapAlert('success', data.message || 'Successfully deleted job group ' + groupId);
+                        $('#activeJobs').load('/JobGroups/RefreshActiveJobGroups');
+                        $('#inactiveJobs').load('/JobGroups/RefreshInactiveJobGroups');
+                    }
+                    else {
+                        showBootstrapAlert('danger', data.message || 'Failed to delete job group ' + groupId);
+                    }
+                }
+            });
+        }
+    </script>
+}

@@ -1,5 +1,6 @@
 ﻿using Backtester.Server.ControllerUtils;
 using Backtester.Server.Models;
+using Backtester.Server.ViewComponents;
 using Backtester.Server.ViewModels;
 using Backtester.Server.ViewModels.JobGroups;
 using Capital.GSG.FX.Utils.Core.Logging;
@@ -50,14 +51,19 @@ namespace Backtester.Server.Controllers.JobGroups
             return View(new UnrealizedPnlSeriesViewModel(groupId, unrealizedPnlSeries));
         }
 
-        public IActionResult Create()
-        {
-            return View(new BacktestJobSettingsModel());
-        }
-
         private async Task<BacktestJobGroupModel> LoadJobGroup(string groupId)
         {
             return (await utils.Get(groupId)).ToBacktestJobGroupModel();
+        }
+
+        public IActionResult RefreshActiveJobGroups()
+        {
+            return ViewComponent("JobGroupsList", new { listType = JobGroupListType.Active });
+        }
+
+        public IActionResult RefreshInactiveJobGroups()
+        {
+            return ViewComponent("JobGroupsList", new { listType = JobGroupListType.Inactive });
         }
     }
 }

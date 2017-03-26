@@ -4,6 +4,7 @@ using Capital.GSG.FX.Utils.Core.Logging;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ViewComponents;
 using Microsoft.Extensions.Logging;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Backtester.Server.ViewComponents
@@ -19,7 +20,7 @@ namespace Backtester.Server.ViewComponents
             this.utils = utils;
         }
 
-        public async Task<IViewComponentResult> InvokeAsync(JobGroupListType listType)
+        public async Task<IViewComponentResult> InvokeAsync(JobGroupListType listType, string searchId = null)
         {
             ViewViewComponentResult view;
 
@@ -34,8 +35,8 @@ namespace Backtester.Server.ViewComponents
                     view.ViewData["Header"] = "Today's Inactive Jobs";
                     break;
                 case JobGroupListType.Search:
-                    // TODO
-                    view = View();
+                    view = !string.IsNullOrEmpty(searchId) ? View(utils.GetSearchResults(searchId).ToBacktestJobGroupModels()) : View(new List<BacktestJobGroupModel>());
+                    view.ViewData["Header"] = "Search Results";
                     break;
                 default:
                     view = View();

@@ -37,19 +37,23 @@ namespace Backtester.Server.Models
         public string CrossesStr => !Crosses.IsNullOrEmpty() ? string.Join(", ", Crosses) : string.Empty;
 
         [Display(Name = "Begin Date")]
-        [DisplayFormat(DataFormatString = "dd/MM/yy")]
+        [DisplayFormat(DataFormatString = "{0:dd/MM/yy}")]
+        [DataType(DataType.Date)]
         public DateTime StartDate { get; set; }
 
         [Display(Name = "End Date")]
-        [DisplayFormat(DataFormatString = "dd/MM/yy")]
+        [DisplayFormat(DataFormatString = "{0:dd/MM/yy}")]
+        [DataType(DataType.Date)]
         public DateTime EndDate { get; set; }
 
         [Display(Name = "Begin Time (HKT)")]
-        [DisplayFormat(DataFormatString = "HH:mm")]
+        [DisplayFormat(DataFormatString = "{0:HH:mm}")]
+        [DataType(DataType.Time)]
         public DateTime StartTime { get; set; }
 
         [Display(Name = "End Time (HKT)")]
-        [DisplayFormat(DataFormatString = "HH:mm")]
+        [DisplayFormat(DataFormatString = "{0:HH:mm}")]
+        [DataType(DataType.Time)]
         public DateTime EndTime { get; set; }
     }
 }

@@ -1,4 +1,6 @@
 ﻿using Backtester.Server.Models;
+using Capital.GSG.FX.Utils.Core;
+using System;
 
 namespace Backtester.Server.ViewModels.CreateJob
 {
@@ -8,11 +10,22 @@ namespace Backtester.Server.ViewModels.CreateJob
 
         public string Message { get; set; }
 
-        public BacktestJobSettingsModel Settings { get; private set; }
+        public BacktestJobSettingsModel Settings { get; set; }
 
         public CreateJobStep1ViewModel()
         {
-            Settings = new BacktestJobSettingsModel();
+            Settings = new BacktestJobSettingsModel()
+            {
+                StartDate = DateTimeUtils.GetLastBusinessDayInHKT(),
+                EndDate = DateTimeUtils.GetLastBusinessDayInHKT(),
+                StartTime = new DateTime(1, 1, 1, 5, 30, 0),
+                EndTime = new DateTime(1, 1, 1, 4, 30, 0)
+            };
+        }
+
+        public CreateJobStep1ViewModel(BacktestJobSettingsModel settings)
+        {
+            Settings = settings;
         }
     }
 }

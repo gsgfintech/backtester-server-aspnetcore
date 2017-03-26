@@ -1,6 +1,7 @@
 ﻿using Backtester.Server.Models;
 using Capital.GSG.FX.Backtest.DataTypes;
 using Capital.GSG.FX.Backtest.MongoConnector.Actioner;
+using Capital.GSG.FX.Data.Core.WebApi;
 using Capital.GSG.FX.Utils.Core;
 using Capital.GSG.FX.Utils.Core.Logging;
 using DataTypes.Core;
@@ -19,6 +20,7 @@ namespace Backtester.Server.ControllerUtils
         private readonly ILogger logger = GSGLoggerFactory.Instance.CreateLogger<JobGroupsControllerUtils>();
 
         private readonly BacktestJobGroupActioner actioner;
+        private readonly JobsControllerUtils jobsControllerUtils;
 
         private ConcurrentQueue<string> pendingJobGroups = new ConcurrentQueue<string>();
         private ConcurrentDictionary<string, BacktestJobGroup> activeJobGroups = null;
@@ -26,9 +28,14 @@ namespace Backtester.Server.ControllerUtils
         private bool jobsLoaded = false;
         private object jobsLoadedLocker = new object();
 
-        public JobGroupsControllerUtils(BacktestJobGroupActioner actioner)
+        private List<string> stratsNames = null;
+
+        private ConcurrentDictionary<string, List<BacktestJobGroup>> searchResults = new ConcurrentDictionary<string, List<BacktestJobGroup>>();
+
+        public JobGroupsControllerUtils(BacktestJobGroupActioner actioner, JobsControllerUtils jobsControllerUtils)
         {
             this.actioner = actioner;
+            this.jobsControllerUtils = jobsControllerUtils;
         }
 
         private async Task LoadJobGroups(bool reset = false)
@@ -93,6 +100,21 @@ namespace Backtester.Server.ControllerUtils
             return jobGroup?.Trades.ToTradeModels();
         }
 
+        internal async Task<GenericActionResult> AddJobGroup(BacktestJobGroup group)
+        {
+            logger.Info($"Adding job group {group.GroupId} to database and active queue");
+
+            var result = await actioner.AddOrUpdate(group.GroupId, group);
+
+            if (!result.Success)
+                return result;
+
+            activeJobGroups.TryAdd(group.GroupId, group);
+            pendingJobGroups.Enqueue(group.GroupId);
+
+            return new GenericActionResult(true, $"Successfully added job group {group.GroupId}");
+        }
+
         private async Task LoadActiveJobGroups()
         {
             activeJobGroups = new ConcurrentDictionary<string, BacktestJobGroup>();
@@ -137,6 +159,64 @@ namespace Backtester.Server.ControllerUtils
                 foreach (var job in jobGroupsList)
                     inactiveJobGroups.AddOrUpdate(job.GroupId, job, (key, oldValue) => job);
             }
+        }
+
+        internal async Task<GenericActionResult> Delete(string groupId)
+        {
+            logger.Info($"About to delete job group {groupId} and related subjobs");
+
+            var jobGroup = await Get(groupId);
+
+            if (jobGroup == null)
+                return new GenericActionResult(false, $"Unable to delete unknown job group {groupId}");
+
+            if (!jobGroup.JobIds.IsNullOrEmpty())
+            {
+                var deleteSubjobs = await jobsControllerUtils.DeleteMany(jobGroup.JobIds.Values);
+
+                if (!deleteSubjobs.Success)
+                    return new GenericActionResult(false, $"Failed to delete one or more subjob ({string.Join(", ", jobGroup.JobIds)}) for job group {groupId}: {deleteSubjobs.Message}. Not deleting subgroup");
+            }
+
+            var result = await actioner.Delete(groupId);
+
+            if (result.Success)
+            {
+                BacktestJobGroup discarded;
+                activeJobGroups.TryRemove(groupId, out discarded);
+                inactiveJobGroups.TryRemove(groupId, out discarded);
+            }
+
+            return result;
+        }
+
+        internal async Task<List<string>> ListStratsNames()
+        {
+            if (stratsNames == null)
+                stratsNames = (await actioner.GetAllStratNames()) ?? new List<string>();
+
+            return stratsNames;
+        }
+
+        internal async Task<string> Search(string groupId, string stratName, DateTimeOffset? rangeStart, DateTimeOffset? rangeEnd)
+        {
+            var results = await actioner.Search(groupId, stratName, null, rangeStart, rangeEnd);
+
+            string searchId = Guid.NewGuid().ToString();
+
+            searchResults.TryAdd(searchId, results);
+
+            return searchId;
+        }
+
+        internal List<BacktestJobGroup> GetSearchResults(string searchId)
+        {
+            List<BacktestJobGroup> results;
+
+            if (searchResults.TryRemove(searchId, out results))
+                return results;
+            else
+                return new List<BacktestJobGroup>();
         }
 
         private class BacktestJobGroupCreationDateComparer : IComparer<BacktestJobGroup>

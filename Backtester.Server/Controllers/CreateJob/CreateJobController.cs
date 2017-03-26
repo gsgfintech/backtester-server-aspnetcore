@@ -5,7 +5,6 @@ using Capital.GSG.FX.Utils.Core.Logging;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -17,16 +16,24 @@ namespace Backtester.Server.Controllers.CreateJob
     {
         private readonly ILogger logger = GSGLoggerFactory.Instance.CreateLogger<CreateJobController>();
 
-        private readonly CreateJobControllerUtils utils;
+        private readonly CreateJobControllerUtils createJobControllerUtils;
+        private readonly JobGroupsControllerUtils jobGroupsControllerUtils;
 
-        public CreateJobController(CreateJobControllerUtils utils)
+        public CreateJobController(CreateJobControllerUtils createJobControllerUtils, JobGroupsControllerUtils jobGroupsControllerUtils)
         {
-            this.utils = utils;
+            this.createJobControllerUtils = createJobControllerUtils;
+            this.jobGroupsControllerUtils = jobGroupsControllerUtils;
         }
 
-        public IActionResult Step1()
+        public async Task<IActionResult> Step1(string jobNameToDuplicate)
         {
-            return View(new CreateJobStep1ViewModel());
+            if (string.IsNullOrEmpty(jobNameToDuplicate))
+            {
+                logger.Info("Will create a new job");
+                return View(new CreateJobStep1ViewModel());
+            }
+            else
+                return View(await createJobControllerUtils.DuplicateJob(jobNameToDuplicate));
         }
 
         [HttpPost]
@@ -38,14 +45,14 @@ namespace Backtester.Server.Controllers.CreateJob
 
             if (file?.Length > 0)
             {
-                string filePath = utils.GetFilePath(file.FileName);
+                string filePath = createJobControllerUtils.GetFilePath(file.FileName);
 
                 using (var stream = new FileStream(filePath, FileMode.Create))
                 {
                     await file.CopyToAsync(stream);
                 }
 
-                result = utils.ListStratProperties(filePath);
+                result = createJobControllerUtils.ListStratProperties(filePath);
             }
             else
             {
@@ -61,7 +68,7 @@ namespace Backtester.Server.Controllers.CreateJob
 
         public IActionResult Step2(string jobName)
         {
-            BacktestJobSettingsModel settings = utils.GetJobSettings(jobName);
+            BacktestJobSettingsModel settings = createJobControllerUtils.GetJobSettings(jobName);
 
             return View(new CreateJobStep2ViewModel(settings));
         }
@@ -69,14 +76,21 @@ namespace Backtester.Server.Controllers.CreateJob
         [HttpPost]
         public IActionResult Step3(string jobName, CreateJobStep2ViewModel model)
         {
-            var settings = utils.SetParameters(jobName, model.Settings.Parameters);
+            var settings = createJobControllerUtils.SetParameters(jobName, model.Settings.Parameters);
 
             return View(new CreateJobStep3ViewModel(settings));
         }
 
-        public IActionResult Step4()
+        public IActionResult Step4(string jobName, CreateJobStep3ViewModel model)
         {
-            return View(new CreateJobStep4ViewModel());
+            var settings = createJobControllerUtils.SetTimeRange(jobName, model.Settings.StartDate, model.Settings.EndDate, model.Settings.StartTime, model.Settings.EndTime);
+
+            return View(new CreateJobStep4ViewModel(settings));
+        }
+
+        public async Task<IActionResult> Submit(string jobName)
+        {
+            return View(await createJobControllerUtils.CreateJob(jobName));
         }
     }
 }

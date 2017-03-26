@@ -1,4 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Backtester.Server.ControllerUtils;
+using Capital.GSG.FX.Data.Core.WebApi;
+using Capital.GSG.FX.Utils.Core.Logging;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,39 +10,22 @@ using System.Threading.Tasks;
 
 namespace Backtester.Server.Controllers.JobGroups
 {
-    [Route("api/[controller]")]
+    [Route("api/jobgroups")]
     public class JobGroupsApiController : Controller
     {
-        // GET: api/values
-        [HttpGet]
-        public IEnumerable<string> Get()
+        private readonly ILogger logger = GSGLoggerFactory.Instance.CreateLogger<JobGroupsApiController>();
+
+        private readonly JobGroupsControllerUtils utils;
+
+        public JobGroupsApiController(JobGroupsControllerUtils utils)
         {
-            return new string[] { "value1", "value2" };
+            this.utils = utils;
         }
 
-        // GET api/values/5
-        [HttpGet("{id}")]
-        public string Get(int id)
+        [HttpDelete("{groupId}")]
+        public async Task<GenericActionResult> Delete(string groupId)
         {
-            return "value";
-        }
-
-        // POST api/values
-        [HttpPost]
-        public void Post([FromBody]string value)
-        {
-        }
-
-        // PUT api/values/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody]string value)
-        {
-        }
-
-        // DELETE api/values/5
-        [HttpDelete("{id}")]
-        public void Delete(int id)
-        {
+            return await utils.Delete(groupId);
         }
     }
 }

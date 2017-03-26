@@ -72,6 +72,20 @@
 </div>
 <div class="panel panel-default">
     <div class="panel-heading">
+        <h4>@Html.DisplayNameFor(m => Model.JobGroup.JobIds)</h4>
+    </div>
+    <table class="table">
+        @foreach (var kvp in Model.JobGroup.JobIds)
+        {
+            <tr>
+                <th>@Html.DisplayFor(m => kvp.Key)</th>
+                <td>@Html.DisplayFor(m => kvp.Value)</td>
+            </tr>
+        }
+    </table>
+</div>
+<div class="panel panel-default">
+    <div class="panel-heading">
         <h4>Strategy</h4>
     </div>
     <div class="table-responsive">
