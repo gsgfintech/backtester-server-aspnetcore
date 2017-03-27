@@ -88,5 +88,10 @@ namespace Backtester.Server.Models
         {
             return trades?.Select(e => e.ToTradeModel()).ToList();
         }
+
+        public static List<BacktestTradeModel> ToTradeModels(this Dictionary<string, BacktestTrade> trades)
+        {
+            return trades?.Values.ToTradeModels();
+        }
     }
 }

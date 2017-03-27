@@ -22,10 +22,6 @@ namespace Backtester.Server.Models
         [DisplayFormat(DataFormatString = "{0:dd/MM HH:mm:ss}")]
         public DateTimeOffset CreateTime { get; set; }
 
-        [Display(Name = "Scheduled Start Time (HKT)")]
-        [DisplayFormat(DataFormatString = "{0:dd/MM HH:mm:ss}")]
-        public DateTimeOffset? ScheduledStartTime { get; set; }
-
         [Display(Name = "Actual Start Time (HKT)")]
         [DisplayFormat(DataFormatString = "{0:dd/MM HH:mm:ss}")]
         public DateTimeOffset? ActualStartTime { get; set; }
@@ -56,8 +52,8 @@ namespace Backtester.Server.Models
 
         public List<BacktestTradeModel> Trades { get; set; }
 
-        [DisplayFormat(DataFormatString = "{0:N2}%")]
-        public double? Progress { get; set; }
+        [DisplayFormat(DataFormatString = "{0:N0}%")]
+        public double Progress { get; set; }
     }
 
     public class BacktestJobStrategyModel
@@ -138,8 +134,7 @@ namespace Backtester.Server.Models
                 EndTime = group.EndTime,
                 GroupId = group.GroupId,
                 JobIds = group.JobIds,
-                Progress = 56.8, // TODO
-                ScheduledStartTime = group.ScheduledStartTime,
+                Progress = group.Progress,
                 StartDate = group.StartDate,
                 StartTime = group.StartTime,
                 Status = group.Status,

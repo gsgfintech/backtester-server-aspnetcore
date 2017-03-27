@@ -1,0 +1,20 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net46</TargetFramework>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <Version>4.0.0</Version>
+    <Authors>GSG Limited</Authors>
+    <Company>GSG Limited</Company>
+    <Description>Connector lib for backtester server</Description>
+    <Copyright>2016-2017 GSG Limited</Copyright>
+    <PackageId>Backtest.ServerConnector</PackageId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Backtest.DataTypes" Version="4.4.2" />
+    <PackageReference Include="Capital.GSG.FX.Utils.Core.Logging" Version="2.2.1" />
+    <PackageReference Include="Flurl.Http" Version="1.1.2" />
+  </ItemGroup>
+
+</Project>

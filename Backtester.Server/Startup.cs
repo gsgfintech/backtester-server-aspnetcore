@@ -148,6 +148,42 @@ namespace Backtester.Server
 
                 return new CreateJobControllerUtils(stratFilesUploadDirectory, jobsControllerUtils, jobGroupsControllerUtils);
             });
+
+            services.AddSingleton((serviceProvider) =>
+            {
+                var actioner = serviceProvider.GetService<BacktestWorkerActioner>();
+                JobsControllerUtils jobsControllerUtils = serviceProvider.GetService<JobsControllerUtils>();
+
+                return new WorkersControllerUtils(actioner, jobsControllerUtils);
+            });
+
+            services.AddSingleton((serviceProvider) =>
+            {
+                JobsControllerUtils jobsControllerUtils = serviceProvider.GetService<JobsControllerUtils>();
+
+                return new AlertsControllerUtils(jobsControllerUtils);
+            });
+
+            services.AddSingleton((serviceProvider) =>
+            {
+                JobsControllerUtils jobsControllerUtils = serviceProvider.GetService<JobsControllerUtils>();
+
+                return new OrdersControllerUtils(jobsControllerUtils);
+            });
+
+            services.AddSingleton((serviceProvider) =>
+            {
+                JobsControllerUtils jobsControllerUtils = serviceProvider.GetService<JobsControllerUtils>();
+
+                return new PositionsControllerUtils(jobsControllerUtils);
+            });
+
+            services.AddSingleton((serviceProvider) =>
+            {
+                JobsControllerUtils jobsControllerUtils = serviceProvider.GetService<JobsControllerUtils>();
+
+                return new TradesControllerUtils(jobsControllerUtils);
+            });
         }
     }
 }

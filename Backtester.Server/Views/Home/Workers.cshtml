@@ -1,0 +1,56 @@
+﻿@model Backtester.Server.ViewModels.WorkersViewModel
+
+@{
+    ViewBag.Title = "Backtester Workers";
+}
+
+<div class="row">
+    <div class="col-xs-12">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4>Backtest Workers</h4>
+            </div>
+            @if (Model.Workers.Count > 0)
+            {
+                <table class="table table-hover">
+                    <tr>
+                        <th></th>
+                        <th>@Html.DisplayNameFor(m => Model.Workers.First().IsAcceptingJobs)</th>
+                        <th>@Html.DisplayNameFor(m => Model.Workers.First().CurrentJob)</th>
+                        <th></th>
+                        @*<th></th>*@
+                    </tr>
+                    @foreach (var worker in Model.Workers)
+                    {
+                        <tr>
+                            <th>@Html.DisplayFor(m => worker.Name)</th>
+                            <td class="@(worker.IsAcceptingJobs ? "bg-success" : "bg-danger")">
+                                <div class="btn-group btn-group-xs">
+                                    <button class="btn btn-success" ng-disabled="worker.status.isAcceptingJobs" ng-click="backtesterWorkersCtrl.workerAcceptJobs(worker.Name)">Yes</button>
+                                    <button class="btn btn-danger" ng-disabled="!worker.status.isAcceptingJobs" ng-click="backtesterWorkersCtrl.workerRejectJobs(worker.Name)">No</button>
+                                </div>
+                            </td>
+                            <td><a asp-controller="JobGroups" asp-action="Info" asp-route-groupid="@worker.CurrentJob">@Html.DisplayFor(m => worker.CurrentJob)</a></td>
+                            <td class="@(worker.IsRunning ? "bg-success" : "bg-danger")">
+                                <div class="btn-group btn-group-xs">
+                                    <button class="btn btn-success" ng-disabled="worker.status.IsAlive" ng-click="backtesterWorkersCtrl.start(worker.Name)">Start</button>
+                                    <button class="btn btn-danger" ng-disabled="!worker.status.IsAlive" ng-click="backtesterWorkersCtrl.stop(worker.Name)">Stop</button>
+                                </div>
+                            </td>
+                            @*<td>
+                                    <div class="btn-group btn-group-xs">
+                                        <button class="btn btn-warning btn-xs" ng-click="backtesterWorkersCtrl.edit(worker.Name)">
+                                            <span class="glyphicon glyphicon-edit"></span>
+                                        </button>
+                                        <button class="btn btn-danger btn-xs" ng-click="backtesterWorkersCtrl.delete(worker.Name)">
+                                            <span class="glyphicon glyphicon-remove-sign"></span>
+                                        </button>
+                                    </div>
+                                </td>*@
+                        </tr>
+                    }
+                </table>
+            }
+        </div>
+    </div>
+</div>

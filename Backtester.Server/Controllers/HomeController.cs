@@ -13,10 +13,12 @@ namespace Backtester.Server.Controllers
     public class HomeController : Controller
     {
         private readonly JobGroupsControllerUtils jobGroupsControllerUtils;
+        private readonly WorkersControllerUtils workersControllerUtils;
 
-        public HomeController(JobGroupsControllerUtils jobGroupsControllerUtils)
+        public HomeController(JobGroupsControllerUtils jobGroupsControllerUtils, WorkersControllerUtils workersControllerUtils)
         {
             this.jobGroupsControllerUtils = jobGroupsControllerUtils;
+            this.workersControllerUtils = workersControllerUtils;
         }
 
         public IActionResult Index()
@@ -50,11 +52,11 @@ namespace Backtester.Server.Controllers
             }
         }
 
-        public IActionResult Contact()
+        public async Task<IActionResult> Workers()
         {
-            ViewData["Message"] = "Your contact page.";
+            var workers = await workersControllerUtils.ListWorkers();
 
-            return View();
+            return View(new WorkersViewModel(workers));
         }
 
         [AllowAnonymous]

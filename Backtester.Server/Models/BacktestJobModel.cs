@@ -1,6 +1,7 @@
 ﻿using Capital.GSG.FX.Backtest.DataTypes;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace Backtester.Server.Models
 {
@@ -10,7 +11,6 @@ namespace Backtester.Server.Models
         public string GroupId { get; set; }
         public BacktestJobStatus Status { get; set; }
         public DateTimeOffset CreateTime { get; set; }
-        public DateTimeOffset? ScheduledStartTime { get; set; }
         public DateTimeOffset? ActualStartTime { get; set; }
         public DateTimeOffset? CompletionTime { get; set; }
         public string Worker { get; set; }
@@ -18,6 +18,9 @@ namespace Backtester.Server.Models
         public DateTimeOffset StartTime { get; set; }
         public DateTimeOffset EndTime { get; set; }
         public BacktestJobOutputDataModel Output { get; set; }
+
+        [DisplayFormat(DataFormatString = "{0:N0}%")]
+        public double Progress { get; set; }
     }
 
     public class BacktestJobOutputDataModel
@@ -61,7 +64,7 @@ namespace Backtester.Server.Models
                 GroupId = job.GroupId,
                 Name = job.Name,
                 Output = job.Output.ToBacktestJobOutputDataModel(),
-                ScheduledStartTime = job.ScheduledStartTime,
+                Progress = job.Progress,
                 StartTime = job.StartTime,
                 Status = job.Status,
                 Worker = job.Worker

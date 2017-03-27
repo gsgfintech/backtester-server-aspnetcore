@@ -15,14 +15,13 @@ using System.Threading.Tasks;
 
 namespace Backtester.Server.ControllerUtils
 {
-    public class JobGroupsControllerUtils
+    public class JobGroupsControllerUtils : IDisposable
     {
         private readonly ILogger logger = GSGLoggerFactory.Instance.CreateLogger<JobGroupsControllerUtils>();
 
         private readonly BacktestJobGroupActioner actioner;
         private readonly JobsControllerUtils jobsControllerUtils;
 
-        private ConcurrentQueue<string> pendingJobGroups = new ConcurrentQueue<string>();
         private ConcurrentDictionary<string, BacktestJobGroup> activeJobGroups = null;
         private ConcurrentDictionary<string, BacktestJobGroup> inactiveJobGroups = null;
         private bool jobsLoaded = false;
@@ -32,6 +31,8 @@ namespace Backtester.Server.ControllerUtils
 
         private ConcurrentDictionary<string, List<BacktestJobGroup>> searchResults = new ConcurrentDictionary<string, List<BacktestJobGroup>>();
 
+        private Timer updateActiveJobGroupsTimer = null;
+
         public JobGroupsControllerUtils(BacktestJobGroupActioner actioner, JobsControllerUtils jobsControllerUtils)
         {
             this.actioner = actioner;
@@ -40,6 +41,9 @@ namespace Backtester.Server.ControllerUtils
 
         private async Task LoadJobGroups(bool reset = false)
         {
+            if (updateActiveJobGroupsTimer == null)
+                updateActiveJobGroupsTimer = new Timer(RefreshActiveJobGroupsCb, null, TimeSpan.FromSeconds(5), TimeSpan.FromSeconds(5));
+
             if (!jobsLoaded || reset)
             {
                 lock (jobsLoadedLocker)
@@ -110,7 +114,6 @@ namespace Backtester.Server.ControllerUtils
                 return result;
 
             activeJobGroups.TryAdd(group.GroupId, group);
-            pendingJobGroups.Enqueue(group.GroupId);
 
             return new GenericActionResult(true, $"Successfully added job group {group.GroupId}");
         }
@@ -118,7 +121,6 @@ namespace Backtester.Server.ControllerUtils
         private async Task LoadActiveJobGroups()
         {
             activeJobGroups = new ConcurrentDictionary<string, BacktestJobGroup>();
-            pendingJobGroups = new ConcurrentQueue<string>();
 
             CancellationTokenSource cts = new CancellationTokenSource();
             cts.CancelAfter(TimeSpan.FromSeconds(20));
@@ -134,9 +136,6 @@ namespace Backtester.Server.ControllerUtils
                 foreach (var group in jobGroupsList)
                 {
                     activeJobGroups.AddOrUpdate(group.GroupId, group, (key, oldValue) => group);
-
-                    if (group.Status == BacktestJobStatus.CREATED)
-                        pendingJobGroups.Enqueue(group.GroupId);
                 }
             }
         }
@@ -158,6 +157,92 @@ namespace Backtester.Server.ControllerUtils
 
                 foreach (var job in jobGroupsList)
                     inactiveJobGroups.AddOrUpdate(job.GroupId, job, (key, oldValue) => job);
+            }
+        }
+
+        private async void RefreshActiveJobGroupsCb(object state)
+        {
+            if (!activeJobGroups.IsEmpty)
+            {
+                var jobGroups = activeJobGroups.ToArray().Select(kvp => kvp.Value);
+
+                foreach (var jobGroup in jobGroups)
+                {
+                    try
+                    {
+                        if (!jobGroup.JobIds.IsNullOrEmpty())
+                        {
+                            var jobs = await jobsControllerUtils.GetMany(jobGroup.JobIds.Values);
+
+                            if (!jobs.IsNullOrEmpty())
+                            {
+                                BacktestJobStatus newStatus = jobs.Select(j => j.Status).Min();
+
+                                // Override: if at least one job is in progress then we want to mark the job group as in progress too
+                                if (newStatus == BacktestJobStatus.CREATED)
+                                {
+                                    if (jobs.FirstOrDefault(j => j.Status == BacktestJobStatus.INPROGRESS) != null)
+                                        newStatus = BacktestJobStatus.INPROGRESS;
+                                }
+
+                                double newProgress = jobs.Select(j => j.Progress).Average();
+                                DateTimeOffset? newActualStartTime = jobs.Where(j => j.ActualStartTime.HasValue)?.Select(j => j.ActualStartTime.Value).Min();
+                                DateTimeOffset? newCompletionTime = (jobs.FirstOrDefault(j => !j.CompletionTime.HasValue) != null) ? null : jobs.Where(j => j.CompletionTime.HasValue)?.Select(j => j.ActualStartTime.Value).Max();
+                                List<BacktestTrade> newTrades = jobs.Where(j => !j.Output.Trades.IsNullOrEmpty())?.Select(j => j.Output.Trades.Values.ToList()).Aggregate((cur, next) => cur.Concat(next).ToList()).ToList();
+
+                                if (BacktestJobStatusUtils.ActiveStatus.Contains(newStatus))
+                                {
+                                    activeJobGroups.AddOrUpdate(jobGroup.GroupId, (key) => null, (key, oldValue) =>
+                                    {
+                                        oldValue.ActualStartTime = newActualStartTime;
+                                        oldValue.Progress = newProgress;
+                                        oldValue.Status = newStatus;
+                                        oldValue.Trades = newTrades;
+
+                                        return oldValue;
+                                    });
+                                }
+                                else
+                                {
+                                    BacktestJobGroup discarded;
+                                    activeJobGroups.TryRemove(jobGroup.GroupId, out discarded);
+
+                                    inactiveJobGroups.AddOrUpdate(jobGroup.GroupId, (key) =>
+                                    {
+                                        return new BacktestJobGroup(jobGroup.GroupId)
+                                        {
+                                            ActualStartTime = newActualStartTime,
+                                            CompletionTime = newCompletionTime,
+                                            CreateTime = jobGroup.CreateTime,
+                                            EndDate = jobGroup.EndDate,
+                                            EndTime = jobGroup.EndTime,
+                                            JobIds = jobGroup.JobIds,
+                                            Progress = newProgress,
+                                            StartDate = jobGroup.StartDate,
+                                            StartTime = jobGroup.StartTime,
+                                            Status = newStatus,
+                                            Strategy = jobGroup.Strategy,
+                                            Trades = newTrades
+                                        };
+                                    }, (key, oldValue) =>
+                                    {
+                                        oldValue.ActualStartTime = newActualStartTime;
+                                        oldValue.CompletionTime = newCompletionTime;
+                                        oldValue.Progress = newProgress;
+                                        oldValue.Status = newStatus;
+                                        oldValue.Trades = newTrades;
+
+                                        return oldValue;
+                                    });
+                                }
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        logger.Error($"Failed to refresh status of job group {jobGroup.GroupId}", ex);
+                    }
+                }
             }
         }
 
@@ -217,6 +302,11 @@ namespace Backtester.Server.ControllerUtils
                 return results;
             else
                 return new List<BacktestJobGroup>();
+        }
+
+        public void Dispose()
+        {
+            try { updateActiveJobGroupsTimer?.Dispose(); updateActiveJobGroupsTimer = null; } catch { }
         }
 
         private class BacktestJobGroupCreationDateComparer : IComparer<BacktestJobGroup>
