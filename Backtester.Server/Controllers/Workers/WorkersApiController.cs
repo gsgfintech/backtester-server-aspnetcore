@@ -20,13 +20,13 @@ namespace Backtester.Server.Controllers.Workers
             this.utils = utils;
         }
 
-        [HttpPost("api/workers/status/{workerName}")]
+        [HttpPost("status/{workerName}")]
         public async Task<GenericActionResult> UpdateStatus(string workerName, [FromBody]SystemStatus status)
         {
             return await utils.HandleStatusUpdate(workerName, status);
         }
 
-        [HttpGet("api/workers/{workerName}/request-job")]
+        [HttpGet("{workerName}/request-job")]
         public GenericActionResult<string> RequestJob(string workerName)
         {
             return utils.RequestJob(workerName);

@@ -19,7 +19,7 @@ namespace Backtester.Server.Controllers.Alerts
             this.utils = utils;
         }
 
-        [HttpPost]
+        [HttpPost("{backtestJobName}")]
         public GenericActionResult Post(string backtestJobName, [FromBody]Alert alert)
         {
             return utils.HandleNewAlert(backtestJobName, alert);

@@ -56,7 +56,7 @@ namespace Backtester.Server.Connector
             catch (OperationCanceledException)
             {
                 string err = "Not posting order update: operation cancelled";
-                logger.Warn(err);
+                logger.Error(err);
                 return new GenericActionResult(false, err);
             }
             catch (ArgumentNullException ex)

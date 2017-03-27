@@ -136,41 +136,50 @@ namespace Backtester.Server.ControllerUtils
 
         internal async Task<GenericActionResult> UpdateJob(string jobName, BacktestJob job)
         {
-            logger.Info($"Updating job {jobName} in database and dictionary");
-
-            var result = await actioner.AddOrUpdate(jobName, job);
-
-            if (!result.Success)
-                return result;
-
-            if (job.Status == BacktestJobStatus.CREATED || job.Status == BacktestJobStatus.INPROGRESS)
-                activeJobs.AddOrUpdate(jobName, (key) => null, (key, oldValue) =>
-                {
-                    oldValue.ActualStartTime = job.ActualStartTime;
-                    oldValue.CompletionTime = job.CompletionTime;
-                    oldValue.Status = job.Status;
-                    oldValue.Worker = job.Worker;
-
-                    return oldValue;
-                });
-            else
+            try
             {
-                BacktestJob discarded;
-                activeJobs.TryRemove(jobName, out discarded);
+                logger.Info($"Updating job {jobName} in database and dictionary");
 
-                inactiveJobs.AddOrUpdate(jobName, job, (key, oldValue) =>
+                var result = await actioner.AddOrUpdate(jobName, job);
+
+                if (!result.Success)
+                    return result;
+
+                if (job.Status == BacktestJobStatus.CREATED || job.Status == BacktestJobStatus.INPROGRESS)
+                    activeJobs.AddOrUpdate(jobName, job, (key, oldValue) =>
+                    {
+                        oldValue.ActualStartTime = job.ActualStartTime;
+                        oldValue.CompletionTime = job.CompletionTime;
+                        oldValue.Status = job.Status;
+                        oldValue.Worker = job.Worker;
+
+                        return oldValue;
+                    });
+                else
                 {
-                    oldValue.ActualStartTime = job.ActualStartTime;
-                    oldValue.CompletionTime = job.CompletionTime;
-                    oldValue.Output = job.Output;
-                    oldValue.Status = job.Status;
-                    oldValue.Worker = job.Worker;
+                    BacktestJob discarded;
+                    activeJobs.TryRemove(jobName, out discarded);
 
-                    return oldValue;
-                });
+                    inactiveJobs.AddOrUpdate(jobName, job, (key, oldValue) =>
+                    {
+                        oldValue.ActualStartTime = job.ActualStartTime;
+                        oldValue.CompletionTime = job.CompletionTime;
+                        oldValue.Output = job.Output;
+                        oldValue.Status = job.Status;
+                        oldValue.Worker = job.Worker;
+
+                        return oldValue;
+                    });
+                }
+
+                return new GenericActionResult(true, $"Successfully updated job {job.Name}");
             }
-
-            return new GenericActionResult(true, $"Successfully updated job {job.Name}");
+            catch (Exception ex)
+            {
+                string err = $"Failed to update job {job?.Name}";
+                logger.Error(err, ex);
+                return new GenericActionResult(false, $"{err}: {ex.Message}");
+            }
         }
 
         internal async Task<GenericActionResult> DeleteMany(IEnumerable<string> jobNames)

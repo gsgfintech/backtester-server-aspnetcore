@@ -19,7 +19,7 @@ namespace Backtester.Server.Controllers.Positions
             this.utils = utils;
         }
 
-        [HttpPost]
+        [HttpPost("{backtestJobName}")]
         public GenericActionResult Post(string backtestJobName, [FromBody]BacktestPosition position)
         {
             return utils.HandlePositionUpdate(backtestJobName, position);

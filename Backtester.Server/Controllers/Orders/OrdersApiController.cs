@@ -19,7 +19,7 @@ namespace Backtester.Server.Controllers.Orders
             this.utils = utils;
         }
 
-        [HttpPost]
+        [HttpPost("{backtestJobName}")]
         public GenericActionResult Post(string backtestJobName, [FromBody]BacktestOrder order)
         {
             return utils.HandleOrderUpdate(backtestJobName, order);

@@ -19,7 +19,7 @@ namespace Backtester.Server.Controllers.Trades
             this.utils = utils;
         }
 
-        [HttpPost]
+        [HttpPost("{backtestJobName}")]
         public GenericActionResult Post(string backtestJobName, [FromBody]BacktestTrade trade)
         {
             return utils.HandleNewTrade(backtestJobName, trade);
