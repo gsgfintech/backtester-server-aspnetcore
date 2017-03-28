@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFrameworks>netstandard1.6;net46</TargetFrameworks>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <Version>4.1.0</Version>
+    <Version>4.2.0</Version>
     <Authors>GSG Limited</Authors>
     <Company>GSG Limited</Company>
     <Description>Connector lib for backtester server</Description>
