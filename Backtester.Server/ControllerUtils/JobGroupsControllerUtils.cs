@@ -213,7 +213,7 @@ namespace Backtester.Server.ControllerUtils
                                     BacktestJobGroup discarded;
                                     activeJobGroups.TryRemove(jobGroup.GroupId, out discarded);
 
-                                    inactiveJobGroups.AddOrUpdate(jobGroup.GroupId, (key) =>
+                                    discarded = inactiveJobGroups.AddOrUpdate(jobGroup.GroupId, (key) =>
                                     {
                                         return new BacktestJobGroup(jobGroup.GroupId)
                                         {
@@ -240,6 +240,11 @@ namespace Backtester.Server.ControllerUtils
 
                                         return oldValue;
                                     });
+
+                                    var dbUpdate = await actioner.AddOrUpdate(jobGroup.GroupId, discarded);
+
+                                    if (!dbUpdate.Success)
+                                        logger.Error($"Failed to update job group {jobGroup.GroupId} in database");
                                 }
                             }
                         }

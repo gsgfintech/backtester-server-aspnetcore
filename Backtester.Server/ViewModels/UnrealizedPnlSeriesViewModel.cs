@@ -52,11 +52,6 @@ namespace Backtester.Server.ViewModels
                 {
                     var series = new Series()
                     {
-                        Marker = new Marker()
-                        {
-                            Shape = ChartShape.Circle,
-                            Visible = true
-                        },
                         Name = s.TradeDescription,
                         Tooltip = new NewTooltip()
                         {

@@ -23,23 +23,20 @@
     color: white;
 }
 
-.navbar-default .navbar-nav > a,
-.navbar-default .navbar-nav > .active > a,
-.navbar-default .navbar-nav > .active > a:hover {
-    background-color: #6293CE;
+.navbar,
+.navbar .navbar-nav > li > a,
+.navbar .navbar-nav > li > .active > a,
+.navbar .navbar-nav > li > .active > a:hover {
     color: white;
 }
 
-.navbar-right {
-    padding-right: 20px;
+.navbar .navbar-nav > li > a:hover {
+    background-color: #6293CE;
 }
+
 
 .footer {
     padding-left: 15px;
-}
-
-.panel {
-    margin: 0.8em;
 }
 
 .container {
@@ -49,4 +46,10 @@
 
 .list-group-xs {
     font-size: 9px;
+}
+
+@media (min-width: 1900px) {
+    .container {
+        width: 1800px;
+    }
 }

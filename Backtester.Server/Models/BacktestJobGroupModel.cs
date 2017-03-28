@@ -30,6 +30,7 @@ namespace Backtester.Server.Models
         [DisplayFormat(DataFormatString = "{0:dd/MM HH:mm:ss}")]
         public DateTimeOffset? CompletionTime { get; set; }
 
+        [DisplayFormat(DataFormatString = @"{0:hh\:mm\:ss}")]
         public TimeSpan? Duration => (ActualStartTime.HasValue && CompletionTime.HasValue) ? CompletionTime.Value.Subtract(ActualStartTime.Value) : (TimeSpan?)null;
 
         [Display(Name = "Test Start Date (HKT)")]
@@ -127,16 +128,16 @@ namespace Backtester.Server.Models
 
             return new BacktestJobGroupModel()
             {
-                ActualStartTime = group.ActualStartTime,
-                CompletionTime = group.CompletionTime,
-                CreateTime = group.CreateTime,
-                EndDate = group.EndDate,
-                EndTime = group.EndTime,
+                ActualStartTime = group.ActualStartTime.HasValue ? group.ActualStartTime.Value.ToLocalTime() : (DateTimeOffset?)null,
+                CompletionTime = group.CompletionTime.HasValue ? group.CompletionTime.Value.ToLocalTime() : (DateTimeOffset?)null,
+                CreateTime = group.CreateTime.ToLocalTime(),
+                EndDate = group.EndDate.ToLocalTime(),
+                EndTime = group.EndTime.ToLocalTime(),
                 GroupId = group.GroupId,
                 JobIds = group.JobIds,
                 Progress = group.Progress,
-                StartDate = group.StartDate,
-                StartTime = group.StartTime,
+                StartDate = group.StartDate.ToLocalTime(),
+                StartTime = group.StartTime.ToLocalTime(),
                 Status = group.Status,
                 Strategy = group.Strategy.ToBacktestJobStrategyModel(),
                 Trades = group.Trades.ToTradeModels()
