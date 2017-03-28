@@ -22,7 +22,7 @@
                     <tr>
                         <td><a asp-controller="JobGroups" asp-action="Info" asp-route-groupid="@jobGroup.GroupId">@Html.DisplayFor(m => jobGroup.GroupId)</a></td>
                         <td>@Html.DisplayFor(m => jobGroup.CreateTime)</td>
-                        <td>@Html.DisplayFor(m => jobGroup.Status)</td>
+                        <td>@Html.DisplayFor(m => jobGroup.Status) <span class="badge">@Html.DisplayFor(m => jobGroup.Progress)</span></td>
                         <td>@Html.DisplayFor(m => jobGroup.ActualStartTime)</td>
                         <td>@Html.DisplayFor(m => jobGroup.CompletionTime)</td>
                         <td>@Html.DisplayFor(m => jobGroup.Duration)</td>

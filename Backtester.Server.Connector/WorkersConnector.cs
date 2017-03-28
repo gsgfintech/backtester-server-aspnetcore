@@ -88,19 +88,19 @@ namespace Backtester.Server.Connector
             }
             catch (OperationCanceledException)
             {
-                string err = "Not posting job started notification: operation cancelled";
+                string err = "Not requesting new job: operation cancelled";
                 logger.Error(err);
                 return new GenericActionResult<string>(false, err);
             }
             catch (ArgumentNullException ex)
             {
-                string err = $"Not posting job started notification: missing or invalid parameter {ex.ParamName}";
+                string err = $"Not requesting new job: missing or invalid parameter {ex.ParamName}";
                 logger.Error(err);
                 return new GenericActionResult<string>(false, err);
             }
             catch (Exception ex)
             {
-                string err = "Failed to post job started notification";
+                string err = "Failed to request new job";
                 logger.Error(err, ex);
                 return new GenericActionResult<string>(false, $"{err}: {ex.Message}");
             }

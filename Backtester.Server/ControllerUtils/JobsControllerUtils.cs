@@ -246,7 +246,11 @@ namespace Backtester.Server.ControllerUtils
 
             if (activeJobs.TryGetValue(jobName, out job))
             {
-                job.Output.Trades[trade.TradeId] = trade;
+                if (!job.Output.Trades.ContainsKey(trade.TradeId))
+                    job.Output.Trades.Add(trade.TradeId, trade);
+                else
+                    job.Output.Trades[trade.TradeId] = trade;
+
                 activeJobs.AddOrUpdate(jobName, job, (key, oldValue) => job);
 
                 return new GenericActionResult(true, $"Added trade {trade.TradeId} to job {jobName}");
@@ -265,7 +269,11 @@ namespace Backtester.Server.ControllerUtils
 
             if (activeJobs.TryGetValue(jobName, out job))
             {
-                job.Output.Orders[order.OrderId] = order;
+                if (!job.Output.Orders.ContainsKey(order.OrderId))
+                    job.Output.Orders.Add(order.OrderId, order);
+                else
+                    job.Output.Orders[order.OrderId] = order;
+
                 activeJobs.AddOrUpdate(jobName, job, (key, oldValue) => job);
 
                 return new GenericActionResult(true, $"Added order {order.OrderId} to job {jobName}");

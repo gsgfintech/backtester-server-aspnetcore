@@ -19,11 +19,7 @@
             <tr>
                 <th>@Html.DisplayNameFor(m => Model.JobGroup.Status)</th>
                 <td>
-                    @Html.DisplayFor(m => Model.JobGroup.Status)
-                    @if (Model.JobGroup.Progress.HasValue)
-                    {
-                        <span>(@Html.DisplayFor(m => Model.JobGroup.Progress))</span>
-                    }
+                    @Html.DisplayFor(m => Model.JobGroup.Status) <span>(@Html.DisplayFor(m => Model.JobGroup.Progress))</span>
                 </td>
             </tr>
             <tr>

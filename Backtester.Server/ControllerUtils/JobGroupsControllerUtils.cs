@@ -186,9 +186,15 @@ namespace Backtester.Server.ControllerUtils
                                 }
 
                                 double newProgress = jobs.Select(j => j.Output.Status.Progress).Average();
-                                DateTimeOffset? newActualStartTime = jobs.Where(j => j.ActualStartTime.HasValue)?.Select(j => j.ActualStartTime.Value).Min();
-                                DateTimeOffset? newCompletionTime = (jobs.FirstOrDefault(j => !j.CompletionTime.HasValue) != null) ? null : jobs.Where(j => j.CompletionTime.HasValue)?.Select(j => j.ActualStartTime.Value).Max();
-                                List<BacktestTrade> newTrades = jobs.Where(j => !j.Output.Trades.IsNullOrEmpty())?.Select(j => j.Output.Trades.Values.ToList()).Aggregate((cur, next) => cur.Concat(next).ToList()).ToList();
+
+                                var jobsWithActualStartTime = jobs.Where(j => j.ActualStartTime.HasValue);
+                                DateTimeOffset? newActualStartTime = !jobsWithActualStartTime.IsNullOrEmpty() ? jobsWithActualStartTime.Select(j => j.ActualStartTime.Value).Min() : (DateTimeOffset?)null;
+
+                                var jobsWithCompletionTime = jobs.Where(j => j.CompletionTime.HasValue);
+                                DateTimeOffset? newCompletionTime = !jobsWithCompletionTime.IsNullOrEmpty() ? jobsWithCompletionTime.Select(j => j.CompletionTime.Value).Max() : (DateTimeOffset?)null;
+
+                                var jobsWithTrades = jobs.Where(j => !j.Output.Trades.IsNullOrEmpty());
+                                List<BacktestTrade> newTrades = !jobsWithTrades.IsNullOrEmpty() ? jobsWithTrades.Select(j => j.Output.Trades.Values.ToList()).Aggregate((cur, next) => cur.Concat(next).ToList()).ToList() : null;
 
                                 if (BacktestJobStatusUtils.ActiveStatus.Contains(newStatus))
                                 {
