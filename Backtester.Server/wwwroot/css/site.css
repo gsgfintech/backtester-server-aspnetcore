@@ -6,9 +6,9 @@
 /* Wrapping element */
 /* Set some basic padding to keep content from hitting the edges */
 .body-content {
+    margin-top: 12px;
     padding-left: 15px;
     padding-right: 15px;
-    width: 1800px;
 }
 
 .navbar {
@@ -41,7 +41,6 @@
 
 .container {
     width: 100%;
-    padding: 0;
 }
 
 .list-group-xs {
@@ -50,6 +49,7 @@
 
 @media (min-width: 1900px) {
     .container {
+        padding: 0;
         width: 1800px;
     }
 }

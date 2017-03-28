@@ -184,6 +184,12 @@ namespace Backtester.Server.ControllerUtils
                                     if (jobs.FirstOrDefault(j => j.Status == BacktestJobStatus.INPROGRESS) != null)
                                         newStatus = BacktestJobStatus.INPROGRESS;
                                 }
+                                // Override: if at least one job is failed then we want to mark the job group as failed too
+                                else if (newStatus == BacktestJobStatus.COMPLETED)
+                                {
+                                    if (jobs.FirstOrDefault(j => j.Status == BacktestJobStatus.FAILED) != null)
+                                        newStatus = BacktestJobStatus.FAILED;
+                                }
 
                                 double newProgress = jobs.Select(j => j.Output.Status.Progress).Average();
 

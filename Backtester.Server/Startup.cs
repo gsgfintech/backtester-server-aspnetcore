@@ -54,6 +54,7 @@ namespace Backtester.Server
 
             GSGLoggerFactory.Instance.AddConsole(Configuration.GetSection("Logging"));
             GSGLoggerFactory.Instance.AddDebug();
+            GSGLoggerFactory.Instance.AddLog4Net();
 
             if (env.IsDevelopment())
             {
