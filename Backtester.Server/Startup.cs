@@ -14,6 +14,8 @@ namespace Backtester.Server
 {
     public class Startup
     {
+        private readonly ILogger logger = GSGLoggerFactory.Instance.CreateLogger<Startup>();
+
         public Startup(IHostingEnvironment env)
         {
             var builder = new ConfigurationBuilder()
@@ -88,11 +90,15 @@ namespace Backtester.Server
 
     internal static class ServiceExtensions
     {
+        private static ILogger logger = GSGLoggerFactory.Instance.CreateLogger<Startup>();
+
         public static void AddBacktestDBServer(this IServiceCollection services, IConfigurationSection configSection)
         {
             string dbName = configSection.GetValue<string>("DBName");
             string host = configSection.GetValue<string>("Host");
             int port = configSection.GetValue<int>("Port");
+
+            logger.Info($"Setting up MongoDB on {host}:{port}/{dbName}");
 
             BacktestMongoDBServer backtestDbServer = new BacktestMongoDBServer(dbName, host, port);
 
