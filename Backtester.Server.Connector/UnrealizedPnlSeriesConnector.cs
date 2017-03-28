@@ -1,4 +1,4 @@
-﻿using Capital.GSG.FX.Data.Core.SystemData;
+﻿using Capital.GSG.FX.Backtest.DataTypes;
 using Capital.GSG.FX.Data.Core.WebApi;
 using Capital.GSG.FX.Utils.Core.Logging;
 using Flurl;
@@ -10,23 +10,23 @@ using System.Threading.Tasks;
 
 namespace Backtester.Server.Connector
 {
-    public class AlertsConnector
+    public class UnrealizedPnlSeriesConnector
     {
-        private static ILogger logger = GSGLoggerFactory.Instance.CreateLogger<AlertsConnector>();
+        private static ILogger logger = GSGLoggerFactory.Instance.CreateLogger<UnrealizedPnlSeriesConnector>();
 
         private readonly string controllerEndpoint;
 
-        private static AlertsConnector _instance;
+        private static UnrealizedPnlSeriesConnector _instance;
 
-        public static AlertsConnector GetConnector(string controllerEndpoint)
+        public static UnrealizedPnlSeriesConnector GetConnector(string controllerEndpoint)
         {
             if (_instance == null)
-                _instance = new AlertsConnector(controllerEndpoint);
+                _instance = new UnrealizedPnlSeriesConnector(controllerEndpoint);
 
             return _instance;
         }
 
-        private AlertsConnector(string controllerEndpoint)
+        private UnrealizedPnlSeriesConnector(string controllerEndpoint)
         {
             if (string.IsNullOrEmpty(controllerEndpoint))
                 throw new ArgumentNullException(nameof(controllerEndpoint));
@@ -37,37 +37,34 @@ namespace Backtester.Server.Connector
             this.controllerEndpoint = controllerEndpoint;
         }
 
-        public async Task<GenericActionResult> PostNewAlert(string backtestJobName, Alert alert, CancellationToken ct = default(CancellationToken))
+        public async Task<GenericActionResult> PostNewUnrealizedPnlSerie(BacktestUnrealizedPnlSerie pnlSerie, CancellationToken ct = default(CancellationToken))
         {
             try
             {
                 ct.ThrowIfCancellationRequested();
 
-                if (string.IsNullOrEmpty(backtestJobName))
-                    throw new ArgumentNullException(nameof(backtestJobName));
+                if (pnlSerie == null)
+                    throw new ArgumentNullException(nameof(pnlSerie));
 
-                if (alert == null)
-                    throw new ArgumentNullException(nameof(alert));
+                logger.Info($"About to send POST request to {controllerEndpoint}/api/unrpnls");
 
-                logger.Info($"About to send POST request to {controllerEndpoint}/api/alerts/{backtestJobName}");
-
-                return await controllerEndpoint.AppendPathSegment($"/api/alerts/{backtestJobName}").PostJsonAsync(alert, ct).ReceiveJson<GenericActionResult>();
+                return await controllerEndpoint.AppendPathSegment("/api/unrpnls").PostJsonAsync(pnlSerie, ct).ReceiveJson<GenericActionResult>();
             }
             catch (OperationCanceledException)
             {
-                string err = "Not posting new alert: operation cancelled";
+                string err = "Not posting new unrealized PnL serie: operation cancelled";
                 logger.Error(err);
                 return new GenericActionResult(false, err);
             }
             catch (ArgumentNullException ex)
             {
-                string err = $"Not posting new alert: missing or invalid parameter {ex.ParamName}";
+                string err = $"Not posting new unrealized PnL serie: missing or invalid parameter {ex.ParamName}";
                 logger.Error(err);
                 return new GenericActionResult(false, err);
             }
             catch (Exception ex)
             {
-                string err = "Failed to post new alert";
+                string err = "Failed to post new unrealized PnL serie";
                 logger.Error(err, ex);
                 return new GenericActionResult(false, $"{err}: {ex.Message}");
             }

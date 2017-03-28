@@ -277,5 +277,24 @@ namespace Backtester.Server.ControllerUtils
                 return new GenericActionResult(false, err);
             }
         }
+
+        internal GenericActionResult AddStatusUpdate(string jobName, BacktestStatus status)
+        {
+            BacktestJob job;
+
+            if (activeJobs.TryGetValue(jobName, out job))
+            {
+                job.Output.Status = status;
+                activeJobs.AddOrUpdate(jobName, job, (key, oldValue) => job);
+
+                return new GenericActionResult(true, $"Updated status of job {jobName}");
+            }
+            else
+            {
+                string err = $"Not updating status of unknown job {jobName}";
+                logger.Error(err);
+                return new GenericActionResult(false, err);
+            }
+        }
     }
 }

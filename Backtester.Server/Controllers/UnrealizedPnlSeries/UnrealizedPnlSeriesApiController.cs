@@ -4,6 +4,7 @@ using Capital.GSG.FX.Data.Core.WebApi;
 using Capital.GSG.FX.Utils.Core.Logging;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using System.Threading.Tasks;
 
 namespace Backtester.Server.Controllers.UnrealizedPnlSeries
 {
@@ -20,9 +21,9 @@ namespace Backtester.Server.Controllers.UnrealizedPnlSeries
         }
 
         [HttpPost]
-        public GenericActionResult Post([FromBody]BacktestUnrealizedPnlSerie pnlSerie)
+        public async Task<GenericActionResult> Post([FromBody]BacktestUnrealizedPnlSerie pnlSerie)
         {
-            return utils.HandleNewUnrealizedPnlSerie(pnlSerie);
+            return await utils.HandleNewUnrealizedPnlSerie(pnlSerie);
         }
     }
 }

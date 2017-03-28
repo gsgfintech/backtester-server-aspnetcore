@@ -38,7 +38,22 @@ namespace Backtester.Server.ControllerUtils
                 logger.Info($"Received new unrealized PnL serie of {pnlSerie.Points.Count} points for job group {pnlSerie.JobGroupId} (trade {pnlSerie.TradeDescription})");
 
                 // 1. Save in database
-                var result= await actioner.AddOrUpdate()
+                var result = await actioner.Insert(pnlSerie);
+
+                if (!result.Success)
+                    return result;
+
+                // 2. Add to in-memory dictionary
+                seriesByJobGroupDict.AddOrUpdate(pnlSerie.JobGroupId, (key) =>
+                {
+                    return new List<BacktestUnrealizedPnlSerie>() { pnlSerie };
+                }, (key, oldValue) =>
+                {
+                    oldValue.Add(pnlSerie);
+                    return oldValue;
+                });
+
+                return new GenericActionResult(true, $"Successfully added new unrealized PnL serie for job group {pnlSerie.JobGroupId}");
             }
             catch (ArgumentNullException ex)
             {

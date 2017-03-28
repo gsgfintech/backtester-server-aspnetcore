@@ -184,6 +184,13 @@ namespace Backtester.Server
 
                 return new TradesControllerUtils(jobsControllerUtils);
             });
+
+            services.AddSingleton((serviceProvider) =>
+            {
+                JobsControllerUtils jobsControllerUtils = serviceProvider.GetService<JobsControllerUtils>();
+
+                return new StatusesControllerUtils(jobsControllerUtils);
+            });
         }
     }
 }

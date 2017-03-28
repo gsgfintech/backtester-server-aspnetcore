@@ -185,7 +185,7 @@ namespace Backtester.Server.ControllerUtils
                                         newStatus = BacktestJobStatus.INPROGRESS;
                                 }
 
-                                double newProgress = jobs.Select(j => j.Progress).Average();
+                                double newProgress = jobs.Select(j => j.Output.Status.Progress).Average();
                                 DateTimeOffset? newActualStartTime = jobs.Where(j => j.ActualStartTime.HasValue)?.Select(j => j.ActualStartTime.Value).Min();
                                 DateTimeOffset? newCompletionTime = (jobs.FirstOrDefault(j => !j.CompletionTime.HasValue) != null) ? null : jobs.Where(j => j.CompletionTime.HasValue)?.Select(j => j.ActualStartTime.Value).Max();
                                 List<BacktestTrade> newTrades = jobs.Where(j => !j.Output.Trades.IsNullOrEmpty())?.Select(j => j.Output.Trades.Values.ToList()).Aggregate((cur, next) => cur.Concat(next).ToList()).ToList();

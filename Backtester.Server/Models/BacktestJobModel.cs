@@ -18,9 +18,6 @@ namespace Backtester.Server.Models
         public DateTimeOffset StartTime { get; set; }
         public DateTimeOffset EndTime { get; set; }
         public BacktestJobOutputDataModel Output { get; set; }
-
-        [DisplayFormat(DataFormatString = "{0:N0}%")]
-        public double Progress { get; set; }
     }
 
     public class BacktestJobOutputDataModel
@@ -64,7 +61,6 @@ namespace Backtester.Server.Models
                 GroupId = job.GroupId,
                 Name = job.Name,
                 Output = job.Output.ToBacktestJobOutputDataModel(),
-                Progress = job.Progress,
                 StartTime = job.StartTime,
                 Status = job.Status,
                 Worker = job.Worker

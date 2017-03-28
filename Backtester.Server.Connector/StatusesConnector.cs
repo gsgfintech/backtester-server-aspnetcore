@@ -1,4 +1,4 @@
-﻿using Capital.GSG.FX.Data.Core.SystemData;
+﻿using Capital.GSG.FX.Backtest.DataTypes;
 using Capital.GSG.FX.Data.Core.WebApi;
 using Capital.GSG.FX.Utils.Core.Logging;
 using Flurl;
@@ -10,23 +10,23 @@ using System.Threading.Tasks;
 
 namespace Backtester.Server.Connector
 {
-    public class AlertsConnector
+    public class StatusesConnector
     {
-        private static ILogger logger = GSGLoggerFactory.Instance.CreateLogger<AlertsConnector>();
+        private static ILogger logger = GSGLoggerFactory.Instance.CreateLogger<StatusesConnector>();
 
         private readonly string controllerEndpoint;
 
-        private static AlertsConnector _instance;
+        private static StatusesConnector _instance;
 
-        public static AlertsConnector GetConnector(string controllerEndpoint)
+        public static StatusesConnector GetConnector(string controllerEndpoint)
         {
             if (_instance == null)
-                _instance = new AlertsConnector(controllerEndpoint);
+                _instance = new StatusesConnector(controllerEndpoint);
 
             return _instance;
         }
 
-        private AlertsConnector(string controllerEndpoint)
+        private StatusesConnector(string controllerEndpoint)
         {
             if (string.IsNullOrEmpty(controllerEndpoint))
                 throw new ArgumentNullException(nameof(controllerEndpoint));
@@ -37,7 +37,7 @@ namespace Backtester.Server.Connector
             this.controllerEndpoint = controllerEndpoint;
         }
 
-        public async Task<GenericActionResult> PostNewAlert(string backtestJobName, Alert alert, CancellationToken ct = default(CancellationToken))
+        public async Task<GenericActionResult> PostBacktestStatus(string backtestJobName, BacktestStatus status, CancellationToken ct = default(CancellationToken))
         {
             try
             {
@@ -46,28 +46,28 @@ namespace Backtester.Server.Connector
                 if (string.IsNullOrEmpty(backtestJobName))
                     throw new ArgumentNullException(nameof(backtestJobName));
 
-                if (alert == null)
-                    throw new ArgumentNullException(nameof(alert));
+                if (status == null)
+                    throw new ArgumentNullException(nameof(status));
 
-                logger.Info($"About to send POST request to {controllerEndpoint}/api/alerts/{backtestJobName}");
+                logger.Info($"About to send POST request to {controllerEndpoint}/api/statuses/{backtestJobName}");
 
-                return await controllerEndpoint.AppendPathSegment($"/api/alerts/{backtestJobName}").PostJsonAsync(alert, ct).ReceiveJson<GenericActionResult>();
+                return await controllerEndpoint.AppendPathSegment($"/api/statuses/{backtestJobName}").PostJsonAsync(status, ct).ReceiveJson<GenericActionResult>();
             }
             catch (OperationCanceledException)
             {
-                string err = "Not posting new alert: operation cancelled";
+                string err = "Not posting status update: operation cancelled";
                 logger.Error(err);
                 return new GenericActionResult(false, err);
             }
             catch (ArgumentNullException ex)
             {
-                string err = $"Not posting new alert: missing or invalid parameter {ex.ParamName}";
+                string err = $"Not posting status update: missing or invalid parameter {ex.ParamName}";
                 logger.Error(err);
                 return new GenericActionResult(false, err);
             }
             catch (Exception ex)
             {
-                string err = "Failed to post new alert";
+                string err = "Failed to post status update";
                 logger.Error(err, ex);
                 return new GenericActionResult(false, $"{err}: {ex.Message}");
             }

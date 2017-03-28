@@ -16,10 +16,10 @@
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'" />
   <ItemGroup>
-    <PackageReference Include="Backtest.MongoConnector" Version="5.3.5" />
+    <PackageReference Include="Backtest.MongoConnector" Version="5.4.1" />
     <PackageReference Include="Capital.GSG.FX.Trading.Strategy" Version="5.1.1" />
     <PackageReference Include="Capital.GSG.FX.Utils.Core" Version="1.2.1" />
-    <PackageReference Include="Capital.GSG.FX.Utils.Core.Logging" Version="2.2.0" />
+    <PackageReference Include="Capital.GSG.FX.Utils.Core.Logging" Version="2.2.1" />
     <PackageReference Include="log4net" Version="2.0.8" />
     <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.0.0" />
     <PackageReference Include="Microsoft.AspNetCore" Version="1.1.1" />

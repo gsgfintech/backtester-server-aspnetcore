@@ -1,8 +1,6 @@
 ﻿using Capital.GSG.FX.Data.Core.SystemData;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Backtester.Server.Connector.Tests
