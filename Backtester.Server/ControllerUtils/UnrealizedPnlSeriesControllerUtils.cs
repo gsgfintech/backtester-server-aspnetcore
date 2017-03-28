@@ -8,6 +8,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Capital.GSG.FX.Data.Core.WebApi;
 
 namespace Backtester.Server.ControllerUtils
 {
@@ -17,12 +18,40 @@ namespace Backtester.Server.ControllerUtils
 
         private readonly UnrealizedPnlSerieActioner actioner;
 
-        private readonly ConcurrentDictionary<string, BacktestUnrealizedPnlSerie> seriesDict = new ConcurrentDictionary<string, BacktestUnrealizedPnlSerie>();
         private readonly ConcurrentDictionary<string, List<BacktestUnrealizedPnlSerie>> seriesByJobGroupDict = new ConcurrentDictionary<string, List<BacktestUnrealizedPnlSerie>>();
 
         public UnrealizedPnlSeriesControllerUtils(UnrealizedPnlSerieActioner actioner)
         {
             this.actioner = actioner;
+        }
+
+        internal async Task<GenericActionResult> HandleNewUnrealizedPnlSerie(BacktestUnrealizedPnlSerie pnlSerie)
+        {
+            try
+            {
+                if (pnlSerie == null)
+                    throw new ArgumentNullException(nameof(pnlSerie));
+
+                if (pnlSerie.Points.IsNullOrEmpty())
+                    return new GenericActionResult(false, "Unrealized PnL serie is empty");
+
+                logger.Info($"Received new unrealized PnL serie of {pnlSerie.Points.Count} points for job group {pnlSerie.JobGroupId} (trade {pnlSerie.TradeDescription})");
+
+                // 1. Save in database
+                var result= await actioner.AddOrUpdate()
+            }
+            catch (ArgumentNullException ex)
+            {
+                string err = $"Not processing unrealized PnL serie: missing or invalid parameter {ex.ParamName}";
+                logger.Error(err);
+                return new GenericActionResult(false, $"{err}: {ex.Message}");
+            }
+            catch (Exception ex)
+            {
+                string err = "Failed to process unrealized PnL serie";
+                logger.Error(err);
+                return new GenericActionResult(false, $"{err}: {ex.Message}");
+            }
         }
 
         internal async Task<List<BacktestUnrealizedPnlSerie>> GetForJobGroup(string jobGroupId)
@@ -42,28 +71,6 @@ namespace Backtester.Server.ControllerUtils
 
                 if (!result.IsNullOrEmpty())
                     seriesByJobGroupDict.TryAdd(jobGroupId, result);
-
-                return result;
-            }
-        }
-
-        internal async Task<BacktestUnrealizedPnlSerie> Get(string tradeDescription)
-        {
-            BacktestUnrealizedPnlSerie serie;
-
-            if (seriesDict.TryGetValue(tradeDescription, out serie))
-                return serie;
-            else
-            {
-                logger.Info($"Querying serie {tradeDescription} from database as it is not in the dictionary");
-
-                CancellationTokenSource cts = new CancellationTokenSource();
-                cts.CancelAfter(TimeSpan.FromSeconds(5));
-
-                var result = await actioner.Get(tradeDescription, cts.Token);
-
-                if (result != null)
-                    seriesDict.TryAdd(tradeDescription, result);
 
                 return result;
             }
