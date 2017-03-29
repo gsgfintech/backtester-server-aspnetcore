@@ -26,8 +26,8 @@
                     <td class="text-right">@Html.DisplayFor(m => Model.Profitability)</td>
                     <th>@Html.DisplayNameFor(m => Model.ShortsWon)</th>
                     <td class="text-right"><i>(@Html.DisplayFor(m => Model.ShortsWon)/@Html.DisplayFor(m => Model.ShortsCount))</i> @Html.DisplayFor(m => Model.ShortsWonRatio)</td>
-                    <th>@Html.DisplayNameFor(m => Model.StandardDeviation)</th>
-                    <td class="text-right">@Html.DisplayFor(m => Model.StandardDeviation)</td>
+                    <th>@Html.DisplayNameFor(m => Model.StandardDeviationUsd)</th>
+                    <td class="text-right">@Html.DisplayFor(m => Model.StandardDeviationPips) / @Html.DisplayFor(m => Model.StandardDeviationUsd)</td>
                 </tr>
                 <tr>
                     <th>@Html.DisplayNameFor(m => Model.TotalPips)</th>
@@ -52,8 +52,8 @@
                             <i>(@Html.DisplayFor(m => Model.WorstTradeUsd.Timestamp))</i> @Html.DisplayFor(m => Model.WorstTradeUsd.RealizedPnlUsd)
                         }
                     </td>
-                    <th>@Html.DisplayNameFor(m => Model.ZScore)</th>
-                    <td class="text-right">@Html.DisplayFor(m => Model.ZScore) (@Html.DisplayFor(m => Model.ZScorePct))</td>
+                    <th>@Html.DisplayNameFor(m => Model.ExpectancyPips)</th>
+                    <td class="text-right">@Html.DisplayFor(m => Model.ExpectancyPips) / @Html.DisplayFor(m => Model.ExpectancyUsd)</td>
                 </tr>
                 <tr>
                     <th>@Html.DisplayNameFor(m => Model.AverageLossPips)</th>
@@ -65,8 +65,8 @@
                             <i>(@Html.DisplayFor(m => Model.BestTradePips.Timestamp))</i> @Html.DisplayFor(m => Model.BestTradePips.RealizedPnlPips)
                         }
                     </td>
-                    <th>@Html.DisplayNameFor(m => Model.ExpectancyPips)</th>
-                    <td class="text-right">@Html.DisplayFor(m => Model.ExpectancyPips) (@Html.DisplayFor(m => Model.ExpectancyUsd))</td>
+                    <th>@Html.DisplayNameFor(m => Model.MaxDrawdown)</th>
+                    <td class="text-right">@Html.DisplayFor(m => Model.MaxDrawdown)</td>
                 </tr>
                 <tr>
                     <th>@Html.DisplayNameFor(m => Model.TotalVolume)</th>
@@ -78,16 +78,16 @@
                             <i>(@Html.DisplayFor(m => Model.WorstTradePips.Timestamp))</i> @Html.DisplayFor(m => Model.WorstTradePips.RealizedPnlPips)
                         }
                     </td>
-                    <th>@Html.DisplayNameFor(m => Model.MaxDrawdown)</th>
-                    <td class="text-right">@Html.DisplayFor(m => Model.MaxDrawdown)</td>
+                    <th>@Html.DisplayNameFor(m => Model.MaxDrawdownDuration)</th>
+                    <td class="text-right">@Html.DisplayFor(m => Model.MaxDrawdownDuration)</td>
                 </tr>
                 <tr>
                     <th>@Html.DisplayNameFor(m => Model.TotalFees)</th>
                     <td class="text-right">@Html.DisplayFor(m => Model.TotalFees)</td>
                     <th>@Html.DisplayNameFor(m => Model.AverageTradeDuration)</th>
                     <td class="text-right">@Html.DisplayFor(m => Model.AverageTradeDuration)</td>
-                    <th>@Html.DisplayNameFor(m => Model.MaxDrawdownDuration)</th>
-                    <td class="text-right">@Html.DisplayFor(m => Model.MaxDrawdownDuration)</td>
+                    <th></th>
+                    <td></td>
                 </tr>
             </table>
         </div>

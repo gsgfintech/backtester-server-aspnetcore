@@ -344,14 +344,13 @@ namespace Backtester.Server.ControllerUtils
             double sharpeRatio = 0;
             int shortsCount = 0;
             int shortsWon = 0;
-            double standardDeviation = 0;
+            double standardDeviationUsd = 0;
+            double standardDeviationPips = 0;
             int totalFees = 0;
             double totalPips = 0;
             int totalVolume = 0; // TODO : need to add SizeUSD property on the trade object
             BacktestTradeModel worstTradePips = null;
             BacktestTradeModel worstTradeUsd = null;
-            double zScore = 0; //
-            double zScorePct = 0; //
 
             var trades = await GetTrades(groupId);
 
@@ -431,17 +430,20 @@ namespace Backtester.Server.ControllerUtils
 
                 if (!tradesWithPnl.IsNullOrEmpty())
                 {
-                    standardDeviation = tradesWithPnl.Select(t => t.RealizedPnlUsd.Value).StandardDeviation();
+                    standardDeviationUsd = tradesWithPnl.Select(t => t.RealizedPnlUsd.Value).StandardDeviation();
+                    standardDeviationPips = tradesWithPnl.Select(t => t.RealizedPnlPips.Value).StandardDeviation();
 
-                    if (averageWinUsd != 0 && standardDeviation != 0)
-                        sharpeRatio = averageWinUsd / standardDeviation;
+                    double averageReturnUsd = tradesWithPnl.Select(t => t.RealizedPnlUsd.Value).Average();
+
+                    if (averageReturnUsd != 0 && standardDeviationUsd != 0)
+                        sharpeRatio = averageReturnUsd / standardDeviationUsd;
                 }
                 #endregion
 
                 #region All
                 totalFees = (int)trades.Select(t => t.CommissionUsd ?? 0).Sum();
                 totalPips = trades.Select(t => t.RealizedPnlPips ?? 0).Sum();
-                totalVolume = trades.Select(t => t.SizeUsd ?? 0).Sum();
+                totalVolume = trades.Select(t => t.SizeUsd ?? 0).Sum() * 1000; // Sizes are divided by 1000 when the BacktestTradeModel is created
 
                 double totalUsd = trades.Select(t => t.RealizedPnlUsd ?? 0).Sum();
 
@@ -472,14 +474,13 @@ namespace Backtester.Server.ControllerUtils
                 SharpeRatio = sharpeRatio,
                 ShortsCount = shortsCount,
                 ShortsWon = shortsWon,
-                StandardDeviation = standardDeviation,
+                StandardDeviationPips = standardDeviationPips,
+                StandardDeviationUsd = standardDeviationUsd,
                 TotalFees = totalFees,
                 TotalPips = totalPips,
                 TotalVolume = totalVolume,
                 WorstTradePips = worstTradePips,
-                WorstTradeUsd = worstTradeUsd,
-                ZScore = zScore,
-                ZScorePct = zScorePct
+                WorstTradeUsd = worstTradeUsd
             };
         }
 

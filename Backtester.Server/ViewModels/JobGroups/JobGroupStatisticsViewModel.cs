@@ -24,7 +24,7 @@ namespace Backtester.Server.ViewModels.JobGroups
         [DisplayFormat(DataFormatString = "{0:N0}")]
         public int LosersCount => TradesCount - WinnersCount;
 
-        [DisplayFormat(DataFormatString = "{0:N0}")]
+        [DisplayFormat(DataFormatString = "{0:N0}%")]
         public int Profitability => (TradesCount > 0) ? (int)((WinnersCount / (double)TradesCount) * 100) : 0;
 
         [Display(Name = "Pips")]
@@ -101,19 +101,15 @@ namespace Backtester.Server.ViewModels.JobGroups
 
         [Display(Name = "Standard Deviation")]
         [DisplayFormat(DataFormatString = "{0:N2} USD")]
-        public double StandardDeviation { get; set; }
+        public double StandardDeviationUsd { get; set; }
+
+        [Display(Name = "Standard Deviation")]
+        [DisplayFormat(DataFormatString = "{0:N1} pips")]
+        public double StandardDeviationPips { get; set; }
 
         [Display(Name = "Sharpe Ratio")]
         [DisplayFormat(DataFormatString = "{0:N2}")]
         public double SharpeRatio { get; set; }
-
-        [Display(Name = "Z-Score (Probability)")]
-        [DisplayFormat(DataFormatString = "{0:N2}")]
-        public double ZScore { get; set; }
-
-        [Display(Name = "Z-Score (Probability)")]
-        [DisplayFormat(DataFormatString = "{0:N2}%")]
-        public double ZScorePct { get; set; }
 
         [Display(Name = "Expectancy")]
         [DisplayFormat(DataFormatString = "{0:N2} pips")]
