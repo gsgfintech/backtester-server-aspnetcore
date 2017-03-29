@@ -1,4 +1,6 @@
-﻿@model IEnumerable<Backtester.Server.Models.BacktestJobGroupModel>
+﻿@using static Capital.GSG.FX.Backtest.DataTypes.BacktestJobStatus
+
+@model IEnumerable<Backtester.Server.Models.BacktestJobGroupModel>
 
 <div class="panel panel-default">
     <div class="panel-heading">
@@ -22,21 +24,26 @@
                     <tr>
                         <td><a asp-controller="JobGroups" asp-action="Info" asp-route-groupid="@jobGroup.GroupId">@Html.DisplayFor(m => jobGroup.GroupId)</a></td>
                         <td>@Html.DisplayFor(m => jobGroup.CreateTime)</td>
-                        <td>@Html.DisplayFor(m => jobGroup.Status) <span class="badge">@Html.DisplayFor(m => jobGroup.Progress)</span></td>
+                        <td>@Html.DisplayFor(m => jobGroup.Status)
+                            @if (jobGroup.Status != CREATED)
+                            {
+                                <span class="badge">@Html.DisplayFor(m => jobGroup.Progress)</span>
+                            }
+                        </td>
                         <td>@Html.DisplayFor(m => jobGroup.ActualStartTime)</td>
                         <td>@Html.DisplayFor(m => jobGroup.CompletionTime)</td>
                         <td>@Html.DisplayFor(m => jobGroup.Duration)</td>
                         <td>
-                            <div class="btn-group btn-group-sm">
-                                <a class="btn btn-primary" asp-controller="CreateJob" asp-action="Step1" asp-route-jobNameToDuplicate="@jobGroup.GroupId">
-                                    <span class="glyphicon glyphicon-plus"></span>
-                                </a>
-                                <button class="btn btn-danger" onclick="deleteJobGroup('@jobGroup.GroupId')">
-                                    <span class="glyphicon glyphicon-trash"></span>
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
+                        <div class="btn-group btn-group-sm">
+                            <a class="btn btn-primary" asp-controller="CreateJob" asp-action="Step1" asp-route-jobNameToDuplicate="@jobGroup.GroupId">
+                                <span class="glyphicon glyphicon-plus"></span>
+                            </a>
+                            <button class="btn btn-danger" onclick="deleteJobGroup('@jobGroup.GroupId')">
+                                <span class="glyphicon glyphicon-trash"></span>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
                 }
             </table>
         </div>
