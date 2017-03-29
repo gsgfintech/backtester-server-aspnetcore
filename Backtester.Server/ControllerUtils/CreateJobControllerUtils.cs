@@ -335,6 +335,7 @@ namespace Backtester.Server.ControllerUtils
                     StartTime = jobSettings.StartTime,
                     Strategy = new Strategy()
                     {
+                        AlgoTypeName = jobSettings.AlgorithmClass,
                         Crosses = jobSettings.Crosses,
                         Name = jobSettings.StrategyName,
                         Parameters = jobSettings.Parameters.ToStrategyParameters("Param"),

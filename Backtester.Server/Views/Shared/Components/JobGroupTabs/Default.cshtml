@@ -2,6 +2,7 @@
 
 <ul class="nav nav-tabs" style="margin-bottom: 15px">
     <li role="presentation" class=@(Url.ActionContext.ActionDescriptor.DisplayName.Contains("Info") ? "active" : "")><a asp-controller="JobGroups" asp-action="Info" asp-route-groupid="@Model.JobGroupId">Info</a></li>
+    <li role="presentation" class=@(Url.ActionContext.ActionDescriptor.DisplayName.Contains("Statistics") ? "active" : "")><a asp-controller="JobGroups" asp-action="Statistics" asp-route-groupid="@Model.JobGroupId">Stats</a></li>
     <li role="presentation" class=@(Url.ActionContext.ActionDescriptor.DisplayName.Contains("AllTrades") ? "active" : "")><a asp-controller="JobGroups" asp-action="AllTrades" asp-route-groupid="@Model.JobGroupId">All Trades</a></li>
     <li role="presentation" class=@(Url.ActionContext.ActionDescriptor.DisplayName.Contains("UnrealizedPnls") ? "active" : "")><a asp-controller="JobGroups" asp-action="UnrealizedPnls" asp-route-groupid="@Model.JobGroupId">Unr PnLs</a></li>
 

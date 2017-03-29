@@ -1,11 +1,15 @@
 ﻿using Backtester.Server.Models;
+using Backtester.Server.ViewModels.JobGroups;
 using Capital.GSG.FX.Backtest.DataTypes;
 using Capital.GSG.FX.Backtest.MongoConnector.Actioner;
+using Capital.GSG.FX.Data.Core.ExecutionData;
 using Capital.GSG.FX.Data.Core.WebApi;
 using Capital.GSG.FX.Utils.Core;
 using Capital.GSG.FX.Utils.Core.Logging;
 using DataTypes.Core;
+using MathNet.Numerics.Statistics;
 using Microsoft.Extensions.Logging;
+using Syncfusion.JavaScript.DataVisualization.Models;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -319,6 +323,164 @@ namespace Backtester.Server.ControllerUtils
                 return results;
             else
                 return new List<BacktestJobGroup>();
+        }
+
+        internal async Task<JobGroupStatisticsViewModel> ComputeStatistics(string groupId)
+        {
+            double averageLossPips = 0;
+            double averageLossUsd = 0;
+            TimeSpan averageTradeDuration = new TimeSpan(0, 0, 0);
+            double averageWinPips = 0;
+            double averageWinUsd = 0;
+            BacktestTradeModel bestTradePips = null;
+            BacktestTradeModel bestTradeUsd = null;
+            double expectancyPips = 0;
+            double expectancyUsd = 0;
+            int longsCount = 0;
+            int longsWon = 0;
+            double maxDrawdown = 0; //
+            TimeSpan maxDrawdownDuration = new TimeSpan(0, 0, 0); //
+            double profitFactor = 0;
+            double sharpeRatio = 0;
+            int shortsCount = 0;
+            int shortsWon = 0;
+            double standardDeviation = 0;
+            int totalFees = 0;
+            double totalPips = 0;
+            int totalVolume = 0; // TODO : need to add SizeUSD property on the trade object
+            BacktestTradeModel worstTradePips = null;
+            BacktestTradeModel worstTradeUsd = null;
+            double zScore = 0; //
+            double zScorePct = 0; //
+
+            var trades = await GetTrades(groupId);
+
+            if (!trades.IsNullOrEmpty())
+            {
+                double grossLoss = 0;
+                double grossProfit = 0;
+
+                #region Losers
+                var losers = trades.Where(t => t.RealizedPnlUsd < 0);
+
+                if (!losers.IsNullOrEmpty())
+                {
+                    averageLossPips = losers.Select(t => t.RealizedPnlPips.Value).Average();
+                    averageLossUsd = losers.Select(t => t.RealizedPnlUsd.Value).Average();
+
+                    double maxLossPips = losers.Select(t => t.RealizedPnlPips.Value).Min();
+                    worstTradePips = losers.FirstOrDefault(t => t.RealizedPnlPips == maxLossPips);
+
+                    double maxLossUsd = losers.Select(t => t.RealizedPnlUsd.Value).Min();
+                    worstTradeUsd = losers.FirstOrDefault(t => t.RealizedPnlUsd == maxLossUsd);
+
+                    grossLoss = losers.Select(t => t.RealizedPnlPips.Value).Sum();
+                }
+                #endregion
+
+                #region Winners
+                var winners = trades.Where(t => t.RealizedPnlUsd > 0);
+
+                if (!winners.IsNullOrEmpty())
+                {
+                    averageWinPips = winners.Select(t => t.RealizedPnlPips.Value).Average();
+                    averageWinUsd = winners.Select(t => t.RealizedPnlUsd.Value).Average();
+
+                    double maxWinPips = winners.Select(t => t.RealizedPnlPips.Value).Max();
+                    bestTradePips = winners.FirstOrDefault(t => t.RealizedPnlPips == maxWinPips);
+
+                    double maxWinUsd = winners.Select(t => t.RealizedPnlUsd.Value).Max();
+                    bestTradeUsd = winners.FirstOrDefault(t => t.RealizedPnlUsd == maxWinUsd);
+
+                    grossProfit = winners.Select(t => t.RealizedPnlPips.Value).Sum();
+                }
+                #endregion
+
+                #region Longs
+                var longs = trades.Where(t => t.IsPositionClosing() && t.Side == ExecutionSide.SOLD); // position closing trade is a SELL (ie the position was LONG)
+
+                if (!longs.IsNullOrEmpty())
+                {
+                    longsCount = longs.Count();
+                    longsWon = longs.Count(t => t.RealizedPnlUsd > 0);
+                }
+                #endregion
+
+                #region Shorts
+                var shorts = trades.Where(t => t.IsPositionClosing() && t.Side == ExecutionSide.BOUGHT); // position closing trade is a BUY (ie the position was SHORT)
+
+                if (!shorts.IsNullOrEmpty())
+                {
+                    shortsCount = shorts.Count();
+                    shortsWon = shorts.Count(t => t.RealizedPnlUsd > 0);
+                }
+                #endregion
+
+                #region Trades With Duration
+                var tradesWithDuration = trades.Where(t => t.Duration.HasValue);
+
+                if (!tradesWithDuration.IsNullOrEmpty())
+                {
+                    long averageTradeDurationTicks = (long)tradesWithDuration.Select(t => t.Duration.Value.Ticks).Average();
+                    averageTradeDuration = new TimeSpan(averageTradeDurationTicks);
+                }
+                #endregion
+
+                #region Trades With PnL
+                var tradesWithPnl = losers.Concat(winners);
+
+                if (!tradesWithPnl.IsNullOrEmpty())
+                {
+                    standardDeviation = tradesWithPnl.Select(t => t.RealizedPnlUsd.Value).StandardDeviation();
+
+                    if (averageWinUsd != 0 && standardDeviation != 0)
+                        sharpeRatio = averageWinUsd / standardDeviation;
+                }
+                #endregion
+
+                #region All
+                totalFees = (int)trades.Select(t => t.CommissionUsd ?? 0).Sum();
+                totalPips = trades.Select(t => t.RealizedPnlPips ?? 0).Sum();
+                totalVolume = trades.Select(t => t.SizeUsd ?? 0).Sum();
+
+                double totalUsd = trades.Select(t => t.RealizedPnlUsd ?? 0).Sum();
+
+                expectancyPips = totalPips / (longsCount + shortsCount);
+                expectancyUsd = totalUsd / (longsCount + shortsCount);
+
+                if (grossLoss != 0 && grossProfit != 0)
+                    profitFactor = Math.Abs(grossProfit) / Math.Abs(grossLoss);
+                #endregion
+            }
+
+            return new JobGroupStatisticsViewModel(groupId)
+            {
+                AverageLossPips = averageLossPips,
+                AverageLossUsd = averageLossUsd,
+                AverageTradeDuration = averageTradeDuration,
+                AverageWinPips = averageWinPips,
+                AverageWinUsd = averageWinUsd,
+                BestTradePips = bestTradePips,
+                BestTradeUsd = bestTradeUsd,
+                ExpectancyPips = expectancyPips,
+                ExpectancyUsd = expectancyUsd,
+                LongsCount = longsCount,
+                LongsWon = longsWon,
+                MaxDrawdown = maxDrawdown,
+                MaxDrawdownDuration = maxDrawdownDuration,
+                ProfitFactor = profitFactor,
+                SharpeRatio = sharpeRatio,
+                ShortsCount = shortsCount,
+                ShortsWon = shortsWon,
+                StandardDeviation = standardDeviation,
+                TotalFees = totalFees,
+                TotalPips = totalPips,
+                TotalVolume = totalVolume,
+                WorstTradePips = worstTradePips,
+                WorstTradeUsd = worstTradeUsd,
+                ZScore = zScore,
+                ZScorePct = zScorePct
+            };
         }
 
         public void Dispose()

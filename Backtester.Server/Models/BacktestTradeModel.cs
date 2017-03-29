@@ -22,7 +22,8 @@ namespace Backtester.Server.Models
         [DisplayFormat(DataFormatString = "{0:N2}")]
         public double? CommissionUsd { get; set; }
 
-        public string Duration { get; set; }
+        [DisplayFormat(DataFormatString = @"{0:hh\:mm\:ss}")]
+        public TimeSpan? Duration { get; set; }
 
         [Display(Name = "Rate")]
         public string Price { get; set; }
@@ -42,6 +43,10 @@ namespace Backtester.Server.Models
         [Display(Name = "Quantity")]
         [DisplayFormat(DataFormatString = "{0:N0}K")]
         public int Size { get; set; }
+
+        [Display(Name = "Quantity (USD)")]
+        [DisplayFormat(DataFormatString = "{0:N0}K")]
+        public int? SizeUsd { get; set; }
 
         [Display(Name = "Execution Time (HKT)")]
         [DisplayFormat(DataFormatString = "{0:dd/MM HH:mm:ss}")]
@@ -66,11 +71,11 @@ namespace Backtester.Server.Models
             if (trade == null)
                 return null;
             else
-                return new BacktestTradeModel()
+            {
+                var model = new BacktestTradeModel()
                 {
                     CommissionUsd = trade.CommissionUsd,
                     Cross = trade.Cross,
-                    Duration = trade.Duration,
                     OrderId = trade.OrderId,
                     OrderOrigin = trade.OrderOrigin,
                     Price = FormatUtils.FormatRate(trade.Cross, trade.Price),
@@ -79,9 +84,18 @@ namespace Backtester.Server.Models
                     RealizedPnlUsd = trade.RealizedPnlUsd,
                     Side = trade.Side,
                     Size = trade.Size / 1000,
+                    SizeUsd = trade.SizeUsd.HasValue ? trade.SizeUsd.Value / 1000 : (int?)null,
                     Timestamp = trade.Timestamp.ToLocalTime(),
                     TradeId = trade.TradeId
                 };
+
+                TimeSpan duration;
+
+                if (TimeSpan.TryParse(trade.Duration, out duration))
+                    model.Duration = duration;
+
+                return model;
+            }
         }
 
         public static List<BacktestTradeModel> ToTradeModels(this IEnumerable<BacktestTrade> trades)
@@ -92,6 +106,38 @@ namespace Backtester.Server.Models
         public static List<BacktestTradeModel> ToTradeModels(this Dictionary<string, BacktestTrade> trades)
         {
             return trades?.Values.ToTradeModels();
+        }
+
+        public static bool IsPositionOpening(this BacktestTradeModel trade)
+        {
+            if (trade == null)
+                return false;
+
+            return (trade.OrderOrigin == OrderOrigin.PositionOpen) || (!trade.Duration.HasValue);
+        }
+
+        public static bool IsPositionClosing(this BacktestTradeModel trade)
+        {
+            if (trade == null)
+                return false;
+
+            return !trade.IsPositionOpening();
+        }
+
+        public static bool IsLong(this BacktestTradeModel trade)
+        {
+            if (trade == null)
+                return false;
+
+            return trade.Side == ExecutionSide.BOUGHT;
+        }
+
+        public static bool IsShort(this BacktestTradeModel trade)
+        {
+            if (trade == null)
+                return false;
+
+            return trade.Side == ExecutionSide.SOLD;
         }
     }
 }

@@ -1,0 +1,95 @@
+﻿@model Backtester.Server.ViewModels.JobGroups.JobGroupStatisticsViewModel
+
+@{
+    ViewBag.Title = "All Trades";
+}
+
+@await Component.InvokeAsync("JobGroupTabs", new { jobGroupId = Model.JobGroupId })
+
+<div class="row">
+    <div class="col-xs-12">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4>Trades</h4>
+            </div>
+            <table class="table table-striped table-bordered">
+                <tr>
+                    <th>@Html.DisplayNameFor(m => Model.TradesCount)</th>
+                    <td class="text-right">@Html.DisplayFor(m => Model.TradesCount)</td>
+                    <th>@Html.DisplayNameFor(m => Model.LongsWon)</th>
+                    <td class="text-right"><i>(@Html.DisplayFor(m => Model.LongsWon)/@Html.DisplayFor(m => Model.LongsCount))</i> @Html.DisplayFor(m => Model.LongsWonRatio)</td>
+                    <th>@Html.DisplayNameFor(m => Model.ProfitFactor)</th>
+                    <td class="text-right">@Html.DisplayFor(m => Model.ProfitFactor)</td>
+                </tr>
+                <tr>
+                    <th>@Html.DisplayNameFor(m => Model.Profitability)</th>
+                    <td class="text-right">@Html.DisplayFor(m => Model.Profitability)</td>
+                    <th>@Html.DisplayNameFor(m => Model.ShortsWon)</th>
+                    <td class="text-right"><i>(@Html.DisplayFor(m => Model.ShortsWon)/@Html.DisplayFor(m => Model.ShortsCount))</i> @Html.DisplayFor(m => Model.ShortsWonRatio)</td>
+                    <th>@Html.DisplayNameFor(m => Model.StandardDeviation)</th>
+                    <td class="text-right">@Html.DisplayFor(m => Model.StandardDeviation)</td>
+                </tr>
+                <tr>
+                    <th>@Html.DisplayNameFor(m => Model.TotalPips)</th>
+                    <td class="text-right">@Html.DisplayFor(m => Model.TotalPips)</td>
+                    <th>@Html.DisplayNameFor(m => Model.BestTradeUsd)</th>
+                    <td class="text-right">
+                        @if (Model.BestTradeUsd != null)
+                        {
+                            <i>(@Html.DisplayFor(m => Model.BestTradeUsd.Timestamp))</i> @Html.DisplayFor(m => Model.BestTradeUsd.RealizedPnlUsd)
+                        }
+                    </td>
+                    <th>@Html.DisplayNameFor(m => Model.SharpeRatio)</th>
+                    <td class="text-right">@Html.DisplayFor(m => Model.SharpeRatio)</td>
+                </tr>
+                <tr>
+                    <th>@Html.DisplayNameFor(m => Model.AverageWinPips)</th>
+                    <td class="text-right">@Html.DisplayFor(m => Model.AverageWinPips) / @Html.DisplayFor(m => Model.AverageWinUsd)</td>
+                    <th>@Html.DisplayNameFor(m => Model.WorstTradeUsd)</th>
+                    <td class="text-right">
+                        @if (Model.WorstTradeUsd != null)
+                        {
+                            <i>(@Html.DisplayFor(m => Model.WorstTradeUsd.Timestamp))</i> @Html.DisplayFor(m => Model.WorstTradeUsd.RealizedPnlUsd)
+                        }
+                    </td>
+                    <th>@Html.DisplayNameFor(m => Model.ZScore)</th>
+                    <td class="text-right">@Html.DisplayFor(m => Model.ZScore) (@Html.DisplayFor(m => Model.ZScorePct))</td>
+                </tr>
+                <tr>
+                    <th>@Html.DisplayNameFor(m => Model.AverageLossPips)</th>
+                    <td class="text-right">@Html.DisplayFor(m => Model.AverageLossPips) / @Html.DisplayFor(m => Model.AverageLossUsd)</td>
+                    <th>@Html.DisplayNameFor(m => Model.BestTradePips)</th>
+                    <td class="text-right">
+                        @if (Model.BestTradePips != null)
+                        {
+                            <i>(@Html.DisplayFor(m => Model.BestTradePips.Timestamp))</i> @Html.DisplayFor(m => Model.BestTradePips.RealizedPnlPips)
+                        }
+                    </td>
+                    <th>@Html.DisplayNameFor(m => Model.ExpectancyPips)</th>
+                    <td class="text-right">@Html.DisplayFor(m => Model.ExpectancyPips) (@Html.DisplayFor(m => Model.ExpectancyUsd))</td>
+                </tr>
+                <tr>
+                    <th>@Html.DisplayNameFor(m => Model.TotalVolume)</th>
+                    <td class="text-right">@Html.DisplayFor(m => Model.TotalVolume)</td>
+                    <th>@Html.DisplayNameFor(m => Model.WorstTradePips)</th>
+                    <td class="text-right">
+                        @if (Model.WorstTradePips != null)
+                        {
+                            <i>(@Html.DisplayFor(m => Model.WorstTradePips.Timestamp))</i> @Html.DisplayFor(m => Model.WorstTradePips.RealizedPnlPips)
+                        }
+                    </td>
+                    <th>@Html.DisplayNameFor(m => Model.MaxDrawdown)</th>
+                    <td class="text-right">@Html.DisplayFor(m => Model.MaxDrawdown)</td>
+                </tr>
+                <tr>
+                    <th>@Html.DisplayNameFor(m => Model.TotalFees)</th>
+                    <td class="text-right">@Html.DisplayFor(m => Model.TotalFees)</td>
+                    <th>@Html.DisplayNameFor(m => Model.AverageTradeDuration)</th>
+                    <td class="text-right">@Html.DisplayFor(m => Model.AverageTradeDuration)</td>
+                    <th>@Html.DisplayNameFor(m => Model.MaxDrawdownDuration)</th>
+                    <td class="text-right">@Html.DisplayFor(m => Model.MaxDrawdownDuration)</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</div>

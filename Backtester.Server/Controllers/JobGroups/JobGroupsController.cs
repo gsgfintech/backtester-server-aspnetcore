@@ -7,6 +7,7 @@ using Capital.GSG.FX.Utils.Core.Logging;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using System;
 using System.Threading.Tasks;
 
 namespace Backtester.Server.Controllers.JobGroups
@@ -49,6 +50,13 @@ namespace Backtester.Server.Controllers.JobGroups
             var unrealizedPnlSeries = await unrealizedPnlSeriesControllerUtils.GetForJobGroup(groupId);
 
             return View(new UnrealizedPnlSeriesViewModel(groupId, unrealizedPnlSeries));
+        }
+
+        public async Task<IActionResult> Statistics(string groupId)
+        {
+            var statistics = await utils.ComputeStatistics(groupId);
+
+            return View(statistics);
         }
 
         private async Task<BacktestJobGroupModel> LoadJobGroup(string groupId)

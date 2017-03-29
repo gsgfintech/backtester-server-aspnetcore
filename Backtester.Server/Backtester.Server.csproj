@@ -15,13 +15,19 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'" />
+
   <ItemGroup>
-    <PackageReference Include="Backtest.MongoConnector" Version="5.4.3" />
+    <None Remove="Properties\PublishProfiles\CustomProfile.pubxml" />
+    <None Remove="Properties\PublishProfiles\FolderProfile.pubxml" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Backtest.MongoConnector" Version="5.4.5" />
     <PackageReference Include="Capital.GSG.FX.Trading.Strategy" Version="5.1.1" />
     <PackageReference Include="Capital.GSG.FX.Utils.Core" Version="1.2.1" />
     <PackageReference Include="Capital.GSG.FX.Utils.Core.Logging" Version="2.2.1" />
     <PackageReference Include="chimera.extensions.logging.log4net" Version="1.1.1" />
     <PackageReference Include="log4net" Version="2.0.8" />
+    <PackageReference Include="MathNet.Numerics.Core" Version="3.17.0" />
     <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.0.0" />
     <PackageReference Include="Microsoft.AspNetCore" Version="1.1.1" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.Cookies" Version="1.1.1" />
@@ -38,6 +44,7 @@
     <DotNetCliToolReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Tools" Version="1.0.0" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="Properties\PublishProfiles\" />
     <Folder Include="wwwroot\images\" />
     <Folder Include="wwwroot\lib\" />
   </ItemGroup>
