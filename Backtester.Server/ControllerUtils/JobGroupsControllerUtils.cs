@@ -511,4 +511,41 @@ namespace Backtester.Server.ControllerUtils
             }
         }
     }
+
+    public class MaxDrawDownCalculator
+    {
+        private double maxDrawdown = 0;
+        private int maxDrawdownIndex = 0;
+
+        public (double, TimeSpan) ComputeMaxDrawDown(IEnumerable<BacktestTradeModel> trades)
+        {
+            var tradesList = trades.OrderBy(t => t.Timestamp).ToList();
+
+
+
+            //List<double> pnlsSteps = new List<double>();
+
+            //for (int i = 1; i < tradesList.Count; i++)
+            //    pnlsSteps.Add(tradesList[i].RealizedPnlUsd.Value - tradesList[i - 1].RealizedPnlUsd.Value);
+
+            //List<int> inversions = new List<int>();
+
+            //int curSign = 0;
+
+            //for (int i = 0; i < pnlsSteps.Count; i++)
+            //{
+            //    int sign = Math.Sign(pnlsSteps[0]);
+
+            //    if (sign != 0 && sign != curSign)
+            //    {
+            //        inversions.Add(i);
+            //        curSign = sign;
+            //    }
+            //}
+
+            //for (int i = 1; i < inversions.Count; i++)
+            //{
+            //}
+        }
+    }
 }
