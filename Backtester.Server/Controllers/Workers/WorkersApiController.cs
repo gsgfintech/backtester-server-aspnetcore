@@ -1,5 +1,4 @@
-﻿using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Capital.GSG.FX.Utils.Core.Logging;
 using Backtester.Server.ControllerUtils;
@@ -21,9 +20,9 @@ namespace Backtester.Server.Controllers.Workers
         }
 
         [HttpPost("status/{workerName}")]
-        public async Task<GenericActionResult> UpdateStatus(string workerName, [FromBody]SystemStatus status)
+        public GenericActionResult UpdateStatus(string workerName, [FromBody]SystemStatus status)
         {
-            return await utils.HandleStatusUpdate(workerName, status);
+            return utils.HandleStatusUpdate(workerName, status);
         }
 
         [HttpGet("{workerName}/request-job")]

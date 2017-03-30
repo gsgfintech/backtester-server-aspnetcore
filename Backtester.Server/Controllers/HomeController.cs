@@ -52,9 +52,9 @@ namespace Backtester.Server.Controllers
             }
         }
 
-        public async Task<IActionResult> Workers()
+        public IActionResult Workers()
         {
-            var workers = await workersControllerUtils.ListWorkers();
+            var workers = workersControllerUtils.ListWorkers();
 
             return View(new WorkersViewModel(workers));
         }

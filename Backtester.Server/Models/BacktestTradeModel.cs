@@ -3,6 +3,7 @@ using Capital.GSG.FX.Backtest.DataTypes;
 using Capital.GSG.FX.Data.Core.ContractData;
 using Capital.GSG.FX.Data.Core.ExecutionData;
 using Capital.GSG.FX.Data.Core.OrderData;
+using Capital.GSG.FX.Utils.Core;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -28,17 +29,29 @@ namespace Backtester.Server.Models
         [Display(Name = "Rate")]
         public string Price { get; set; }
 
-        [Display(Name = "Realized PnL")]
+        [Display(Name = "PnL")]
         [DisplayFormat(DataFormatString = "{0:N2}")]
         public double? RealizedPnL { get; set; }
 
-        [Display(Name = "Realized PnL (pips)")]
+        [Display(Name = "PnL (pips)")]
         [DisplayFormat(DataFormatString = "{0:N1} pips")]
         public double? RealizedPnlPips { get; set; }
 
-        [Display(Name = "Realized PnL (USD)")]
+        [Display(Name = "PnL per Hour (pips)")]
+        [DisplayFormat(DataFormatString = "{0:N1} pips/h")]
+        public double? RealizedPnlPipsPerHour => RealizedPnlPips.HasValue && Duration.HasValue ? RealizedPnlPips.Value / Duration.Value.TotalHours : (double?)null;
+
+        [Display(Name = "PnL (USD)")]
         [DisplayFormat(DataFormatString = "{0:N2} USD")]
         public double? RealizedPnlUsd { get; set; }
+
+        [Display(Name = "PnL per Hour (USD)")]
+        [DisplayFormat(DataFormatString = "{0:N2} USD/h")]
+        public double? RealizedPnlUsdPerHour => RealizedPnlUsd.HasValue && Duration.HasValue ? RealizedPnlUsd.Value / Duration.Value.TotalHours : (double?)null;
+
+        [Display(Name = "Net Cumul PnL (USD)")]
+        [DisplayFormat(DataFormatString = "{0:N2} USD")]
+        public double NetCumulPnlUsd { get; set; }
 
         [Display(Name = "Quantity")]
         [DisplayFormat(DataFormatString = "{0:N0}K")]
@@ -100,7 +113,28 @@ namespace Backtester.Server.Models
 
         public static List<BacktestTradeModel> ToTradeModels(this IEnumerable<BacktestTrade> trades)
         {
-            return trades?.Select(e => e.ToTradeModel()).ToList();
+            if (trades.IsNullOrEmpty())
+                return null;
+
+            var models = trades?.Select(e => e.ToTradeModel()).ToList();
+
+            models = ComputeCumulativePnl(models);
+
+            return models;
+        }
+
+        private static List<BacktestTradeModel> ComputeCumulativePnl(List<BacktestTradeModel> trades)
+        {
+            double netCumulPnl = 0;
+
+            foreach (var trade in trades)
+            {
+                netCumulPnl += (trade.RealizedPnlUsd ?? 0 - trade.CommissionUsd ?? 0);
+
+                trade.NetCumulPnlUsd = netCumulPnl;
+            }
+
+            return trades;
         }
 
         public static List<BacktestTradeModel> ToTradeModels(this Dictionary<string, BacktestTrade> trades)

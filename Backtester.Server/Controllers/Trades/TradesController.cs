@@ -14,18 +14,25 @@ namespace Backtester.Server.Controllers.Trades
     {
         private readonly ILogger logger = GSGLoggerFactory.Instance.CreateLogger<TradesController>();
 
-        private readonly JobGroupsControllerUtils utils;
+        private readonly JobGroupsControllerUtils jobGroupsControllerUtils;
+        private readonly TradesControllerUtils tradesControllerUtils;
 
-        public TradesController(JobGroupsControllerUtils utils)
+        public TradesController(JobGroupsControllerUtils jobGroupsControllerUtils, TradesControllerUtils tradesControllerUtils)
         {
-            this.utils = utils;
+            this.jobGroupsControllerUtils = jobGroupsControllerUtils;
+            this.tradesControllerUtils = tradesControllerUtils;
         }
 
         public async Task<IActionResult> Index(string jobGroupId, string tradeId)
         {
-            var jobGroup = await utils.Get(jobGroupId);
+            var jobGroup = await jobGroupsControllerUtils.Get(jobGroupId);
 
             return View(jobGroup?.Trades?.FirstOrDefault(t => t.TradeId == tradeId).ToTradeModel());
+        }
+
+        public async Task<FileResult> ExportExcel(string jobGroupId)
+        {
+            return await tradesControllerUtils.ExportExcel(jobGroupId);
         }
     }
 }

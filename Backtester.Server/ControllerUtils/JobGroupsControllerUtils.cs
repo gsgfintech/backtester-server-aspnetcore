@@ -9,7 +9,6 @@ using Capital.GSG.FX.Utils.Core.Logging;
 using DataTypes.Core;
 using MathNet.Numerics.Statistics;
 using Microsoft.Extensions.Logging;
-using Syncfusion.JavaScript.DataVisualization.Models;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;

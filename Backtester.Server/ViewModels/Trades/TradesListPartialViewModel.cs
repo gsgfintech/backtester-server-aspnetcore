@@ -1,6 +1,7 @@
 ﻿using Backtester.Server.Models;
 using Capital.GSG.FX.Utils.Core;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace Backtester.Server.ViewModels.Trades

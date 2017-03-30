@@ -5,7 +5,10 @@
 <div class="panel panel-default">
     <div class="panel-heading">
         <h4>
-            <button id="copybtn" class="btn" data-clipboard-text="@Model.ClipboardContent"><span class="glyphicon glyphicon-copy"></span></button>
+            <div class="btn-group">
+                <button id="copybtn" class="btn btn-primary" data-clipboard-text="@Model.ClipboardContent"><span class="glyphicon glyphicon-copy"></span></button>
+                <a class="btn btn-success" asp-controller="Trades" asp-action="ExportExcel" asp-route-jobgroupid="@Model.JobGroupId"><span class="glyphicon glyphicon-save"></span></a>
+            </div>
             Trades <small>@Model.JobGroupId</small>
         </h4>
     </div>
@@ -20,7 +23,10 @@
                 <th>@Html.DisplayNameFor(m => Model.Trades.First().Cross)</th>
                 <th>@Html.DisplayNameFor(m => Model.Trades.First().Price)</th>
                 <th>@Html.DisplayNameFor(m => Model.Trades.First().RealizedPnlUsd)</th>
+                <th>@Html.DisplayNameFor(m => Model.Trades.First().RealizedPnlUsdPerHour)</th>
                 <th>@Html.DisplayNameFor(m => Model.Trades.First().RealizedPnlPips)</th>
+                <th>@Html.DisplayNameFor(m => Model.Trades.First().RealizedPnlPipsPerHour)</th>
+                <th>@Html.DisplayNameFor(m => Model.Trades.First().NetCumulPnlUsd)</th>
                 <th>@Html.DisplayNameFor(m => Model.Trades.First().Duration)</th>
                 <th>@Html.DisplayNameFor(m => Model.Trades.First().CommissionUsd)</th>
                 <th></th>
@@ -54,6 +60,8 @@
                         </td>
                     }
 
+                    <td class="@(trade.RealizedPnlUsdPerHour > 0 ? "bg-success" : trade.RealizedPnlUsdPerHour < 0 ? "bg-danger" : "")">@Html.DisplayFor(m => trade.RealizedPnlUsdPerHour)</td>
+
                     @if (trade.RealizedPnlPips > 0)
                     {
                         <td class="bg-success">
@@ -73,6 +81,8 @@
                         </td>
                     }
 
+                    <td class="@(trade.RealizedPnlPipsPerHour > 0 ? "bg-success" : trade.RealizedPnlPipsPerHour < 0 ? "bg-danger" : "")">@Html.DisplayFor(m => trade.RealizedPnlPipsPerHour)</td>
+                    <td class="@(trade.NetCumulPnlUsd > 0 ? "bg-success" : trade.NetCumulPnlUsd < 0 ? "bg-danger" : "")">@Html.DisplayFor(m => trade.NetCumulPnlUsd)</td>
                     <td>@Html.DisplayFor(m => trade.Duration)</td>
                     <td>@Html.DisplayFor(m => trade.CommissionUsd)</td>
                     <td><button type="button" class="btn btn-primary btn-xs" data-toggle="modal" data-target="#tradeModal-@trade.TradeId"><span class="glyphicon glyphicon-plus"></span></button></td>

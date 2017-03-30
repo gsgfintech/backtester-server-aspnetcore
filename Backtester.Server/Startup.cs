@@ -158,10 +158,9 @@ namespace Backtester.Server
 
             services.AddSingleton((serviceProvider) =>
             {
-                var actioner = serviceProvider.GetService<BacktestWorkerActioner>();
                 JobsControllerUtils jobsControllerUtils = serviceProvider.GetService<JobsControllerUtils>();
 
-                return new WorkersControllerUtils(actioner, jobsControllerUtils);
+                return new WorkersControllerUtils(jobsControllerUtils);
             });
 
             services.AddSingleton((serviceProvider) =>
@@ -188,8 +187,9 @@ namespace Backtester.Server
             services.AddSingleton((serviceProvider) =>
             {
                 JobsControllerUtils jobsControllerUtils = serviceProvider.GetService<JobsControllerUtils>();
+                JobGroupsControllerUtils jobGroupsControllerUtils = serviceProvider.GetService<JobGroupsControllerUtils>();
 
-                return new TradesControllerUtils(jobsControllerUtils);
+                return new TradesControllerUtils(jobsControllerUtils, jobGroupsControllerUtils);
             });
 
             services.AddSingleton((serviceProvider) =>
