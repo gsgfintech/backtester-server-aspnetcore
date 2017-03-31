@@ -18,11 +18,13 @@ namespace Backtester.Server.Controllers.JobGroups
         private readonly ILogger logger = GSGLoggerFactory.Instance.CreateLogger<JobGroupsController>();
 
         private readonly JobGroupsControllerUtils utils;
+        private readonly TradeGenericMetric2SeriesControllerUtils tradeGenericMetric2SeriesControllerUtils;
         private readonly UnrealizedPnlSeriesControllerUtils unrealizedPnlSeriesControllerUtils;
 
-        public JobGroupsController(JobGroupsControllerUtils utils, UnrealizedPnlSeriesControllerUtils unrealizedPnlSeriesControllerUtils)
+        public JobGroupsController(JobGroupsControllerUtils utils, UnrealizedPnlSeriesControllerUtils unrealizedPnlSeriesControllerUtils, TradeGenericMetric2SeriesControllerUtils tradeGenericMetric2SeriesControllerUtils)
         {
             this.utils = utils;
+            this.tradeGenericMetric2SeriesControllerUtils = tradeGenericMetric2SeriesControllerUtils;
             this.unrealizedPnlSeriesControllerUtils = unrealizedPnlSeriesControllerUtils;
         }
 
@@ -72,6 +74,21 @@ namespace Backtester.Server.Controllers.JobGroups
         public IActionResult RefreshInactiveJobGroups()
         {
             return ViewComponent("JobGroupsList", new { listType = JobGroupListType.Inactive });
+        }
+
+        public async Task<FileResult> ExportUnrealizedPnLsToExcel(string jobGroupId)
+        {
+            return await unrealizedPnlSeriesControllerUtils.ExportUnrPnLExcel(jobGroupId);
+        }
+
+        public async Task<FileResult> ExportUnrealizedPnLsPerHourToExcel(string jobGroupId)
+        {
+            return await unrealizedPnlSeriesControllerUtils.ExportUnrPnLPerHourExcel(jobGroupId);
+        }
+
+        public async Task<FileResult> ExportGenericMetric2ToExcel(string jobGroupId)
+        {
+            return await tradeGenericMetric2SeriesControllerUtils.ExportExcel(jobGroupId);
         }
     }
 }

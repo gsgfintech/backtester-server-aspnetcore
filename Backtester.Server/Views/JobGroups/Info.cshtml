@@ -8,10 +8,17 @@
 
 <div class="panel panel-default">
     <div class="panel-heading">
-        <h4>
+        <h4 style="display:inline-block">
             <button id="copybtn" class="btn" data-clipboard-text="@Model.ClipboardContent"><span class="glyphicon glyphicon-copy"></span></button>
             Job @Html.DisplayFor(m => Model.JobGroup.GroupId)
         </h4>
+        <div class="pull-right">
+            <div class="btn-group btn-group-sm">
+                <a class="btn btn-default" asp-controller="JobGroups" asp-action="ExportUnrealizedPnLsToExcel" asp-route-jobgroupid="@Model.JobGroup.GroupId"><span class="glyphicon glyphicon-save"></span> Unr PnLs</a>
+                <a class="btn btn-default" asp-controller="JobGroups" asp-action="ExportUnrealizedPnLsPerHourToExcel" asp-route-jobgroupid="@Model.JobGroup.GroupId"><span class="glyphicon glyphicon-save"></span> Unr PnLs/h</a>
+                <a class="btn btn-default" asp-controller="JobGroups" asp-action="ExportGenericMetric2ToExcel" asp-route-jobgroupid="@Model.JobGroup.GroupId"><span class="glyphicon glyphicon-save"></span> Metric2</a>
+            </div>
+        </div>
     </div>
     <div class="table-responsive">
         <table class="table">
