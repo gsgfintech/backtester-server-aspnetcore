@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFrameworks>netstandard1.6;net46</TargetFrameworks>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <Version>4.2.1</Version>
+    <Version>4.3.0</Version>
     <Authors>GSG Limited</Authors>
     <Company>GSG Limited</Company>
     <Description>Connector lib for backtester server</Description>
@@ -12,9 +12,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Backtest.DataTypes" Version="4.4.5" />
+    <PackageReference Include="Backtest.DataTypes" Version="4.5.1" />
     <PackageReference Include="Capital.GSG.FX.Utils.Core.Logging" Version="2.2.1" />
     <PackageReference Include="Flurl.Http" Version="1.1.2" />
+    <PackageReference Include="System.ValueTuple" Version="4.3.0" />
   </ItemGroup>
 
 </Project>

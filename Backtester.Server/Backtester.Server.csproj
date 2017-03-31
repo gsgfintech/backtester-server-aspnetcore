@@ -21,8 +21,8 @@
     <None Remove="Properties\PublishProfiles\FolderProfile.pubxml" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Backtest.MongoConnector" Version="5.4.5" />
-    <PackageReference Include="Capital.GSG.FX.Trading.Strategy" Version="5.1.1" />
+    <PackageReference Include="Backtest.MongoConnector" Version="5.5.0" />
+    <PackageReference Include="Capital.GSG.FX.Trading.Strategy" Version="5.2.0" />
     <PackageReference Include="Capital.GSG.FX.Utils.Core" Version="1.2.1" />
     <PackageReference Include="Capital.GSG.FX.Utils.Core.Logging" Version="2.2.1" />
     <PackageReference Include="chimera.extensions.logging.log4net" Version="1.1.1" />

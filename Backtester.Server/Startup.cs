@@ -119,6 +119,11 @@ namespace Backtester.Server
 
             services.AddSingleton((serviceProvider) =>
             {
+                return backtestDbServer.TradeGenericMetric2SerieActioner;
+            });
+
+            services.AddSingleton((serviceProvider) =>
+            {
                 return backtestDbServer.UnrealizedPnlSerieActioner;
             });
         }
@@ -145,6 +150,13 @@ namespace Backtester.Server
                 var actioner = serviceProvider.GetService<UnrealizedPnlSerieActioner>();
 
                 return new UnrealizedPnlSeriesControllerUtils(actioner);
+            });
+
+            services.AddSingleton((serviceProvider) =>
+            {
+                var actioner = serviceProvider.GetService<TradeGenericMetric2SerieActioner>();
+
+                return new TradeGenericMetric2SeriesControllerUtils(actioner);
             });
 
             services.AddSingleton((serviceProvider) =>
