@@ -14,9 +14,9 @@ namespace Backtester.Server.Models
         [Display(Name = "ID")]
         public string GroupId { get; set; }
 
-        public Dictionary<string, string> JobIds { get; set; }
+        public Dictionary<string, BacktestJobLightModel> Jobs { get; set; }
 
-        public BacktestJobStatus Status { get; set; }
+        public BacktestJobStatusCode Status { get; set; }
 
         [Display(Name = "Time Created (HKT)")]
         [DisplayFormat(DataFormatString = "{0:dd/MM HH:mm:ss}")]
@@ -126,19 +126,22 @@ namespace Backtester.Server.Models
             if (group == null)
                 return null;
 
+            DateTimeOffset? actualStartTime = !group.Jobs.IsNullOrEmpty() ? group.GetActualStartTime() : null;
+            DateTimeOffset? completionTime = !group.Jobs.IsNullOrEmpty() ? group.GetCompletionTime() : null;
+
             return new BacktestJobGroupModel()
             {
-                ActualStartTime = group.ActualStartTime.HasValue ? group.ActualStartTime.Value.ToLocalTime() : (DateTimeOffset?)null,
-                CompletionTime = group.CompletionTime.HasValue ? group.CompletionTime.Value.ToLocalTime() : (DateTimeOffset?)null,
+                ActualStartTime = actualStartTime.HasValue ? actualStartTime.Value.ToLocalTime() : (DateTimeOffset?)null,
+                CompletionTime = completionTime.HasValue ? completionTime.Value.ToLocalTime() : (DateTimeOffset?)null,
                 CreateTime = group.CreateTime.ToLocalTime(),
                 EndDate = group.EndDate.ToLocalTime(),
                 EndTime = group.EndTime.ToLocalTime(),
                 GroupId = group.GroupId,
-                JobIds = group.JobIds,
-                Progress = group.Progress,
+                Jobs = group.Jobs.ToBacktestJobLightModels(),
+                Progress = !group.Jobs.IsNullOrEmpty() ? group.GetProgress() : 0,
                 StartDate = group.StartDate.ToLocalTime(),
                 StartTime = group.StartTime.ToLocalTime(),
-                Status = group.Status,
+                Status = !group.Jobs.IsNullOrEmpty() ? group.GetStatus() : BacktestJobStatusCode.UNKNOWN,
                 Strategy = group.Strategy.ToBacktestJobStrategyModel(),
                 Trades = group.Trades.ToTradeModels()
             };

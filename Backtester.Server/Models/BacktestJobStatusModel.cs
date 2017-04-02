@@ -6,7 +6,7 @@ using System.Linq;
 
 namespace Backtester.Server.Models
 {
-    public class BacktestStatusModel
+    public class BacktestJobStatusModel
     {
         public List<BacktestStatusAttributeModel> Attributes { get; set; }
         public string Message { get; set; }
@@ -16,7 +16,14 @@ namespace Backtester.Server.Models
 
         [Display(Name = "Current Time")]
         [DisplayFormat(DataFormatString = "{0:dd/MM/yyyy HH:mm:ss} (HKT)")]
-        public DateTimeOffset Timestamp { get; set; }
+        public DateTimeOffset? Timestamp { get; set; }
+
+        public DateTimeOffset? ActualStartTime { get; set; }
+        public DateTimeOffset? CompletionTime { get; set; }
+
+        public BacktestJobStatusCode StatusCode { get; set; }
+
+        public string Worker { get; set; }
     }
 
     public class BacktestStatusAttributeModel
@@ -41,20 +48,24 @@ namespace Backtester.Server.Models
 
         private static List<BacktestStatusAttributeModel> ToBacktestStatusAttributeModels(this IEnumerable<BacktestStatusAttribute> attributes)
         {
-            return attributes?.Select(a => a.ToBacktestStatusAttributeModel()).OrderBy(a => a.Name).ToList();
+            return attributes?.Select(a => a.ToBacktestStatusAttributeModel()).Where(a => a != null)?.OrderBy(a => a.Name).ToList();
         }
 
-        public static BacktestStatusModel ToBacktestStatusModel(this BacktestStatus status)
+        public static BacktestJobStatusModel ToBacktestStatusModel(this BacktestJobStatus status)
         {
             if (status == null)
                 return null;
 
-            return new BacktestStatusModel()
+            return new BacktestJobStatusModel()
             {
+                ActualStartTime = status.ActualStartTime,
                 Attributes = status.Attributes.ToBacktestStatusAttributeModels(),
+                CompletionTime = status.CompletionTime,
                 Message = status.Message,
                 Progress = status.Progress,
-                Timestamp = status.Timestamp.ToLocalTime()
+                StatusCode = status.StatusCode,
+                Timestamp = (status.Timestamp > DateTimeOffset.MinValue) ? status.Timestamp.ToLocalTime() : (DateTimeOffset?)null,
+                Worker = status.Worker
             };
         }
     }

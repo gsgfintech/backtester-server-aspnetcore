@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>net461</TargetFramework>
-    <RuntimeIdentifier>win7-x86</RuntimeIdentifier>
+    <RuntimeIdentifier>win10-x64</RuntimeIdentifier>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -16,12 +16,14 @@
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'" />
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" />
+
   <ItemGroup>
     <None Remove="Properties\PublishProfiles\CustomProfile.pubxml" />
     <None Remove="Properties\PublishProfiles\FolderProfile.pubxml" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Backtest.MongoConnector" Version="5.5.1" />
+    <PackageReference Include="Backtest.MongoConnector" Version="5.9.0" />
     <PackageReference Include="Capital.GSG.FX.Trading.Strategy" Version="5.2.0" />
     <PackageReference Include="Capital.GSG.FX.Utils.Core" Version="1.2.1" />
     <PackageReference Include="Capital.GSG.FX.Utils.Core.Logging" Version="2.2.1" />

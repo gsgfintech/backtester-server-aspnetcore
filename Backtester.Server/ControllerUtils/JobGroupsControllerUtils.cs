@@ -18,23 +18,16 @@ using System.Threading.Tasks;
 
 namespace Backtester.Server.ControllerUtils
 {
-    public class JobGroupsControllerUtils : IDisposable
+    public class JobGroupsControllerUtils
     {
         private readonly ILogger logger = GSGLoggerFactory.Instance.CreateLogger<JobGroupsControllerUtils>();
 
         private readonly BacktestJobGroupActioner actioner;
         private readonly JobsControllerUtils jobsControllerUtils;
 
-        private ConcurrentDictionary<string, BacktestJobGroup> activeJobGroups = null;
-        private ConcurrentDictionary<string, BacktestJobGroup> inactiveJobGroups = null;
-        private bool jobsLoaded = false;
-        private object jobsLoadedLocker = new object();
-
         private List<string> stratsNames = null;
 
         private ConcurrentDictionary<string, List<BacktestJobGroup>> searchResults = new ConcurrentDictionary<string, List<BacktestJobGroup>>();
-
-        private Timer updateActiveJobGroupsTimer = null;
 
         public JobGroupsControllerUtils(BacktestJobGroupActioner actioner, JobsControllerUtils jobsControllerUtils)
         {
@@ -42,62 +35,54 @@ namespace Backtester.Server.ControllerUtils
             this.jobsControllerUtils = jobsControllerUtils;
         }
 
-        private async Task LoadJobGroups(bool reset = false)
-        {
-            if (updateActiveJobGroupsTimer == null)
-                updateActiveJobGroupsTimer = new Timer(RefreshActiveJobGroupsCb, null, TimeSpan.FromSeconds(5), TimeSpan.FromSeconds(5));
-
-            if (!jobsLoaded || reset)
-            {
-                lock (jobsLoadedLocker)
-                {
-                    jobsLoaded = true;
-                }
-
-                await LoadActiveJobGroups();
-                await LoadTodaysInactiveJobGroups();
-            }
-        }
-
         internal async Task<List<BacktestJobGroup>> GetActiveJobs()
         {
-            await LoadJobGroups();
+            CancellationTokenSource cts = new CancellationTokenSource();
+            cts.CancelAfter(TimeSpan.FromSeconds(20));
 
-            List<BacktestJobGroup> groups = activeJobGroups?.Values?.ToList();
-            groups?.Sort(BacktestJobGroupCreationDateComparer.Instance);
+            var jobGroups = await actioner.GetAllActive(cts.Token);
 
-            return groups?.ToList();
+            if (!jobGroups.IsNullOrEmpty())
+                jobGroups.Sort(BacktestJobGroupCreationDateComparer.Instance);
+
+            return jobGroups;
         }
 
         internal async Task<List<BacktestJobGroup>> GetInactiveJobs()
         {
-            await LoadJobGroups();
+            CancellationTokenSource cts = new CancellationTokenSource();
+            cts.CancelAfter(TimeSpan.FromSeconds(20));
 
-            List<BacktestJobGroup> groups = inactiveJobGroups?.Values?.ToList();
-            groups?.Sort(BacktestJobGroupCreationDateComparer.Instance);
+            var jobGroups = await actioner.GetTodaysInactive(cts.Token);
 
-            return groups?.ToList();
+            if (!jobGroups.IsNullOrEmpty())
+                jobGroups.Sort(BacktestJobGroupCreationDateComparer.Instance);
+
+            return jobGroups;
         }
 
         internal async Task<BacktestJobGroup> Get(string groupId)
         {
-            await LoadJobGroups();
+            logger.Info($"Querying backtest job group {groupId} from database");
 
-            BacktestJobGroup group;
+            CancellationTokenSource cts = new CancellationTokenSource();
+            cts.CancelAfter(TimeSpan.FromSeconds(5));
 
-            if (activeJobGroups.TryGetValue(groupId, out group))
-                return group;
-            else if (inactiveJobGroups.TryGetValue(groupId, out group))
-                return group;
-            else
+            var jobGroup = await actioner.Get(groupId, cts.Token);
+
+            if (jobGroup != null && !jobGroup.Jobs.IsNullOrEmpty() && BacktestJobStatusCodeUtils.InactiveStatus.Contains(jobGroup.GetStatus()) && jobGroup.Trades.IsNullOrEmpty())
             {
-                logger.Info($"Querying backtest job group {groupId} from database as it is not in the dictionary");
+                logger.Info($"Will compute trades list for newlt inactive job group {groupId} and update in database");
+                var trades = await ComputeTradesList(jobGroup.Jobs.Keys);
 
-                CancellationTokenSource cts = new CancellationTokenSource();
-                cts.CancelAfter(TimeSpan.FromSeconds(5));
-
-                return await actioner.Get(groupId, cts.Token);
+                if (!trades.IsNullOrEmpty())
+                {
+                    jobGroup.Trades = trades;
+                    await actioner.AddOrUpdate(groupId, jobGroup);
+                }
             }
+
+            return jobGroup;
         }
 
         internal async Task<List<BacktestTradeModel>> GetTrades(string groupId)
@@ -109,161 +94,22 @@ namespace Backtester.Server.ControllerUtils
 
         internal async Task<GenericActionResult> AddJobGroup(BacktestJobGroup group)
         {
-            logger.Info($"Adding job group {group.GroupId} to database and active queue");
+            logger.Info($"Adding job group {group.GroupId} to database");
 
-            var result = await actioner.AddOrUpdate(group.GroupId, group);
-
-            if (!result.Success)
-                return result;
-
-            activeJobGroups.TryAdd(group.GroupId, group);
-
-            return new GenericActionResult(true, $"Successfully added job group {group.GroupId}");
+            return await actioner.AddOrUpdate(group.GroupId, group);
         }
 
-        private async Task LoadActiveJobGroups()
+        private async Task<List<BacktestTrade>> ComputeTradesList(IEnumerable<string> jobIds)
         {
-            activeJobGroups = new ConcurrentDictionary<string, BacktestJobGroup>();
+            if (jobIds.IsNullOrEmpty())
+                return new List<BacktestTrade>();
 
-            CancellationTokenSource cts = new CancellationTokenSource();
-            cts.CancelAfter(TimeSpan.FromSeconds(20));
+            var jobs = await jobsControllerUtils.GetMany(jobIds);
 
-            List<BacktestJobGroup> jobGroupsList = await actioner.GetAllActive(cts.Token);
+            if (jobs == null)
+                return new List<BacktestTrade>();
 
-            if (!jobGroupsList.IsNullOrEmpty())
-            {
-                logger.Debug($"Retrieved {jobGroupsList.Count} active job groups from the database: {string.Join(", ", jobGroupsList.Select(j => j.GroupId))}");
-
-                jobGroupsList.Sort(BacktestJobGroupCreationDateComparer.Instance);
-
-                foreach (var group in jobGroupsList)
-                {
-                    activeJobGroups.AddOrUpdate(group.GroupId, group, (key, oldValue) => group);
-                }
-            }
-        }
-
-        private async Task LoadTodaysInactiveJobGroups()
-        {
-            inactiveJobGroups = new ConcurrentDictionary<string, BacktestJobGroup>();
-
-            CancellationTokenSource cts = new CancellationTokenSource();
-            cts.CancelAfter(TimeSpan.FromSeconds(20));
-
-            List<BacktestJobGroup> jobGroupsList = await actioner.GetTodaysInactive(cts.Token);
-
-            if (!jobGroupsList.IsNullOrEmpty())
-            {
-                logger.Debug($"Retrieved {jobGroupsList.Count} inactive job groups from the database: {string.Join(", ", jobGroupsList.Select(j => j.GroupId))}");
-
-                jobGroupsList.Sort(BacktestJobGroupCreationDateComparer.Instance);
-
-                foreach (var job in jobGroupsList)
-                    inactiveJobGroups.AddOrUpdate(job.GroupId, job, (key, oldValue) => job);
-            }
-        }
-
-        private async void RefreshActiveJobGroupsCb(object state)
-        {
-            if (!activeJobGroups.IsEmpty)
-            {
-                var jobGroups = activeJobGroups.ToArray().Select(kvp => kvp.Value);
-
-                foreach (var jobGroup in jobGroups)
-                {
-                    try
-                    {
-                        if (!jobGroup.JobIds.IsNullOrEmpty())
-                        {
-                            var jobs = await jobsControllerUtils.GetMany(jobGroup.JobIds.Values);
-
-                            if (!jobs.IsNullOrEmpty())
-                            {
-                                BacktestJobStatus newStatus = jobs.Select(j => j.Status).Min();
-
-                                // Override: if at least one job is in progress then we want to mark the job group as in progress too
-                                if (newStatus == BacktestJobStatus.CREATED)
-                                {
-                                    if (jobs.FirstOrDefault(j => j.Status == BacktestJobStatus.INPROGRESS) != null)
-                                        newStatus = BacktestJobStatus.INPROGRESS;
-                                }
-                                // Override: if at least one job is failed then we want to mark the job group as failed too
-                                else if (newStatus == BacktestJobStatus.COMPLETED)
-                                {
-                                    if (jobs.FirstOrDefault(j => j.Status == BacktestJobStatus.FAILED) != null)
-                                        newStatus = BacktestJobStatus.FAILED;
-                                }
-
-                                double newProgress = jobs.Select(j => j.Output.Status.Progress).Average();
-
-                                var jobsWithActualStartTime = jobs.Where(j => j.ActualStartTime.HasValue);
-                                DateTimeOffset? newActualStartTime = !jobsWithActualStartTime.IsNullOrEmpty() ? jobsWithActualStartTime.Select(j => j.ActualStartTime.Value).Min() : (DateTimeOffset?)null;
-
-                                var jobsWithCompletionTime = jobs.Where(j => j.CompletionTime.HasValue);
-                                DateTimeOffset? newCompletionTime = !jobsWithCompletionTime.IsNullOrEmpty() ? jobsWithCompletionTime.Select(j => j.CompletionTime.Value).Max() : (DateTimeOffset?)null;
-
-                                var jobsWithTrades = jobs.Where(j => !j.Output.Trades.IsNullOrEmpty());
-                                List<BacktestTrade> newTrades = !jobsWithTrades.IsNullOrEmpty() ? jobsWithTrades.Select(j => j.Output.Trades.Values.ToList()).Aggregate((cur, next) => cur.Concat(next).ToList()).ToList() : null;
-
-                                if (BacktestJobStatusUtils.ActiveStatus.Contains(newStatus))
-                                {
-                                    activeJobGroups.AddOrUpdate(jobGroup.GroupId, (key) => null, (key, oldValue) =>
-                                    {
-                                        oldValue.ActualStartTime = newActualStartTime;
-                                        oldValue.Progress = newProgress;
-                                        oldValue.Status = newStatus;
-                                        oldValue.Trades = newTrades;
-
-                                        return oldValue;
-                                    });
-                                }
-                                else
-                                {
-                                    BacktestJobGroup discarded;
-                                    activeJobGroups.TryRemove(jobGroup.GroupId, out discarded);
-
-                                    discarded = inactiveJobGroups.AddOrUpdate(jobGroup.GroupId, (key) =>
-                                    {
-                                        return new BacktestJobGroup(jobGroup.GroupId)
-                                        {
-                                            ActualStartTime = newActualStartTime,
-                                            CompletionTime = newCompletionTime,
-                                            CreateTime = jobGroup.CreateTime,
-                                            EndDate = jobGroup.EndDate,
-                                            EndTime = jobGroup.EndTime,
-                                            JobIds = jobGroup.JobIds,
-                                            Progress = newProgress,
-                                            StartDate = jobGroup.StartDate,
-                                            StartTime = jobGroup.StartTime,
-                                            Status = newStatus,
-                                            Strategy = jobGroup.Strategy,
-                                            Trades = newTrades
-                                        };
-                                    }, (key, oldValue) =>
-                                    {
-                                        oldValue.ActualStartTime = newActualStartTime;
-                                        oldValue.CompletionTime = newCompletionTime;
-                                        oldValue.Progress = newProgress;
-                                        oldValue.Status = newStatus;
-                                        oldValue.Trades = newTrades;
-
-                                        return oldValue;
-                                    });
-
-                                    var dbUpdate = await actioner.AddOrUpdate(jobGroup.GroupId, discarded);
-
-                                    if (!dbUpdate.Success)
-                                        logger.Error($"Failed to update job group {jobGroup.GroupId} in database");
-                                }
-                            }
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        logger.Error($"Failed to refresh status of job group {jobGroup.GroupId}", ex);
-                    }
-                }
-            }
+            return jobs.Select(j => j.Output.Trades.Values.ToList()).Aggregate((cur, next) => cur.Concat(next).ToList());
         }
 
         internal async Task<GenericActionResult> Delete(string groupId)
@@ -275,24 +121,15 @@ namespace Backtester.Server.ControllerUtils
             if (jobGroup == null)
                 return new GenericActionResult(false, $"Unable to delete unknown job group {groupId}");
 
-            if (!jobGroup.JobIds.IsNullOrEmpty())
+            if (!jobGroup.Jobs.IsNullOrEmpty())
             {
-                var deleteSubjobs = await jobsControllerUtils.DeleteMany(jobGroup.JobIds.Values);
+                var deleteSubjobs = await jobsControllerUtils.DeleteMany(jobGroup.Jobs.Keys);
 
                 if (!deleteSubjobs.Success)
-                    return new GenericActionResult(false, $"Failed to delete one or more subjob ({string.Join(", ", jobGroup.JobIds)}) for job group {groupId}: {deleteSubjobs.Message}. Not deleting subgroup");
+                    return new GenericActionResult(false, $"Failed to delete one or more subjob ({string.Join(", ", jobGroup.Jobs)}) for job group {groupId}: {deleteSubjobs.Message}. Not deleting subgroup");
             }
 
-            var result = await actioner.Delete(groupId);
-
-            if (result.Success)
-            {
-                BacktestJobGroup discarded;
-                activeJobGroups.TryRemove(groupId, out discarded);
-                inactiveJobGroups.TryRemove(groupId, out discarded);
-            }
-
-            return result;
+            return await actioner.Delete(groupId);
         }
 
         internal async Task<List<string>> ListStratsNames()
@@ -481,11 +318,6 @@ namespace Backtester.Server.ControllerUtils
                 WorstTradePips = worstTradePips,
                 WorstTradeUsd = worstTradeUsd
             };
-        }
-
-        public void Dispose()
-        {
-            try { updateActiveJobGroupsTimer?.Dispose(); updateActiveJobGroupsTimer = null; } catch { }
         }
 
         private class BacktestJobGroupCreationDateComparer : IComparer<BacktestJobGroup>

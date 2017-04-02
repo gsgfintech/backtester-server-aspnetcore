@@ -24,7 +24,7 @@ namespace Backtester.Server.Controllers.Jobs
         {
             var job = await utils.Get(jobId);
 
-            return View(new JobStatusViewModel(jobGroupId, jobId, job?.Output?.Status, job?.Worker));
+            return View(new JobStatusViewModel(jobGroupId, jobId, job?.Status));
         }
 
         public async Task<IActionResult> Alerts(string jobGroupId, string jobId)

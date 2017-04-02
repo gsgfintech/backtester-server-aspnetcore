@@ -20,7 +20,7 @@ namespace Backtester.Server.Controllers.Statuses
         }
 
         [HttpPost("{backtestJobName}")]
-        public GenericActionResult Post(string backtestJobName, [FromBody]BacktestStatus status)
+        public GenericActionResult Post(string backtestJobName, [FromBody]BacktestJobStatus status)
         {
             return utils.HandleStatusUpdate(backtestJobName, status);
         }

@@ -3,6 +3,7 @@ using Capital.GSG.FX.Data.Core.SystemData;
 using Capital.GSG.FX.Data.Core.WebApi;
 using Capital.GSG.FX.Utils.Core.Logging;
 using Microsoft.Extensions.Logging;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -14,7 +15,7 @@ namespace Backtester.Server.ControllerUtils
 
         private readonly JobsControllerUtils jobsControllerUtils;
 
-        private Dictionary<string, BacktesterWorkerModel> workers = new Dictionary<string, BacktesterWorkerModel>();
+        private ConcurrentDictionary<string, BacktesterWorkerModel> workers = new ConcurrentDictionary<string, BacktesterWorkerModel>();
 
         public WorkersControllerUtils(JobsControllerUtils jobsControllerUtils)
         {
@@ -38,11 +39,11 @@ namespace Backtester.Server.ControllerUtils
             if (status == null)
                 return new GenericActionResult(false, "Invalid status object: null");
 
-            if (!workers.ContainsKey(workerName))
+            workers.AddOrUpdate(workerName, (key) =>
             {
                 logger.Info($"Registering new backtester worker {workerName}");
 
-                workers.Add(workerName, new BacktesterWorkerModel()
+                return new BacktesterWorkerModel()
                 {
                     Attributes = status.Attributes.ToSystemStatusAttributeModels(),
                     Datacenter = status.Datacenter,
@@ -51,19 +52,18 @@ namespace Backtester.Server.ControllerUtils
                     Name = workerName,
                     OverallStatus = status.OverallStatus,
                     StartTime = status.StartTime
-                });
-            }
-            else
+                };
+            }, (key, oldValue) =>
             {
-                var worker = workers[workerName];
+                oldValue.Attributes = status.Attributes.ToSystemStatusAttributeModels();
+                oldValue.Datacenter = status.Datacenter;
+                oldValue.IsRunning = status.IsAlive;
+                oldValue.LastHeardFrom = status.LastHeardFrom;
+                oldValue.OverallStatus = status.OverallStatus;
+                oldValue.StartTime = status.StartTime;
 
-                worker.Attributes = status.Attributes.ToSystemStatusAttributeModels();
-                worker.Datacenter = status.Datacenter;
-                worker.IsRunning = status.IsAlive;
-                worker.LastHeardFrom = status.LastHeardFrom;
-                worker.OverallStatus = status.OverallStatus;
-                worker.StartTime = status.StartTime;
-            }
+                return oldValue;
+            });
 
             return new GenericActionResult(true, $"Updated status of worker {workerName}");
         }

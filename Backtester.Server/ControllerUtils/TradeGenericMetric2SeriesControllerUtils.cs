@@ -6,7 +6,6 @@ using Capital.GSG.FX.Backtest.DataTypes;
 using Microsoft.Extensions.Logging;
 using Capital.GSG.FX.Utils.Core.Logging;
 using Capital.GSG.FX.Backtest.MongoConnector.Actioner;
-using System.Collections.Concurrent;
 using Capital.GSG.FX.Utils.Core;
 using System.Threading;
 using Microsoft.AspNetCore.Mvc;
@@ -21,8 +20,6 @@ namespace Backtester.Server.ControllerUtils
         private readonly ILogger logger = GSGLoggerFactory.Instance.CreateLogger<TradeGenericMetric2SeriesControllerUtils>();
 
         private readonly TradeGenericMetric2SerieActioner actioner;
-
-        private readonly ConcurrentDictionary<string, List<BacktestTradeGenericMetric2Serie>> seriesByJobGroupDict = new ConcurrentDictionary<string, List<BacktestTradeGenericMetric2Serie>>();
 
         public TradeGenericMetric2SeriesControllerUtils(TradeGenericMetric2SerieActioner actioner)
         {
@@ -46,18 +43,8 @@ namespace Backtester.Server.ControllerUtils
 
                 if (!result.Item1)
                     return result;
-
-                // 2. Add to in-memory dictionary
-                seriesByJobGroupDict.AddOrUpdate(tradeGenericMetric2Serie.JobGroupId, (key) =>
-                {
-                    return new List<BacktestTradeGenericMetric2Serie>() { tradeGenericMetric2Serie };
-                }, (key, oldValue) =>
-                {
-                    oldValue.Add(tradeGenericMetric2Serie);
-                    return oldValue;
-                });
-
-                return (true, $"Successfully added new unrealized PnL serie for job group {tradeGenericMetric2Serie.JobGroupId}");
+                else
+                    return (true, $"Successfully added new unrealized PnL serie for job group {tradeGenericMetric2Serie.JobGroupId}");
             }
             catch (ArgumentNullException ex)
             {
@@ -75,24 +62,14 @@ namespace Backtester.Server.ControllerUtils
 
         internal async Task<List<BacktestTradeGenericMetric2Serie>> GetForJobGroup(string jobGroupId)
         {
-            List<BacktestTradeGenericMetric2Serie> series;
+            logger.Info($"Querying series for job group {jobGroupId} from database as they are not in the dictionary");
 
-            if (seriesByJobGroupDict.TryGetValue(jobGroupId, out series))
-                return series;
-            else
-            {
-                logger.Info($"Querying series for job group {jobGroupId} from database as they are not in the dictionary");
+            var series = await actioner.GetAllForJobGroup(jobGroupId);
 
-                CancellationTokenSource cts = new CancellationTokenSource();
-                cts.CancelAfter(TimeSpan.FromSeconds(5));
+            if (!series.IsNullOrEmpty())
+                series.Sort(new Comparison<BacktestTradeGenericMetric2Serie>((x, y) => x.TradeOpenTimestamp.CompareTo(y.TradeOpenTimestamp)));
 
-                var result = await actioner.GetAllForJobGroup(jobGroupId, cts.Token);
-
-                if (!result.IsNullOrEmpty())
-                    seriesByJobGroupDict.TryAdd(jobGroupId, result);
-
-                return result;
-            }
+            return series;
         }
 
         internal async Task<FileResult> ExportExcel(string jobGroupId)

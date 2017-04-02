@@ -1,4 +1,6 @@
-﻿@model Backtester.Server.ViewModels.JobGroups.JobGroupInfoViewModel
+﻿@using static Capital.GSG.FX.Backtest.DataTypes.BacktestJobStatusCode;
+
+@model Backtester.Server.ViewModels.JobGroups.JobGroupInfoViewModel
 
 @{
     ViewBag.Title = "Info";
@@ -121,17 +123,29 @@
 </div>
 <div class="panel panel-default">
     <div class="panel-heading">
-        <h4>@Html.DisplayNameFor(m => Model.JobGroup.JobIds)</h4>
+        <h4>@Html.DisplayNameFor(m => Model.JobGroup.Jobs)</h4>
     </div>
-    <table class="table">
-        @foreach (var kvp in Model.JobGroup.JobIds)
-        {
-            <tr>
-                <th>@Html.DisplayFor(m => kvp.Key)</th>
-                <td>@Html.DisplayFor(m => kvp.Value)</td>
-            </tr>
-        }
-    </table>
+    @if (Model.JobGroup.Jobs != null && Model.JobGroup.Jobs.Count > 0)
+    {
+        <table class="table">
+            @foreach (var kvp in Model.JobGroup.Jobs)
+            {
+                <tr>
+                    <th>@Html.DisplayFor(m => kvp.Value.DayStr)</th>
+                    <td><a asp-controller="Jobs" asp-action="Status" asp-route-jobgroupid="@Model.JobGroup.GroupId" asp-route-jobid="@kvp.Key">@Html.DisplayFor(m => kvp.Key)</a></td>
+                    <td class="@(kvp.Value.StatusCode == FAILED ? "bg-danger" : kvp.Value.StatusCode == COMPLETED ? "bg-success" : "")">@Html.DisplayFor(m => kvp.Value.StatusCode)</td>
+                    <td>@Html.DisplayFor(m => kvp.Value.Progress)</td>
+                    <td>@Html.DisplayFor(m => kvp.Value.Worker)</td>
+                </tr>
+            }
+        </table>
+    }
+    else
+    {
+        <div class="panel-body">
+            <p>No job to display</p>
+        </div>
+    }
 </div>
 
 @section Scripts

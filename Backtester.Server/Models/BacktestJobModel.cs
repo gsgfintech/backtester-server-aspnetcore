@@ -9,11 +9,8 @@ namespace Backtester.Server.Models
     {
         public string Name { get; set; }
         public string GroupId { get; set; }
-        public BacktestJobStatus Status { get; set; }
+        public BacktestJobStatusModel Status { get; set; }
         public DateTimeOffset CreateTime { get; set; }
-        public DateTimeOffset? ActualStartTime { get; set; }
-        public DateTimeOffset? CompletionTime { get; set; }
-        public string Worker { get; set; }
         public DateTime Day { get; set; }
         public DateTimeOffset StartTime { get; set; }
         public DateTimeOffset EndTime { get; set; }
@@ -26,7 +23,6 @@ namespace Backtester.Server.Models
         public List<BacktestOrderModel> Orders { get; set; }
         public List<BacktestPositionModel> Positions { get; set; }
         public List<AlertModel> Alerts { get; set; }
-        public BacktestStatusModel Status { get; set; }
     }
 
     public static class BacktestJobModelExtensions
@@ -41,7 +37,6 @@ namespace Backtester.Server.Models
                 Alerts = output.Alerts.ToAlertModels(),
                 Orders = output.Orders.ToOrderModels(),
                 Positions = output.Positions.ToPositionModels(),
-                Status = output.Status.ToBacktestStatusModel(),
                 Trades = output.Trades.Values.ToTradeModels()
             };
         }
@@ -53,8 +48,6 @@ namespace Backtester.Server.Models
 
             return new BacktestJobModel()
             {
-                ActualStartTime = job.ActualStartTime,
-                CompletionTime = job.CompletionTime,
                 CreateTime = job.CreateTime,
                 Day = job.Day,
                 EndTime = job.EndTime,
@@ -62,8 +55,7 @@ namespace Backtester.Server.Models
                 Name = job.Name,
                 Output = job.Output.ToBacktestJobOutputDataModel(),
                 StartTime = job.StartTime,
-                Status = job.Status,
-                Worker = job.Worker
+                Status = job.Status.ToBacktestStatusModel()
             };
         }
     }

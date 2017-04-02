@@ -11,6 +11,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Capital.GSG.FX.Data.Core.SystemData;
+using Capital.GSG.FX.Utils.Core;
 
 namespace Backtester.Server.ControllerUtils
 {
@@ -21,8 +22,7 @@ namespace Backtester.Server.ControllerUtils
         private readonly BacktestJobActioner actioner;
 
         private ConcurrentQueue<string> pendingJobs = new ConcurrentQueue<string>();
-        private ConcurrentDictionary<string, BacktestJob> activeJobs = new ConcurrentDictionary<string, BacktestJob>();
-        private ConcurrentDictionary<string, BacktestJob> inactiveJobs = new ConcurrentDictionary<string, BacktestJob>();
+        //private ConcurrentDictionary<string, BacktestJobStatus> statusesDict = new ConcurrentDictionary<string, BacktestJobStatus>();
 
         public JobsControllerUtils(BacktestJobActioner actioner)
         {
@@ -31,31 +31,12 @@ namespace Backtester.Server.ControllerUtils
 
         internal async Task<BacktestJob> Get(string jobId)
         {
-            BacktestJob job;
+            logger.Info($"Querying backtest job {jobId} from database as it is not in the dictionary");
 
-            if (activeJobs.TryGetValue(jobId, out job))
-                return job;
-            else if (inactiveJobs.TryGetValue(jobId, out job))
-                return job;
-            else
-            {
-                logger.Info($"Querying backtest job {jobId} from database as it is not in the dictionary");
+            CancellationTokenSource cts = new CancellationTokenSource();
+            cts.CancelAfter(TimeSpan.FromSeconds(5));
 
-                CancellationTokenSource cts = new CancellationTokenSource();
-                cts.CancelAfter(TimeSpan.FromSeconds(5));
-
-                job = await actioner.Get(jobId, cts.Token);
-
-                if (job != null)
-                {
-                    if (job.Status == BacktestJobStatus.COMPLETED || job.Status == BacktestJobStatus.FAILED)
-                        inactiveJobs.TryAdd(jobId, job);
-                    else
-                        activeJobs.TryAdd(jobId, job);
-                }
-
-                return job;
-            }
+            return await actioner.Get(jobId, cts.Token);
         }
 
         internal GenericActionResult<string> GetNextPendingJobName()
@@ -79,45 +60,31 @@ namespace Backtester.Server.ControllerUtils
 
         internal async Task<List<BacktestJob>> GetMany(IEnumerable<string> jobIds)
         {
-            List<BacktestJob> jobs = new List<BacktestJob>();
+            CancellationTokenSource cts = new CancellationTokenSource();
+            cts.CancelAfter(TimeSpan.FromSeconds(5));
 
-            foreach (var jobId in jobIds)
-            {
-                BacktestJob job;
-
-                if (activeJobs.TryGetValue(jobId, out job))
-                {
-                    jobs.Add(job);
-                    continue;
-                }
-                else if (inactiveJobs.TryGetValue(jobId, out job))
-                {
-                    jobs.Add(job);
-                    continue;
-                }
-                else
-                {
-                    logger.Info($"Querying backtest job {jobId} from database as it is not in the dictionary");
-
-                    CancellationTokenSource cts = new CancellationTokenSource();
-                    cts.CancelAfter(TimeSpan.FromSeconds(5));
-
-                    job = await actioner.Get(jobId, cts.Token);
-
-                    if (job != null)
-                    {
-                        if (job.Status == BacktestJobStatus.COMPLETED || job.Status == BacktestJobStatus.FAILED)
-                            inactiveJobs.TryAdd(jobId, job);
-                        else
-                            activeJobs.TryAdd(jobId, job);
-                    }
-
-                    jobs.Add(job);
-                }
-            }
-
-            return jobs;
+            return await actioner.GetMany(jobIds, cts.Token);
         }
+
+        //internal async Task<Dictionary<string, BacktestJobStatus>> GetStatuses(IEnumerable<string> jobIds)
+        //{
+        //    if (jobIds.IsNullOrEmpty())
+        //        return new Dictionary<string, BacktestJobStatus>();
+
+        //    Dictionary<string, BacktestJobStatus> statuses = new Dictionary<string, BacktestJobStatus>();
+
+        //    foreach (var jobId in jobIds)
+        //    {
+        //        BacktestJobStatus status;
+        //        if (!statusesDict.TryGetValue(jobId, out status))
+        //            status = (await actioner.Get(jobId))?.Status;
+
+        //        if (status != null)
+        //            statuses.Add(jobId, status);
+        //    }
+
+        //    return statuses;
+        //}
 
         internal async Task<GenericActionResult> AddJob(BacktestJob job)
         {
@@ -128,7 +95,6 @@ namespace Backtester.Server.ControllerUtils
             if (!result.Success)
                 return result;
 
-            activeJobs.TryAdd(job.Name, job);
             pendingJobs.Enqueue(job.Name);
 
             return new GenericActionResult(true, $"Successfully added job {job.Name}");
@@ -144,35 +110,8 @@ namespace Backtester.Server.ControllerUtils
 
                 if (!result.Success)
                     return result;
-
-                if (job.Status == BacktestJobStatus.CREATED || job.Status == BacktestJobStatus.INPROGRESS)
-                    activeJobs.AddOrUpdate(jobName, job, (key, oldValue) =>
-                    {
-                        oldValue.ActualStartTime = job.ActualStartTime;
-                        oldValue.CompletionTime = job.CompletionTime;
-                        oldValue.Status = job.Status;
-                        oldValue.Worker = job.Worker;
-
-                        return oldValue;
-                    });
                 else
-                {
-                    BacktestJob discarded;
-                    activeJobs.TryRemove(jobName, out discarded);
-
-                    inactiveJobs.AddOrUpdate(jobName, job, (key, oldValue) =>
-                    {
-                        oldValue.ActualStartTime = job.ActualStartTime;
-                        oldValue.CompletionTime = job.CompletionTime;
-                        oldValue.Output = job.Output;
-                        oldValue.Status = job.Status;
-                        oldValue.Worker = job.Worker;
-
-                        return oldValue;
-                    });
-                }
-
-                return new GenericActionResult(true, $"Successfully updated job {job.Name}");
+                    return new GenericActionResult(true, $"Successfully updated job {job.Name}");
             }
             catch (Exception ex)
             {
@@ -186,122 +125,169 @@ namespace Backtester.Server.ControllerUtils
         {
             logger.Info($"About to delete {jobNames.Count()} jobs from DB: {string.Join(", ", jobNames)}");
 
-            var result = await actioner.DeleteMany(jobNames);
-
-            if (result.Success)
-            {
-                foreach (var jobName in jobNames)
-                {
-                    BacktestJob discarded;
-                    activeJobs.TryRemove(jobName, out discarded);
-                    inactiveJobs.TryRemove(jobName, out discarded);
-                }
-            }
-
-            return result;
+            return await actioner.DeleteMany(jobNames);
         }
 
         internal GenericActionResult AddAlert(string jobName, Alert alert)
         {
-            BacktestJob job;
+            //BacktestJob job;
 
-            if (activeJobs.TryGetValue(jobName, out job))
-            {
-                job.Output.Alerts.Add(alert);
+            //if (activeJobs.TryGetValue(jobName, out job))
+            //{
+            //    job.Output.Alerts.Add(alert);
 
-                activeJobs.AddOrUpdate(jobName, job, (key, oldValue) => job);
+            //    activeJobs.AddOrUpdate(jobName, job, (key, oldValue) => job);
 
-                return new GenericActionResult(true, $"Added alert {alert.AlertId} to job {jobName}");
-            }
-            else
-            {
-                string err = $"Not adding alert to unknown job {jobName}";
-                logger.Error(err);
-                return new GenericActionResult(false, err);
-            }
+            //    return new GenericActionResult(true, $"Added alert {alert.AlertId} to job {jobName}");
+            //}
+            //else
+            //{
+            //    string err = $"Not adding alert to unknown job {jobName}";
+            //    logger.Error(err);
+            //    return new GenericActionResult(false, err);
+            //}
+
+            return new GenericActionResult(false, "Disabled");
         }
 
         internal GenericActionResult AddPosition(string jobName, BacktestPosition position)
         {
-            BacktestJob job;
+            //BacktestJob job;
 
-            if (activeJobs.TryGetValue(jobName, out job))
-            {
-                job.Output.Positions.Add(position);
-                activeJobs.AddOrUpdate(jobName, job, (key, oldValue) => job);
+            //if (activeJobs.TryGetValue(jobName, out job))
+            //{
+            //    job.Output.Positions.Add(position);
+            //    activeJobs.AddOrUpdate(jobName, job, (key, oldValue) => job);
 
-                return new GenericActionResult(true, $"Added position update to job {jobName}");
-            }
-            else
-            {
-                string err = $"Not adding position update to unknown job {jobName}";
-                logger.Error(err);
-                return new GenericActionResult(false, err);
-            }
+            //    return new GenericActionResult(true, $"Added position update to job {jobName}");
+            //}
+            //else
+            //{
+            //    string err = $"Not adding position update to unknown job {jobName}";
+            //    logger.Error(err);
+            //    return new GenericActionResult(false, err);
+            //}
+
+            return new GenericActionResult(false, "Disabled");
         }
 
         internal GenericActionResult AddTrade(string jobName, BacktestTrade trade)
         {
-            BacktestJob job;
+            //BacktestJob job;
 
-            if (activeJobs.TryGetValue(jobName, out job))
-            {
-                if (!job.Output.Trades.ContainsKey(trade.TradeId))
-                    job.Output.Trades.Add(trade.TradeId, trade);
-                else
-                    job.Output.Trades[trade.TradeId] = trade;
+            //if (activeJobs.TryGetValue(jobName, out job))
+            //{
+            //    if (!job.Output.Trades.ContainsKey(trade.TradeId))
+            //        job.Output.Trades.Add(trade.TradeId, trade);
+            //    else
+            //        job.Output.Trades[trade.TradeId] = trade;
 
-                activeJobs.AddOrUpdate(jobName, job, (key, oldValue) => job);
+            //    activeJobs.AddOrUpdate(jobName, job, (key, oldValue) => job);
 
-                return new GenericActionResult(true, $"Added trade {trade.TradeId} to job {jobName}");
-            }
-            else
-            {
-                string err = $"Not adding trade to unknown job {jobName}";
-                logger.Error(err);
-                return new GenericActionResult(false, err);
-            }
+            //    return new GenericActionResult(true, $"Added trade {trade.TradeId} to job {jobName}");
+            //}
+            //else
+            //{
+            //    string err = $"Not adding trade to unknown job {jobName}";
+            //    logger.Error(err);
+            //    return new GenericActionResult(false, err);
+            //}
+
+            return new GenericActionResult(false, "Disabled");
         }
 
         internal GenericActionResult AddOrder(string jobName, BacktestOrder order)
         {
-            BacktestJob job;
+            //BacktestJob job;
 
-            if (activeJobs.TryGetValue(jobName, out job))
-            {
-                if (!job.Output.Orders.ContainsKey(order.OrderId))
-                    job.Output.Orders.Add(order.OrderId, order);
-                else
-                    job.Output.Orders[order.OrderId] = order;
+            //if (activeJobs.TryGetValue(jobName, out job))
+            //{
+            //    if (!job.Output.Orders.ContainsKey(order.OrderId))
+            //        job.Output.Orders.Add(order.OrderId, order);
+            //    else
+            //        job.Output.Orders[order.OrderId] = order;
 
-                activeJobs.AddOrUpdate(jobName, job, (key, oldValue) => job);
+            //    activeJobs.AddOrUpdate(jobName, job, (key, oldValue) => job);
 
-                return new GenericActionResult(true, $"Added order {order.OrderId} to job {jobName}");
-            }
-            else
-            {
-                string err = $"Not adding order to unknown job {jobName}";
-                logger.Error(err);
-                return new GenericActionResult(false, err);
-            }
+            //    return new GenericActionResult(true, $"Added order {order.OrderId} to job {jobName}");
+            //}
+            //else
+            //{
+            //    string err = $"Not adding order to unknown job {jobName}";
+            //    logger.Error(err);
+            //    return new GenericActionResult(false, err);
+            //}
+
+            return new GenericActionResult(false, "Disabled");
         }
 
-        internal GenericActionResult AddStatusUpdate(string jobName, BacktestStatus status)
+        internal GenericActionResult AddStatusUpdate(string jobName, BacktestJobStatus status)
         {
-            BacktestJob job;
+            //statusesDict.AddOrUpdate(jobName, (key) =>
+            //{
+            //    logger.Info($"Record status update for new job {jobName}");
+            //    return status;
+            //}, (key, oldValue) =>
+            //{
+            //    logger.Debug($"Record status update for job {jobName}");
+            //    return status;
+            //});
 
-            if (activeJobs.TryGetValue(jobName, out job))
-            {
-                job.Output.Status = status;
-                activeJobs.AddOrUpdate(jobName, job, (key, oldValue) => job);
+            //if (!statusesDict.ContainsKey(jobName))
+            //{
+            //    logger.Info($"Record status update for new job {jobName}");
+            //    statusesDict.Add(jobName, status);
+            //}
+            //else
+            //{
+            //    logger.Debug($"Record status update for job {jobName}");
 
-                return new GenericActionResult(true, $"Updated status of job {jobName}");
-            }
-            else
+            //    UpdateAttributes(statusesDict[jobName].Attributes, status.Attributes);
+
+            //    statusesDict[jobName].CompletionTime = status.CompletionTime;
+            //    statusesDict[jobName].Message = status.Message;
+            //    statusesDict[jobName].Progress = status.Progress;
+            //    statusesDict[jobName].StatusCode = status.StatusCode;
+            //    statusesDict[jobName].Timestamp = status.Timestamp;
+            //}
+
+            return new GenericActionResult(true, "Not used");
+
+            //BacktestJob job;
+
+            //if (activeJobs.TryGetValue(jobName, out job))
+            //{
+            //    job.Output.Status = status;
+            //    activeJobs.AddOrUpdate(jobName, job, (key, oldValue) => job);
+
+            //    return new GenericActionResult(true, $"Updated status of job {jobName}");
+            //}
+            //else
+            //{
+            //    string err = $"Not updating status of unknown job {jobName}";
+            //    logger.Error(err);
+            //    return new GenericActionResult(false, err);
+            //}
+        }
+
+        private void UpdateAttributes(List<BacktestStatusAttribute> existingAttributes, List<BacktestStatusAttribute> newAttributes)
+        {
+            if (!newAttributes.IsNullOrEmpty())
             {
-                string err = $"Not updating status of unknown job {jobName}";
-                logger.Error(err);
-                return new GenericActionResult(false, err);
+                if (existingAttributes.IsNullOrEmpty())
+                    existingAttributes = newAttributes;
+                else
+                {
+                    foreach (var newAttribute in newAttributes)
+                    {
+                        var existingAttribute = existingAttributes.FirstOrDefault(attr => attr.Name == newAttribute.Name);
+
+                        if (existingAttribute != null)
+                            existingAttribute.Value = newAttribute.Value;
+                        else
+                            existingAttributes.Add(newAttribute);
+                    }
+                }
             }
         }
     }

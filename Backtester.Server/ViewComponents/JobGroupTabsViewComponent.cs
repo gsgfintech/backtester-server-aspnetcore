@@ -1,4 +1,5 @@
 ﻿using Backtester.Server.ControllerUtils;
+using Backtester.Server.Models;
 using Backtester.Server.ViewModels;
 using Capital.GSG.FX.Utils.Core.Logging;
 using Microsoft.AspNetCore.Mvc;
@@ -22,7 +23,7 @@ namespace Backtester.Server.ViewComponents
         {
             var group = await utils.Get(jobGroupId);
 
-            return View(new JobGroupTabsViewModel(jobGroupId, group?.JobIds));
+            return View(new JobGroupTabsViewModel(jobGroupId, group?.Jobs.ToBacktestJobLightModels()));
         }
     }
 }

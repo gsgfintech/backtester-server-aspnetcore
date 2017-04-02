@@ -37,7 +37,7 @@ namespace Backtester.Server.Connector
             this.controllerEndpoint = controllerEndpoint;
         }
 
-        public async Task<GenericActionResult> PostBacktestStatus(string backtestJobName, BacktestStatus status, CancellationToken ct = default(CancellationToken))
+        public async Task<GenericActionResult> PostBacktestJobStatus(string backtestJobName, BacktestJobStatus status, CancellationToken ct = default(CancellationToken))
         {
             try
             {

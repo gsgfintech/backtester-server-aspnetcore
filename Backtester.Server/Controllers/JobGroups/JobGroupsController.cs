@@ -3,11 +3,13 @@ using Backtester.Server.Models;
 using Backtester.Server.ViewComponents;
 using Backtester.Server.ViewModels;
 using Backtester.Server.ViewModels.JobGroups;
+using Capital.GSG.FX.Backtest.DataTypes;
 using Capital.GSG.FX.Utils.Core.Logging;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Backtester.Server.Controllers.JobGroups
@@ -44,7 +46,7 @@ namespace Backtester.Server.Controllers.JobGroups
         {
             var group = await utils.Get(groupId);
 
-            return View(new JobGroupAllTradesViewModel(groupId, group?.Trades));
+            return View(new JobGroupAllTradesViewModel(groupId, group?.Trades ?? new List<BacktestTrade>()));
         }
 
         public async Task<IActionResult> UnrealizedPnls(string groupId)

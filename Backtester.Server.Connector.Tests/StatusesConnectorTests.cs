@@ -19,7 +19,7 @@ namespace Backtester.Server.Connector.Tests
 
             try
             {
-                BacktestStatus status = new BacktestStatus()
+                BacktestJobStatus status = new BacktestJobStatus()
                 {
                     Attributes = new List<BacktestStatusAttribute>()
                     {
@@ -31,7 +31,7 @@ namespace Backtester.Server.Connector.Tests
                     Timestamp = DateTimeOffset.Now
                 };
 
-                var result = await connector.PostBacktestStatus("RegTestJob", status);
+                var result = await connector.PostBacktestJobStatus("RegTestJob", status);
 
                 Assert.IsTrue(result.Success, result.Message);
             }

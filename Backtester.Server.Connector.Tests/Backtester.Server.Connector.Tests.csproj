@@ -4,11 +4,13 @@
     <TargetFramework>netcoreapp1.1</TargetFramework>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" />
+
   <ItemGroup>
     <PackageReference Include="Flurl.Http" Version="1.1.2" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.0.0" />
-    <PackageReference Include="MSTest.TestAdapter" Version="1.1.13" />
-    <PackageReference Include="MSTest.TestFramework" Version="1.1.13" />
+    <PackageReference Include="MSTest.TestAdapter" Version="1.1.14" />
+    <PackageReference Include="MSTest.TestFramework" Version="1.1.14" />
     <PackageReference Include="System.ValueTuple" Version="4.3.0" />
   </ItemGroup>
 

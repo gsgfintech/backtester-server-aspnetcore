@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Backtester.Server.Models;
+using System.Collections.Generic;
 
 namespace Backtester.Server.ViewModels
 {
@@ -6,12 +7,12 @@ namespace Backtester.Server.ViewModels
     {
         public string JobGroupId { get; private set; }
 
-        public Dictionary<string, string> JobIds { get; private set; }
+        public Dictionary<string, BacktestJobLightModel> Jobs { get; private set; }
 
-        public JobGroupTabsViewModel(string jobGroupId, Dictionary<string, string> jobIds)
+        public JobGroupTabsViewModel(string jobGroupId, Dictionary<string, BacktestJobLightModel> jobs)
         {
             JobGroupId = jobGroupId;
-            JobIds = jobIds ?? new Dictionary<string, string>();
+            Jobs = jobs ?? new Dictionary<string, BacktestJobLightModel>();
         }
     }
 }

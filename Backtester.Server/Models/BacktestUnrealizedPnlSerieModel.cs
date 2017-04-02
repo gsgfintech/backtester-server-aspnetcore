@@ -1,4 +1,5 @@
 ﻿using Capital.GSG.FX.Backtest.DataTypes;
+using Capital.GSG.FX.Data.Core.OrderData;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,6 +9,10 @@ namespace Backtester.Server.Models
     public class BacktestUnrealizedPnlSerieModel
     {
         public string TradeDescription { get; set; }
+
+        public OrderOrigin TradeCloseOrigin { get; set; }
+
+        public DateTimeOffset? Timestamp { get; set; }
 
         public List<BacktestUnrealizedPnlPointModel> Points { get; set; }
     }
@@ -38,7 +43,7 @@ namespace Backtester.Server.Models
             return points?.Select(p => p.ToBacktestUnrealizedPnlPointModel()).ToList();
         }
 
-        private static BacktestUnrealizedPnlSerieModel ToBacktestUnrealizedPnlSerieModel(this BacktestUnrealizedPnlSerie serie)
+        public static BacktestUnrealizedPnlSerieModel ToBacktestUnrealizedPnlSerieModel(this BacktestUnrealizedPnlSerie serie, DateTimeOffset? timestamp = null)
         {
             if (serie == null)
                 return null;
@@ -46,6 +51,8 @@ namespace Backtester.Server.Models
             return new BacktestUnrealizedPnlSerieModel()
             {
                 Points = serie.Points.ToBacktestUnrealizedPnlPointModels(),
+                Timestamp = timestamp,
+                TradeCloseOrigin = serie.TradeCloseOrigin,
                 TradeDescription = serie.TradeDescription
             };
         }

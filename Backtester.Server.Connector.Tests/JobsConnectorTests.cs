@@ -1,8 +1,5 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Backtester.Server.Connector;
 using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 using Capital.GSG.FX.Backtest.DataTypes;
 
@@ -23,13 +20,14 @@ namespace Backtester.Server.Connector.Tests
 
             BacktestJob job = new BacktestJob(groupName, jobName)
             {
-                ActualStartTime = DateTimeOffset.Now,
-                CompletionTime = DateTimeOffset.Now,
                 Day = DateTime.Today,
                 EndTime = DateTimeOffset.Now,
-                StartTime = DateTimeOffset.Now,
-                Worker = "RegtestWorker"
+                StartTime = DateTimeOffset.Now
             };
+
+            job.Status.ActualStartTime = DateTimeOffset.Now;
+            job.Status.CompletionTime = DateTimeOffset.Now;
+            job.Status.Worker = "RegtestWorker";
 
             var result = await connector.UpdateStatus(jobName, job);
 

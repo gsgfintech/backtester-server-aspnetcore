@@ -7,15 +7,13 @@ namespace Backtester.Server.ViewModels.Jobs
     {
         public string JobGroupId { get; private set; }
         public string JobId { get; private set; }
-        public BacktestStatusModel Status { get; private set; }
-        public string Worker { get; private set; }
+        public BacktestJobStatusModel Status { get; private set; }
 
-        public JobStatusViewModel(string jobGroupId, string jobId, BacktestStatus status, string worker)
+        public JobStatusViewModel(string jobGroupId, string jobId, BacktestJobStatus status)
         {
             JobGroupId = jobGroupId;
             JobId = jobId;
             Status = status.ToBacktestStatusModel();
-            Worker = worker;
         }
     }
 }

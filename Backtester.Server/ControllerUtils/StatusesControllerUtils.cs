@@ -17,7 +17,7 @@ namespace Backtester.Server.ControllerUtils
             this.jobsControllerUtils = jobsControllerUtils;
         }
 
-        internal GenericActionResult HandleStatusUpdate(string backtestJobName, BacktestStatus status)
+        internal GenericActionResult HandleStatusUpdate(string backtestJobName, BacktestJobStatus status)
         {
             if (status == null)
                 return new GenericActionResult(false, "Invalid status object: null");

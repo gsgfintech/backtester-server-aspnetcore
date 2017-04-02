@@ -1,4 +1,5 @@
 ﻿@using Backtester.Server.ViewModels.Jobs
+@using static Capital.GSG.FX.Backtest.DataTypes.BacktestJobStatusCode
 
 @model JobStatusViewModel
 
@@ -11,9 +12,9 @@
 
 @Html.Partial("JobTabsPartial", new JobTabsPartialViewModel(Model.JobGroupId, Model.JobId))
 
-<div class="panel panel-default">
+<div class="@(Model.Status.StatusCode == FAILED ? "panel panel-danger" : Model.Status.StatusCode == COMPLETED ? "panel panel-success" : Model.Status.StatusCode == CANCELLED ? "panel panel-warning" : "panel panel-default")">
     <div class="panel-heading">
-        <h4>Status</h4>
+        <h4>@Html.DisplayFor(m => Model.Status.StatusCode)</h4>
     </div>
     <table class="table">
         <tr>
@@ -29,8 +30,8 @@
             <td>@Html.DisplayFor(m => Model.Status.Timestamp)</td>
         </tr>
         <tr>
-            <th>@Html.DisplayNameFor(m => Model.Worker)</th>
-            <td>@Html.DisplayFor(m => Model.Worker)</td>
+            <th>@Html.DisplayNameFor(m => Model.Status.Worker)</th>
+            <td>@Html.DisplayFor(m => Model.Status.Worker)</td>
         </tr>
     </table>
 </div>

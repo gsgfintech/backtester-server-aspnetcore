@@ -365,17 +365,17 @@ namespace Backtester.Server.ControllerUtils
                     var addResult = await jobsControllerUtils.AddJob(job);
 
                     if (addResult.Success)
-                        jobGroup.JobIds.Add(day.ToString("yyyy-MM-dd"), job.Name);
+                        jobGroup.Jobs.Add(job.Name, new BacktestJobLight() { DayStr = day.ToString("yyyy-MM-dd") });
                     else
                         failed.Add(addResult);
                 }
 
-                if (!jobGroup.JobIds.IsNullOrEmpty() && failed.IsNullOrEmpty())
+                if (!jobGroup.Jobs.IsNullOrEmpty() && failed.IsNullOrEmpty())
                 {
                     var result = await jobGroupsControllerUtils.AddJobGroup(jobGroup);
 
                     if (result.Success)
-                        return new CreateJobSubmitViewModel(jobName, true, $"Successfully split backtest job {jobName} into {jobGroup.JobIds.Count} subjobs ({string.Join(", ", jobGroup.JobIds)}) and submitted.");
+                        return new CreateJobSubmitViewModel(jobName, true, $"Successfully split backtest job {jobName} into {jobGroup.Jobs.Count} subjobs ({string.Join(", ", jobGroup.Jobs.Keys)}) and submitted.");
                     else
                         return new CreateJobSubmitViewModel(jobName, false, $"Failed to submit group job {jobName}: {result.Message}");
                 }
