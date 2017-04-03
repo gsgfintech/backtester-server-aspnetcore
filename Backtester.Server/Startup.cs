@@ -9,6 +9,8 @@ using Capital.GSG.FX.Backtest.MongoConnector.Actioner;
 using Backtester.Server.ControllerUtils;
 using Capital.GSG.FX.Utils.Core.Logging;
 using System.IO;
+using Backtester.Server.Controllers.Info;
+using System;
 
 namespace Backtester.Server
 {
@@ -209,6 +211,13 @@ namespace Backtester.Server
                 JobsControllerUtils jobsControllerUtils = serviceProvider.GetService<JobsControllerUtils>();
 
                 return new StatusesControllerUtils(jobsControllerUtils);
+            });
+
+            services.AddSingleton((serviceProvider) =>
+            {
+                string serverName = config.GetValue<string>("ServerName") ?? "BacktesterServer";
+
+                return new InfoControllerUtils(serverName, DateTimeOffset.Now);
             });
         }
     }
