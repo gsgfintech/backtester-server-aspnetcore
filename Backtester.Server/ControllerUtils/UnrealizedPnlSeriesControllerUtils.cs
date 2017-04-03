@@ -5,7 +5,6 @@ using Capital.GSG.FX.Utils.Core.Logging;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
-using System.Threading;
 using System.Threading.Tasks;
 using Capital.GSG.FX.Data.Core.WebApi;
 using Microsoft.AspNetCore.Mvc;
@@ -147,7 +146,7 @@ namespace Backtester.Server.ControllerUtils
                     for (int i = 0; i < series.Count; i++)
                     {
                         if (kvp.Value.ContainsKey(i))
-                            ws.Cells[curRow, curColumn].Value = pnlPerHour ? ((double?)kvp.Key > 0 ? Math.Round(kvp.Value[i] / kvp.Key * 12 * 60, 1) : (double?)null) : kvp.Value[i];
+                            ws.Cells[curRow, curColumn].Value = pnlPerHour ? ((double?)kvp.Key > 0 ? Math.Round(kvp.Value[i] / kvp.Key * 3600, 1) : (double?)null) : kvp.Value[i];
 
                         curColumn++;
                     }
