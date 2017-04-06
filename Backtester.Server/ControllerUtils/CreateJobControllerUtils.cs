@@ -233,7 +233,8 @@ namespace Backtester.Server.ControllerUtils
                             StartTime = jobGroup.StartTime.LocalDateTime,
                             StrategyClass = jobGroup.Strategy.StrategyTypeName,
                             StrategyName = jobGroup.Strategy.Name,
-                            StrategyVersion = jobGroup.Strategy.Version
+                            StrategyVersion = jobGroup.Strategy.Version,
+                            UseHistoDatabase = jobGroup.UseHistoDatabase
                         },
                         Success = true
                     };
@@ -285,7 +286,7 @@ namespace Backtester.Server.ControllerUtils
             });
         }
 
-        public BacktestJobSettingsModel SetTimeRange(string jobName, DateTime startDate, DateTime endDate, DateTime startTime, DateTime endTime)
+        public BacktestJobSettingsModel SetTimeRange(string jobName, DateTime startDate, DateTime endDate, DateTime startTime, DateTime endTime, bool useHistoDatabase)
         {
             return jobs.AddOrUpdate(jobName, (key) => null, (key, oldValue) =>
             {
@@ -293,6 +294,7 @@ namespace Backtester.Server.ControllerUtils
                 oldValue.EndDate = endDate;
                 oldValue.StartTime = startTime;
                 oldValue.EndTime = endTime;
+                oldValue.UseHistoDatabase = useHistoDatabase;
 
                 return oldValue;
             });
@@ -342,7 +344,8 @@ namespace Backtester.Server.ControllerUtils
                         StrategyDllPath = jobSettings.NewFileName,
                         StrategyTypeName = jobSettings.StrategyClass,
                         Version = jobSettings.StrategyVersion
-                    }
+                    },
+                    UseHistoDatabase = jobSettings.UseHistoDatabase
                 };
 
                 List<GenericActionResult> failed = new List<GenericActionResult>();

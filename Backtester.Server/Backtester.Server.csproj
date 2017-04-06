@@ -23,7 +23,8 @@
     <None Remove="Properties\PublishProfiles\FolderProfile.pubxml" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Backtest.MongoConnector" Version="5.9.0" />
+    <PackageReference Include="Backtest.DataTypes" Version="4.9.3" />
+    <PackageReference Include="Backtest.MongoConnector" Version="5.9.4" />
     <PackageReference Include="Capital.GSG.FX.Trading.Strategy" Version="5.2.0" />
     <PackageReference Include="Capital.GSG.FX.Utils.Core" Version="1.2.1" />
     <PackageReference Include="Capital.GSG.FX.Utils.Core.Logging" Version="2.2.1" />
@@ -45,7 +46,7 @@
     <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="1.1.1" />
     <PackageReference Include="Microsoft.VisualStudio.Web.BrowserLink" Version="1.1.0" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="1.1.0" />
-    <PackageReference Include="Syncfusion.EJ.AspNet.Core" Version="15.1600.0.37" />
+    <PackageReference Include="Syncfusion.EJ.AspNet.Core" Version="15.1600.0.41" />
     <PackageReference Include="System.ValueTuple" Version="4.3.0" />
   </ItemGroup>
   <ItemGroup>

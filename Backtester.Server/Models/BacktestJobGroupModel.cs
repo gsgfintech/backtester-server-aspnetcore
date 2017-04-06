@@ -55,6 +55,9 @@ namespace Backtester.Server.Models
 
         [DisplayFormat(DataFormatString = "{0:N0}%")]
         public double Progress { get; set; }
+
+        [Display(Name = "Use historical database if no data is available in the IB database")]
+        public bool UseHistoDatabase { get; set; }
     }
 
     public class BacktestJobStrategyModel
@@ -143,7 +146,8 @@ namespace Backtester.Server.Models
                 StartTime = group.StartTime.ToLocalTime(),
                 Status = !group.Jobs.IsNullOrEmpty() ? group.GetStatus() : BacktestJobStatusCode.UNKNOWN,
                 Strategy = group.Strategy.ToBacktestJobStrategyModel(),
-                Trades = group.Trades.ToTradeModels()
+                Trades = group.Trades.ToTradeModels(),
+                UseHistoDatabase = group.UseHistoDatabase
             };
         }
 

@@ -9,11 +9,11 @@ namespace Backtester.Server.ViewModels.Jobs
         public string JobId { get; private set; }
         public BacktestJobStatusModel Status { get; private set; }
 
-        public JobStatusViewModel(string jobGroupId, string jobId, BacktestJobStatus status)
+        public JobStatusViewModel(string jobGroupId, string jobId, BacktestJobStatus status, bool? usedHistoMd)
         {
             JobGroupId = jobGroupId;
             JobId = jobId;
-            Status = status.ToBacktestStatusModel();
+            Status = status.ToBacktestStatusModel(usedHistoMd ?? false);
         }
     }
 }

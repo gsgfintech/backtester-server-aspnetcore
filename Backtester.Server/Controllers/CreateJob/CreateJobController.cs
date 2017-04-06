@@ -83,7 +83,7 @@ namespace Backtester.Server.Controllers.CreateJob
 
         public IActionResult Step4(string jobName, CreateJobStep3ViewModel model)
         {
-            var settings = createJobControllerUtils.SetTimeRange(jobName, model.Settings.StartDate, model.Settings.EndDate, model.Settings.StartTime, model.Settings.EndTime);
+            var settings = createJobControllerUtils.SetTimeRange(jobName, model.Settings.StartDate, model.Settings.EndDate, model.Settings.StartTime, model.Settings.EndTime, model.Settings.UseHistoDatabase);
 
             return View(new CreateJobStep4ViewModel(settings));
         }

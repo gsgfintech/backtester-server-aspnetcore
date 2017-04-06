@@ -62,7 +62,7 @@ namespace Backtester.Server.Models
         public int? SizeUsd { get; set; }
 
         [Display(Name = "Execution Time (HKT)")]
-        [DisplayFormat(DataFormatString = "{0:dd/MM HH:mm:ss}")]
+        [DisplayFormat(DataFormatString = "{0:dd/MM/yy HH:mm:ss}")]
         public DateTimeOffset Timestamp { get; set; }
 
         public ExecutionSide Side { get; set; }

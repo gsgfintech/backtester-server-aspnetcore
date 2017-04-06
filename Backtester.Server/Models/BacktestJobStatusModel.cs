@@ -24,6 +24,9 @@ namespace Backtester.Server.Models
         public BacktestJobStatusCode StatusCode { get; set; }
 
         public string Worker { get; set; }
+
+        [Display(Name = "Used Historical Market Data")]
+        public bool UsedHistoMarketData { get; set; }
     }
 
     public class BacktestStatusAttributeModel
@@ -51,7 +54,7 @@ namespace Backtester.Server.Models
             return attributes?.Select(a => a.ToBacktestStatusAttributeModel()).Where(a => a != null)?.OrderBy(a => a.Name).ToList();
         }
 
-        public static BacktestJobStatusModel ToBacktestStatusModel(this BacktestJobStatus status)
+        public static BacktestJobStatusModel ToBacktestStatusModel(this BacktestJobStatus status, bool usedHistoMd)
         {
             if (status == null)
                 return null;
@@ -65,6 +68,7 @@ namespace Backtester.Server.Models
                 Progress = status.Progress,
                 StatusCode = status.StatusCode,
                 Timestamp = (status.Timestamp > DateTimeOffset.MinValue) ? status.Timestamp.ToLocalTime() : (DateTimeOffset?)null,
+                UsedHistoMarketData = usedHistoMd,
                 Worker = status.Worker
             };
         }

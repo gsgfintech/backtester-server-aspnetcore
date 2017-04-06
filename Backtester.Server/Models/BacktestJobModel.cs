@@ -55,7 +55,7 @@ namespace Backtester.Server.Models
                 Name = job.Name,
                 Output = job.Output.ToBacktestJobOutputDataModel(),
                 StartTime = job.StartTime,
-                Status = job.Status.ToBacktestStatusModel()
+                Status = job.Status.ToBacktestStatusModel(job.UsedHistoData)
             };
         }
     }

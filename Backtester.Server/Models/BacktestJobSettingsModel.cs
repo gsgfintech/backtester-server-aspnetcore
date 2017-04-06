@@ -55,5 +55,8 @@ namespace Backtester.Server.Models
         [DisplayFormat(DataFormatString = "{0:HH:mm}")]
         [DataType(DataType.Time)]
         public DateTime EndTime { get; set; }
+
+        [Display(Name = "Use historical database if no data is available in the IB database")]
+        public bool UseHistoDatabase { get; set; }
     }
 }

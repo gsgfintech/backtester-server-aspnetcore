@@ -16,6 +16,10 @@ namespace Backtester.Server.Models
         public double Progress { get; set; }
 
         public BacktestJobStatusCode StatusCode { get; set; }
+
+        [Display(Name = "Used Historical Market Data")]
+        public bool UsedHistoMarketData { get; set; }
+
         public string Worker { get; set; }
     }
 
@@ -33,6 +37,7 @@ namespace Backtester.Server.Models
                 DayStr = job.DayStr,
                 Progress = job.Progress,
                 StatusCode = job.StatusCode,
+                UsedHistoMarketData = job.UsedHistoData,
                 Worker = job.Worker
             };
         }

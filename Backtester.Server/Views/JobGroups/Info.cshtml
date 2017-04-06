@@ -75,6 +75,10 @@
                 <th>@Html.DisplayNameFor(m => Model.JobGroup.EndTime)</th>
                 <td>@Html.DisplayFor(m => Model.JobGroup.EndTime)</td>
             </tr>
+            <tr>
+                <th>@Html.DisplayNameFor(m => Model.JobGroup.UseHistoDatabase)</th>
+                <td>@Html.DisplayTextFor(m => Model.JobGroup.UseHistoDatabase)</td>
+            </tr>
         </table>
     </div>
 </div>
@@ -133,9 +137,17 @@
                 <tr>
                     <th>@Html.DisplayFor(m => kvp.Value.DayStr)</th>
                     <td><a asp-controller="Jobs" asp-action="Status" asp-route-jobgroupid="@Model.JobGroup.GroupId" asp-route-jobid="@kvp.Key">@Html.DisplayFor(m => kvp.Key)</a></td>
-                    <td class="@(kvp.Value.StatusCode == FAILED ? "bg-danger" : kvp.Value.StatusCode == COMPLETED ? "bg-success" : "")">@Html.DisplayFor(m => kvp.Value.StatusCode)</td>
+                    <td class="@(kvp.Value.StatusCode == FAILED ? "bg-danger" : kvp.Value.StatusCode == COMPLETED ? "bg-success" : kvp.Value.StatusCode == FAILED_NO_DATA ? "bg-warning" : "")">@Html.DisplayFor(m => kvp.Value.StatusCode)</td>
                     <td>@Html.DisplayFor(m => kvp.Value.Progress)</td>
                     <td>@Html.DisplayFor(m => kvp.Value.Worker)</td>
+                    @if (kvp.Value.UsedHistoMarketData)
+                    {
+                        <td><i>Histo MD</i></td>
+                    }
+                    else
+                    {
+                        <td></td>
+                    }
                 </tr>
             }
         </table>

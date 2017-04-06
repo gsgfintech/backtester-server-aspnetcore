@@ -6,7 +6,7 @@
     <div class="panel-heading">
         <h4>@ViewData["Header"]</h4>
     </div>
-    @if (Model.Count() > 0)
+    @if (Model != null && Model.Count() > 0)
     {
         <div class="table-responsive">
             <table class="table table-hover">
@@ -24,16 +24,17 @@
                     <tr>
                         <td><a asp-controller="JobGroups" asp-action="Info" asp-route-groupid="@jobGroup.GroupId">@Html.DisplayFor(m => jobGroup.GroupId)</a></td>
                         <td>@Html.DisplayFor(m => jobGroup.CreateTime)</td>
-                        <td>@Html.DisplayFor(m => jobGroup.Status)
-                            @if (jobGroup.Status != CREATED)
-                            {
-                                <span class="badge">@Html.DisplayFor(m => jobGroup.Progress)</span>
-                            }
-                        </td>
-                        <td>@Html.DisplayFor(m => jobGroup.ActualStartTime)</td>
-                        <td>@Html.DisplayFor(m => jobGroup.CompletionTime)</td>
-                        <td>@Html.DisplayFor(m => jobGroup.Duration)</td>
                         <td>
+                            @Html.DisplayFor(m => jobGroup.Status)
+                        @if (jobGroup.Status != CREATED)
+                        {
+                            <span class="badge">@Html.DisplayFor(m => jobGroup.Progress)</span>
+                        }
+                    </td>
+                    <td>@Html.DisplayFor(m => jobGroup.ActualStartTime)</td>
+                    <td>@Html.DisplayFor(m => jobGroup.CompletionTime)</td>
+                    <td>@Html.DisplayFor(m => jobGroup.Duration)</td>
+                    <td>
                         <div class="btn-group btn-group-sm">
                             <a class="btn btn-primary" asp-controller="CreateJob" asp-action="Step1" asp-route-jobNameToDuplicate="@jobGroup.GroupId">
                                 <span class="glyphicon glyphicon-plus"></span>
