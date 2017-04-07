@@ -18,7 +18,7 @@ namespace Backtester.Server.ViewModels.CreateJob
             {
                 StartDate = DateTimeUtils.GetLastBusinessDayInHKT(),
                 EndDate = DateTimeUtils.GetLastBusinessDayInHKT(),
-                StartTime = new DateTime(1, 1, 1, 7, 45, 0),
+                StartTime = new DateTime(1, 1, 1, 6, 15, 0),
                 EndTime = new DateTime(1, 1, 1, 16, 30, 0),
                 UseHistoDatabase = true
             };
