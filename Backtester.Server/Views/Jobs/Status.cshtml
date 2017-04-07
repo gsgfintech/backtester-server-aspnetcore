@@ -5,48 +5,69 @@
 
 @{
     ViewBag.Title = "Status";
-    ViewBag.ActiveTab = Model.JobId;
+    ViewBag.ActiveTab = Model.Job.Name;
 }
 
-@await Component.InvokeAsync("JobGroupTabs", new { jobGroupId = Model.JobGroupId })
+@await Component.InvokeAsync("JobGroupTabs", new { jobGroupId = Model.Job.GroupId })
 
-@Html.Partial("JobTabsPartial", new JobTabsPartialViewModel(Model.JobGroupId, Model.JobId))
+@Html.Partial("JobTabsPartial", new JobTabsPartialViewModel(Model.Job.GroupId, Model.Job.Name))
 
-<div class="@(Model.Status.StatusCode == FAILED ? "panel panel-danger" : Model.Status.StatusCode == COMPLETED ? "panel panel-success" : Model.Status.StatusCode == CANCELLED ? "panel panel-warning" : "panel panel-default")">
+<div class="@(Model.Job.Status.StatusCode == FAILED ? "panel panel-danger" : Model.Job.Status.StatusCode == COMPLETED ? "panel panel-success" : Model.Job.Status.StatusCode == CANCELLED ? "panel panel-warning" : "panel panel-default")">
     <div class="panel-heading">
-        <h4>@Html.DisplayFor(m => Model.Status.StatusCode)</h4>
+        <h4>@Html.DisplayFor(m => Model.Job.Status.StatusCode)</h4>
     </div>
     <table class="table">
         <tr>
-            <th>@Html.DisplayNameFor(m => Model.Status.Progress)</th>
-            <td>@Html.DisplayFor(m => Model.Status.Progress)</td>
+            <th>@Html.DisplayNameFor(m => Model.Job.Status.Progress)</th>
+            <td>@Html.DisplayFor(m => Model.Job.Status.Progress)</td>
         </tr>
         <tr>
-            <th>@Html.DisplayNameFor(m => Model.Status.Message)</th>
-            <td>@Html.DisplayFor(m => Model.Status.Message)</td>
+            <th>@Html.DisplayNameFor(m => Model.Job.Status.Message)</th>
+            <td>@Html.DisplayFor(m => Model.Job.Status.Message)</td>
         </tr>
         <tr>
-            <th>@Html.DisplayNameFor(m => Model.Status.Timestamp)</th>
-            <td>@Html.DisplayFor(m => Model.Status.Timestamp)</td>
+            <th>@Html.DisplayNameFor(m => Model.Job.Status.Timestamp)</th>
+            <td>@Html.DisplayFor(m => Model.Job.Status.Timestamp)</td>
         </tr>
         <tr>
-            <th>@Html.DisplayNameFor(m => Model.Status.Worker)</th>
-            <td>@Html.DisplayFor(m => Model.Status.Worker)</td>
+            <th>@Html.DisplayNameFor(m => Model.Job.Status.Worker)</th>
+            <td>@Html.DisplayFor(m => Model.Job.Status.Worker)</td>
         </tr>
         <tr>
-            <th>@Html.DisplayNameFor(m => Model.Status.UsedHistoMarketData)</th>
-            <td>@Html.DisplayTextFor(m => Model.Status.UsedHistoMarketData)</td>
+            <th>@Html.DisplayNameFor(m => Model.Job.UsedHistoMarketData)</th>
+            <td>@Html.DisplayTextFor(m => Model.Job.UsedHistoMarketData)</td>
         </tr>
     </table>
 </div>
 <div class="panel panel-default">
     <div class="panel-heading">
+        <h4>Timeframe</h4>
+    </div>
+    <div class="table-responsive">
+        <table class="table">
+            <tr>
+                <th>@Html.DisplayNameFor(m => Model.Job.Day)</th>
+                <td>@Html.DisplayFor(m => Model.Job.Day)</td>
+            </tr>
+            <tr>
+                <th>@Html.DisplayNameFor(m => Model.Job.StartTime)</th>
+                <td>@Html.DisplayFor(m => Model.Job.StartTime)</td>
+            </tr>
+            <tr>
+                <th>@Html.DisplayNameFor(m => Model.Job.EndTime)</th>
+                <td>@Html.DisplayFor(m => Model.Job.EndTime)</td>
+            </tr>
+        </table>
+    </div>
+</div>
+<div class="panel panel-default">
+    <div class="panel-heading">
         <h4>Attributes</h4>
     </div>
-    @if (Model?.Status?.Attributes?.Count > 0)
+    @if (Model.Job?.Status?.Attributes?.Count > 0)
     {
         <table class="table">
-            @foreach (var attribute in Model.Status.Attributes)
+            @foreach (var attribute in Model.Job.Status.Attributes)
             {
                 <tr>
                     <th>@Html.DisplayFor(m => attribute.Name)</th>

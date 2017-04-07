@@ -72,7 +72,7 @@ namespace Backtester.Server.ControllerUtils
 
             if (jobGroup != null && !jobGroup.Jobs.IsNullOrEmpty() && BacktestJobStatusCodeUtils.InactiveStatus.Contains(jobGroup.GetStatus()) && jobGroup.Trades.IsNullOrEmpty())
             {
-                logger.Info($"Will compute trades list for newlt inactive job group {groupId} and update in database");
+                logger.Info($"Will compute trades list for newly inactive job group {groupId} and update in database");
                 var trades = await ComputeTradesList(jobGroup.Jobs.Keys);
 
                 if (!trades.IsNullOrEmpty())

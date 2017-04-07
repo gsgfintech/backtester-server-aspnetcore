@@ -11,10 +11,22 @@ namespace Backtester.Server.Models
         public string GroupId { get; set; }
         public BacktestJobStatusModel Status { get; set; }
         public DateTimeOffset CreateTime { get; set; }
+
+        [DisplayFormat(DataFormatString = "{0:dd/MM/yy}")]
         public DateTime Day { get; set; }
+
+        [Display(Name = "Test Start Time (UTC)")]
+        [DisplayFormat(DataFormatString = "{0:HH:mm}")]
         public DateTimeOffset StartTime { get; set; }
+
+        [Display(Name = "Test End Time (UTC)")]
+        [DisplayFormat(DataFormatString = "{0:HH:mm}")]
         public DateTimeOffset EndTime { get; set; }
+
         public BacktestJobOutputDataModel Output { get; set; }
+
+        [Display(Name = "Used Historical Market Data")]
+        public bool UsedHistoMarketData { get; set; }
     }
 
     public class BacktestJobOutputDataModel
@@ -55,7 +67,8 @@ namespace Backtester.Server.Models
                 Name = job.Name,
                 Output = job.Output.ToBacktestJobOutputDataModel(),
                 StartTime = job.StartTime,
-                Status = job.Status.ToBacktestStatusModel(job.UsedHistoData)
+                Status = job.Status.ToBacktestStatusModel(),
+                UsedHistoMarketData = job.UsedHistoData
             };
         }
     }

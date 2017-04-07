@@ -1,4 +1,5 @@
 ﻿using Backtester.Server.ControllerUtils;
+using Backtester.Server.Models;
 using Backtester.Server.ViewModels.Jobs;
 using Capital.GSG.FX.Utils.Core.Logging;
 using Microsoft.AspNetCore.Authorization;
@@ -24,7 +25,7 @@ namespace Backtester.Server.Controllers.Jobs
         {
             var job = await utils.Get(jobId);
 
-            return View(new JobStatusViewModel(jobGroupId, jobId, job?.Status, job?.UsedHistoData));
+            return View(new JobStatusViewModel(job.ToBacktestJobModel()));
         }
 
         public async Task<IActionResult> Alerts(string jobGroupId, string jobId)

@@ -51,7 +51,7 @@ namespace Backtester.Server.Models
         [DataType(DataType.Time)]
         public DateTime StartTime { get; set; }
 
-        [Display(Name = "End Time (HKT)")]
+        [Display(Name = "End Time (EST/EDT)")]
         [DisplayFormat(DataFormatString = "{0:HH:mm}")]
         [DataType(DataType.Time)]
         public DateTime EndTime { get; set; }

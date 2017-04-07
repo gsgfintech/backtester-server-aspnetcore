@@ -353,11 +353,13 @@ namespace Backtester.Server.ControllerUtils
                 int dayCounter = 1;
                 foreach (var day in days)
                 {
+                    var nycOffsetForDay = day.GetNewYorkTimeUtcOffset();
+
                     BacktestJob job = new BacktestJob(jobName, $"{jobName}_{dayCounter++}")
                     {
                         Day = day,
-                        EndTime = jobSettings.EndTime,
-                        StartTime = jobSettings.StartTime
+                        EndTime = new DateTimeOffset(jobSettings.EndTime, nycOffsetForDay), // End time is expressed in NYC timezone. UTC offset can vary depending on the day
+                        StartTime = new DateTimeOffset(jobSettings.StartTime, TimeSpan.FromHours(8)) // Start time is expressed in HK timezone. UTC offset is fixed to +08:00
                     };
 
                     logger.Info($"Inserting new backtest job {job.Name} in dictionary database");
