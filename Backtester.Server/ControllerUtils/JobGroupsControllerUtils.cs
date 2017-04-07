@@ -66,7 +66,7 @@ namespace Backtester.Server.ControllerUtils
             logger.Info($"Querying backtest job group {groupId} from database");
 
             CancellationTokenSource cts = new CancellationTokenSource();
-            cts.CancelAfter(TimeSpan.FromSeconds(5));
+            cts.CancelAfter(TimeSpan.FromMinutes(5));
 
             var jobGroup = await actioner.Get(groupId, cts.Token);
 

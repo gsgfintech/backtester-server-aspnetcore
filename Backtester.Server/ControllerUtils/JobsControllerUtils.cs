@@ -61,7 +61,7 @@ namespace Backtester.Server.ControllerUtils
         internal async Task<List<BacktestJob>> GetMany(IEnumerable<string> jobIds)
         {
             CancellationTokenSource cts = new CancellationTokenSource();
-            cts.CancelAfter(TimeSpan.FromSeconds(5));
+            cts.CancelAfter(TimeSpan.FromMinutes(5));
 
             return await actioner.GetMany(jobIds, cts.Token);
         }
