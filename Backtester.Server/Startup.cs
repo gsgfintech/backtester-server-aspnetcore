@@ -11,6 +11,7 @@ using Capital.GSG.FX.Utils.Core.Logging;
 using System.IO;
 using Backtester.Server.Controllers.Info;
 using System;
+using Backtester.Server.BatchWorker.Connector;
 
 namespace Backtester.Server
 {
@@ -40,7 +41,7 @@ namespace Backtester.Server
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddBacktestDBServer(Configuration.GetSection("BacktestDBServer"));
-
+            services.AddBacktestBatchWorkerConnectors(Configuration.GetSection("BacktestServerBatchWorker"));
             services.AddControllerUtils(Configuration);
 
             // Add framework services.
@@ -99,10 +100,12 @@ namespace Backtester.Server
             string dbName = configSection.GetValue<string>("DBName");
             string host = configSection.GetValue<string>("Host");
             int port = configSection.GetValue<int>("Port");
+            string user = configSection.GetValue<string>("User");
+            string password = configSection.GetValue<string>("Password");
 
-            logger.Info($"Setting up MongoDB on {host}:{port}/{dbName}");
+            logger.Info($"Setting up MongoDB on {host}:{port}/{dbName} (user: {user})");
 
-            BacktestMongoDBServer backtestDbServer = new BacktestMongoDBServer(dbName, host, port);
+            BacktestMongoDBServer backtestDbServer = new BacktestMongoDBServer(dbName, host, port, username: user, password: password);
 
             services.AddSingleton((serviceProvider) =>
             {
@@ -130,6 +133,26 @@ namespace Backtester.Server
             });
         }
 
+        public static void AddBacktestBatchWorkerConnectors(this IServiceCollection services, IConfigurationSection backtestServerBatchWorkerSection)
+        {
+            string endpoint = backtestServerBatchWorkerSection.GetValue<string>("Endpoint");
+
+            services.AddSingleton((serviceProvider) =>
+            {
+                return new AllTradesConnector(endpoint);
+            });
+
+            services.AddSingleton((serviceProvider) =>
+            {
+                return new TradeGenericMetric2SeriesConnector(endpoint);
+            });
+
+            services.AddSingleton((serviceProvider) =>
+            {
+                return new UnrealizedPnlSeriesConnector(endpoint);
+            });
+        }
+
         public static void AddControllerUtils(this IServiceCollection services, IConfigurationRoot config)
         {
             services.AddSingleton((serviceProvider) =>
@@ -144,7 +167,11 @@ namespace Backtester.Server
                 var actioner = serviceProvider.GetService<BacktestJobGroupActioner>();
                 JobsControllerUtils jobsControllerUtils = serviceProvider.GetService<JobsControllerUtils>();
 
-                return new JobGroupsControllerUtils(actioner, jobsControllerUtils);
+                AllTradesConnector allTradesConnector = serviceProvider.GetService<AllTradesConnector>();
+                TradeGenericMetric2SeriesConnector tradeGenericMetric2SeriesConnector = serviceProvider.GetService<TradeGenericMetric2SeriesConnector>();
+                UnrealizedPnlSeriesConnector unrealizedPnlSeriesConnector = serviceProvider.GetService<UnrealizedPnlSeriesConnector>();
+
+                return new JobGroupsControllerUtils(actioner, jobsControllerUtils, allTradesConnector, tradeGenericMetric2SeriesConnector, unrealizedPnlSeriesConnector);
             });
 
             services.AddSingleton((serviceProvider) =>

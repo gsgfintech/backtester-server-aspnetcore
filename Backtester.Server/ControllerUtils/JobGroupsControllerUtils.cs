@@ -1,4 +1,5 @@
-﻿using Backtester.Server.Models;
+﻿using Backtester.Server.BatchWorker.Connector;
+using Backtester.Server.Models;
 using Backtester.Server.ViewModels.JobGroups;
 using Capital.GSG.FX.Backtest.DataTypes;
 using Capital.GSG.FX.Backtest.MongoConnector.Actioner;
@@ -25,14 +26,24 @@ namespace Backtester.Server.ControllerUtils
         private readonly BacktestJobGroupActioner actioner;
         private readonly JobsControllerUtils jobsControllerUtils;
 
+        private readonly AllTradesConnector allTradesConnector;
+        private readonly TradeGenericMetric2SeriesConnector tradeGenericMetric2SeriesConnector;
+        private readonly UnrealizedPnlSeriesConnector unrealizedPnlSeriesConnector;
+
         private List<string> stratsNames = null;
 
         private ConcurrentDictionary<string, List<BacktestJobGroup>> searchResults = new ConcurrentDictionary<string, List<BacktestJobGroup>>();
 
-        public JobGroupsControllerUtils(BacktestJobGroupActioner actioner, JobsControllerUtils jobsControllerUtils)
+        private ConcurrentDictionary<string, DateTimeOffset> jobGroupsWithFilesRequested = new ConcurrentDictionary<string, DateTimeOffset>();
+
+        public JobGroupsControllerUtils(BacktestJobGroupActioner actioner, JobsControllerUtils jobsControllerUtils, AllTradesConnector allTradesConnector, TradeGenericMetric2SeriesConnector tradeGenericMetric2SeriesConnector, UnrealizedPnlSeriesConnector unrealizedPnlSeriesConnector)
         {
             this.actioner = actioner;
             this.jobsControllerUtils = jobsControllerUtils;
+
+            this.allTradesConnector = allTradesConnector;
+            this.tradeGenericMetric2SeriesConnector = tradeGenericMetric2SeriesConnector;
+            this.unrealizedPnlSeriesConnector = unrealizedPnlSeriesConnector;
         }
 
         internal async Task<List<BacktestJobGroup>> GetActiveJobs()
@@ -70,15 +81,25 @@ namespace Backtester.Server.ControllerUtils
 
             var jobGroup = await actioner.Get(groupId, cts.Token);
 
-            if (jobGroup != null && !jobGroup.Jobs.IsNullOrEmpty() && BacktestJobStatusCodeUtils.InactiveStatus.Contains(jobGroup.GetStatus()) && jobGroup.Trades.IsNullOrEmpty())
+            if (jobGroup != null && !jobGroup.Jobs.IsNullOrEmpty() && BacktestJobStatusCodeUtils.InactiveStatus.Contains(jobGroup.GetStatus()) && jobGroup.Trades.IsNullOrEmpty() && !jobGroupsWithFilesRequested.ContainsKey(groupId))
             {
-                logger.Info($"Will compute trades list for newly inactive job group {groupId} and update in database");
-                var trades = await ComputeTradesList(jobGroup.Jobs.Keys);
-
-                if (!trades.IsNullOrEmpty())
+                if (jobGroupsWithFilesRequested.TryAdd(groupId, DateTimeOffset.Now))
                 {
-                    jobGroup.Trades = trades;
-                    await actioner.AddOrUpdate(groupId, jobGroup);
+                    logger.Info($"Will request to compute trade list and generate Excel files for newly inactive job group {groupId} and update in database");
+
+                    await allTradesConnector.PostFileRequest(groupId);
+
+                    Task.Delay(TimeSpan.FromSeconds(1)).Wait();
+
+                    await tradeGenericMetric2SeriesConnector.PostFileRequest(groupId);
+
+                    Task.Delay(TimeSpan.FromSeconds(1)).Wait();
+
+                    await unrealizedPnlSeriesConnector.PostUnrealizedPnlFileRequest(groupId);
+
+                    Task.Delay(TimeSpan.FromSeconds(1)).Wait();
+
+                    await unrealizedPnlSeriesConnector.PostUnrealizedPnlPerHourFileRequest(groupId);
                 }
             }
 
