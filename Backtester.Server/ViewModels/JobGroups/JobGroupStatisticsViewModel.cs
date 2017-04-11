@@ -49,7 +49,7 @@ namespace Backtester.Server.ViewModels.JobGroups
 
         [Display(Name = "Volume")]
         [DisplayFormat(DataFormatString = "{0:N0} USD")]
-        public int TotalVolume { get; set; }
+        public double TotalVolume { get; set; }
 
         [Display(Name = "Commissions")]
         [DisplayFormat(DataFormatString = "{0:N2} USD")]

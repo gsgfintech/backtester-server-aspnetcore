@@ -55,11 +55,11 @@ namespace Backtester.Server.Models
 
         [Display(Name = "Quantity")]
         [DisplayFormat(DataFormatString = "{0:N0}K")]
-        public int Size { get; set; }
+        public double Size { get; set; }
 
         [Display(Name = "Quantity (USD)")]
         [DisplayFormat(DataFormatString = "{0:N0}K")]
-        public int? SizeUsd { get; set; }
+        public double? SizeUsd { get; set; }
 
         [Display(Name = "Execution Time (HKT)")]
         [DisplayFormat(DataFormatString = "{0:dd/MM/yy HH:mm:ss}")]
@@ -97,7 +97,7 @@ namespace Backtester.Server.Models
                     RealizedPnlUsd = trade.RealizedPnlUsd,
                     Side = trade.Side,
                     Size = trade.Size / 1000,
-                    SizeUsd = trade.SizeUsd.HasValue ? trade.SizeUsd.Value / 1000 : (int?)null,
+                    SizeUsd = trade.SizeUsd.HasValue ? trade.SizeUsd.Value / 1000 : (double?)null,
                     Timestamp = trade.Timestamp.ToLocalTime(),
                     TradeId = trade.TradeId
                 };

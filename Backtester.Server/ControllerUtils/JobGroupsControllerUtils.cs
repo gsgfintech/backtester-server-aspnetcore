@@ -205,7 +205,7 @@ namespace Backtester.Server.ControllerUtils
             double standardDeviationPips = 0;
             int totalFees = 0;
             double totalPips = 0;
-            int totalVolume = 0; // TODO : need to add SizeUSD property on the trade object
+            double totalVolume = 0; // TODO : need to add SizeUSD property on the trade object
             BacktestTradeModel worstTradePips = null;
             BacktestTradeModel worstTradeUsd = null;
 
