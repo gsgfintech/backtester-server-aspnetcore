@@ -12,6 +12,7 @@ using System.IO;
 using Backtester.Server.Controllers.Info;
 using System;
 using Backtester.Server.BatchWorker.Connector;
+using Chimera.Extensions.Logging.Log4Net;
 
 namespace Backtester.Server
 {
@@ -59,7 +60,7 @@ namespace Backtester.Server
 
             GSGLoggerFactory.Instance.AddConsole(Configuration.GetSection("Logging"));
             GSGLoggerFactory.Instance.AddDebug();
-            GSGLoggerFactory.Instance.AddLog4Net();
+            GSGLoggerFactory.Instance.AddLog4Net(Configuration.GetSection("Log4net").Get<Log4NetSettings>());
 
             if (env.IsDevelopment())
             {
