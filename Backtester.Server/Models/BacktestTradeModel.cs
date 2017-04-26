@@ -144,18 +144,17 @@ namespace Backtester.Server.Models
 
         public static bool IsPositionOpening(this BacktestTradeModel trade)
         {
-            if (trade == null)
-                return false;
-
-            return (trade.OrderOrigin == OrderOrigin.PositionOpen) || (!trade.Duration.HasValue);
+            return trade != null && OrderOriginUtils.PositionOpenOrigins.Contains(trade.OrderOrigin);
         }
 
         public static bool IsPositionClosing(this BacktestTradeModel trade)
         {
-            if (trade == null)
-                return false;
+            return trade != null && OrderOriginUtils.PositionCloseOrigins.Contains(trade.OrderOrigin);
+        }
 
-            return !trade.IsPositionOpening();
+        public static bool IsPositionContinuing(this BacktestTradeModel trade)
+        {
+            return trade != null && OrderOriginUtils.PositionContinueOrigins.Contains(trade.OrderOrigin);
         }
 
         public static bool IsLong(this BacktestTradeModel trade)
