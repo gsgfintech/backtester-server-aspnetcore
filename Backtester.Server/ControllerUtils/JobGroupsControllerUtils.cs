@@ -208,6 +208,7 @@ namespace Backtester.Server.ControllerUtils
             double totalVolume = 0; // TODO : need to add SizeUSD property on the trade object
             BacktestTradeModel worstTradePips = null;
             BacktestTradeModel worstTradeUsd = null;
+            List<JobGroupPerCrossStatisticsViewModel> perCrossStats;
 
             var trades = await GetTrades(groupId);
 
@@ -310,7 +311,11 @@ namespace Backtester.Server.ControllerUtils
                 if (grossLoss != 0 && grossProfit != 0)
                     profitFactor = Math.Abs(grossProfit) / Math.Abs(grossLoss);
                 #endregion
+
+                perCrossStats = ComputePerCrossStats(trades);
             }
+            else
+                perCrossStats = new List<JobGroupPerCrossStatisticsViewModel>();
 
             return new JobGroupStatisticsViewModel(groupId)
             {
@@ -327,6 +332,7 @@ namespace Backtester.Server.ControllerUtils
                 LongsWon = longsWon,
                 MaxDrawdown = maxDrawdown,
                 MaxDrawdownDuration = maxDrawdownDuration,
+                PerCrossStatistics = perCrossStats,
                 ProfitFactor = profitFactor,
                 SharpeRatio = sharpeRatio,
                 ShortsCount = shortsCount,
@@ -339,6 +345,21 @@ namespace Backtester.Server.ControllerUtils
                 WorstTradePips = worstTradePips,
                 WorstTradeUsd = worstTradeUsd
             };
+        }
+
+        private List<JobGroupPerCrossStatisticsViewModel> ComputePerCrossStats(List<BacktestTradeModel> trades)
+        {
+            var groupings = trades.GroupBy(t => t.Cross);
+
+            return groupings.Select(g => new JobGroupPerCrossStatisticsViewModel()
+            {
+                Pair = g.Key,
+                TotalFeesUsd = g.Select(t => t.CommissionUsd ?? 0).Sum(),
+                TotalGrossUsd = g.Select(t => t.RealizedPnlUsd ?? 0).Sum(),
+                TotalPips = g.Select(t => t.RealizedPnlPips ?? 0).Sum(),
+                TradesCount = g.Count(t => t.IsPositionClosing() || t.IsPositionContinuing()),
+                Volume = g.Select(t => t.SizeUsd ?? 0).Sum() * 1000
+            }).OrderBy(c => c.Pair).ToList();
         }
 
         private class BacktestJobGroupCreationDateComparer : IComparer<BacktestJobGroup>

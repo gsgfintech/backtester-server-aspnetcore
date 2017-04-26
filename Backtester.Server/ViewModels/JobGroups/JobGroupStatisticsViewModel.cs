@@ -1,5 +1,6 @@
 ﻿using Backtester.Server.Models;
 using Capital.GSG.FX.Backtest.DataTypes;
+using Capital.GSG.FX.Data.Core.ContractData;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -127,9 +128,38 @@ namespace Backtester.Server.ViewModels.JobGroups
         [DisplayFormat(DataFormatString = @"{0:hh\:mm\:ss}")]
         public TimeSpan MaxDrawdownDuration { get; set; }
 
+        public List<JobGroupPerCrossStatisticsViewModel> PerCrossStatistics { get; set; }
+
         public JobGroupStatisticsViewModel(string jobGroupId)
         {
             JobGroupId = jobGroupId;
         }
+    }
+
+    public class JobGroupPerCrossStatisticsViewModel
+    {
+        public Cross Pair { get; set; }
+
+        [Display(Name = "Trades")]
+        public int TradesCount { get; set; }
+
+        [DisplayFormat(DataFormatString = "{0:N0} USD")]
+        public double Volume { get; set; }
+
+        [Display(Name = "Gross")]
+        [DisplayFormat(DataFormatString = "{0:N2} USD")]
+        public double TotalGrossUsd { get; set; }
+
+        [Display(Name = "Commissions")]
+        [DisplayFormat(DataFormatString = "{0:N2} USD")]
+        public double TotalFeesUsd { get; set; }
+
+        [Display(Name = "Net")]
+        [DisplayFormat(DataFormatString = "{0:N2} USD")]
+        public double TotalNet => TotalGrossUsd - TotalFeesUsd;
+
+        [Display(Name = "Pips")]
+        [DisplayFormat(DataFormatString = "{0:N1} pips")]
+        public double TotalPips { get; set; }
     }
 }
