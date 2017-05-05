@@ -23,11 +23,11 @@
     <None Remove="Properties\PublishProfiles\FolderProfile.pubxml" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Backtest.DataTypes" Version="4.12.0" />
+    <PackageReference Include="Backtest.DataTypes" Version="4.12.1" />
     <PackageReference Include="Backtest.MongoConnector" Version="5.11.1" />
     <PackageReference Include="Backtest.ServerBatchWorker.Connector" Version="1.0.0" />
-    <PackageReference Include="Capital.GSG.FX.Trading.Strategy" Version="5.3.3" />
-    <PackageReference Include="Capital.GSG.FX.Utils.Core" Version="1.3.0" />
+    <PackageReference Include="Capital.GSG.FX.Trading.Strategy" Version="5.4.0" />
+    <PackageReference Include="Capital.GSG.FX.Utils.Core" Version="1.4.1" />
     <PackageReference Include="Capital.GSG.FX.Utils.Core.Logging" Version="2.2.1" />
     <PackageReference Include="chimera.extensions.logging.log4net" Version="1.1.1" />
     <PackageReference Include="EPPlus.Core" Version="1.3.2" />

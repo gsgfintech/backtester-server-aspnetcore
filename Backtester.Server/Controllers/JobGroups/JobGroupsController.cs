@@ -20,11 +20,13 @@ namespace Backtester.Server.Controllers.JobGroups
         private readonly ILogger logger = GSGLoggerFactory.Instance.CreateLogger<JobGroupsController>();
 
         private readonly JobGroupsControllerUtils utils;
+        private readonly JobsControllerUtils jobsControllerUtils;
         private readonly TradeGenericMetric2SeriesControllerUtils tradeGenericMetric2SeriesControllerUtils;
         private readonly UnrealizedPnlSeriesControllerUtils unrealizedPnlSeriesControllerUtils;
 
-        public JobGroupsController(JobGroupsControllerUtils utils, UnrealizedPnlSeriesControllerUtils unrealizedPnlSeriesControllerUtils, TradeGenericMetric2SeriesControllerUtils tradeGenericMetric2SeriesControllerUtils)
+        public JobGroupsController(JobGroupsControllerUtils utils, UnrealizedPnlSeriesControllerUtils unrealizedPnlSeriesControllerUtils, TradeGenericMetric2SeriesControllerUtils tradeGenericMetric2SeriesControllerUtils, JobsControllerUtils jobsControllerUtils)
         {
+            this.jobsControllerUtils = jobsControllerUtils;
             this.utils = utils;
             this.tradeGenericMetric2SeriesControllerUtils = tradeGenericMetric2SeriesControllerUtils;
             this.unrealizedPnlSeriesControllerUtils = unrealizedPnlSeriesControllerUtils;
@@ -39,7 +41,19 @@ namespace Backtester.Server.Controllers.JobGroups
         {
             var group = await utils.Get(groupId);
 
-            return View(new JobGroupInfoViewModel(group));
+            var viewModel = new JobGroupInfoViewModel(group);
+
+            foreach (var kvm in viewModel.JobGroup.Jobs)
+            {
+                var pnlResult = await jobsControllerUtils.GetNetRealizedPnl(kvm.Key);
+
+                if (!pnlResult.Success)
+                    logger.Error($"Failed to get net realized pnl for job {kvm.Key}: {pnlResult.Message}");
+
+                viewModel.JobGroup.Jobs[kvm.Key].NetRealizedPnlUsd = pnlResult.NetRealizedPnlUsd;
+            }
+
+            return View(viewModel);
         }
 
         public async Task<IActionResult> AllTrades(string groupId)

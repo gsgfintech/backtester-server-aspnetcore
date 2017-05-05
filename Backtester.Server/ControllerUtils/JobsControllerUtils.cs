@@ -39,6 +39,21 @@ namespace Backtester.Server.ControllerUtils
             return await actioner.Get(jobId, cts.Token);
         }
 
+        internal async Task<(bool Success, string Message, double? NetRealizedPnlUsd)> GetNetRealizedPnl(string jobId)
+        {
+            var job = await Get(jobId);
+
+            if (job == null)
+                return (false, $"Failed to load job {jobId}", null);
+
+            if (job.Output.Trades.IsNullOrEmpty())
+                return (true, $"Job {jobId} has no trade", null);
+
+            double pnl = job.Output.Trades.Select(t => t.Value.RealizedPnlUsd ?? 0).Sum();
+
+            return (true, "", pnl);
+        }
+
         internal GenericActionResult<string> GetNextPendingJobName()
         {
             if (pendingJobs.IsEmpty)

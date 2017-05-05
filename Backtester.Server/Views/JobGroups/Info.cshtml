@@ -148,6 +148,7 @@
                     {
                         <td></td>
                     }
+                    <td class="@(kvp.Value.NetRealizedPnlUsd < 0 ? "bg-danger text-right" : kvp.Value.NetRealizedPnlUsd > 0 ? "bg-success text-right" : "text-right")">@Html.DisplayFor(m => kvp.Value.NetRealizedPnlUsd)</td>
                 </tr>
             }
         </table>

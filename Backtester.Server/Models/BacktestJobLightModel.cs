@@ -21,6 +21,10 @@ namespace Backtester.Server.Models
         public bool UsedHistoMarketData { get; set; }
 
         public string Worker { get; set; }
+
+        [Display(Name = "Realized PnL (USD)")]
+        [DisplayFormat(DataFormatString = "{0:N2} USD")]
+        public double? NetRealizedPnlUsd { get; set; }
     }
 
     public static class BacktestJobLightModelExtensions
