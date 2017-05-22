@@ -41,6 +41,9 @@ namespace Backtester.Server.Models
         [DisplayFormat(DataFormatString = "{0:dd/MM/yy}")]
         public DateTimeOffset EndDate { get; set; }
 
+        [Display(Name = "Time Frame")]
+        public string TimeFrame => $"{StartDate:dd/MM/yy} - {EndDate:dd/MM/yy}";
+
         [Display(Name = "Test Start Time (HKT)")]
         [DisplayFormat(DataFormatString = "{0:HH:mm}")]
         public DateTimeOffset StartTime { get; set; }
@@ -58,6 +61,10 @@ namespace Backtester.Server.Models
 
         [Display(Name = "Use historical database if no data is available in the IB database")]
         public bool UseHistoDatabase { get; set; }
+
+        [Display(Name = "PnL (USD)")]
+        [DisplayFormat(DataFormatString = "{0:N2} USD")]
+        public double? NetRealizedPnlUsd => !Jobs.IsNullOrEmpty() ? Jobs.Select(j => j.Value.NetRealizedPnlUsd ?? 0).Sum() : (double?)null;
     }
 
     public class BacktestJobStrategyModel
