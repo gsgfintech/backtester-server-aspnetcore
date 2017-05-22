@@ -13,6 +13,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -153,10 +154,7 @@ namespace Backtester.Server.ControllerUtils
                         result.Settings.Parameters = properties;
                         result.Success = true;
 
-                        do
-                        {
-                            result.Settings.JobName = GetNextJobName(result.Settings.StrategyName, result.Settings.StrategyVersion);
-                        } while (!jobs.TryAdd(result.Settings.JobName, result.Settings));
+                        AssignJobNameAndAddToDictionary(result.Settings);
 
                         return result;
                     }
@@ -193,6 +191,16 @@ namespace Backtester.Server.ControllerUtils
 
                 return result;
             }
+        }
+
+        internal string AssignJobNameAndAddToDictionary(BacktestJobSettingsModel settings)
+        {
+            do
+            {
+                settings.JobName = GetNextJobName(settings.StrategyName, settings.StrategyVersion);
+            } while (!jobs.TryAdd(settings.JobName, settings));
+
+            return settings.JobName;
         }
 
         private string GetNextJobName(string stratName, string stratVersion)
@@ -239,10 +247,7 @@ namespace Backtester.Server.ControllerUtils
                         Success = true
                     };
 
-                    do
-                    {
-                        result.Settings.JobName = GetNextJobName(result.Settings.StrategyName, result.Settings.StrategyVersion);
-                    } while (!jobs.TryAdd(result.Settings.JobName, result.Settings));
+                    result.Settings.JobName = AssignJobNameAndAddToDictionary(result.Settings);
 
                     return result;
                 }
@@ -300,14 +305,49 @@ namespace Backtester.Server.ControllerUtils
             });
         }
 
-        internal async Task<CreateJobSubmitViewModel> CreateJob(string jobName)
+        internal async Task<(bool Success, string Message, List<string> JobNames)> CreateJobs(IEnumerable<string> jobNames)
         {
+            (bool Success, string Message, List<string> JobNames) result = (true, null, null);
+
+            if(jobNames.IsNullOrEmpty())
+            {
+                result.Message = $"Unable to submit jobs: missing or empty parameter {jobNames}";
+                return result;
+            }
+
+            result.JobNames = jobNames.ToList();
+
+            StringBuilder sb = new StringBuilder();
+
+            foreach (var jobName in jobNames)
+            {
+                var localResult = await CreateJob(jobName);
+
+                if (!localResult.Success)
+                {
+                    result.Success = false;
+                    sb.AppendLine($"Failed to create job {jobName}: {localResult.Message}");
+                }
+            }
+
+            result.Message = sb.ToString();
+
+            return result;
+        }
+
+        internal async Task<(bool Success, string Message, string JobName)> CreateJob(string jobName)
+        {
+            (bool Success, string Message, string JobName) result = (false, null, jobName);
+
             try
             {
                 var jobSettings = GetJobSettings(jobName);
 
                 if (jobSettings == null)
-                    return new CreateJobSubmitViewModel(jobName, false, $"Failed to get settings for job {jobName}");
+                {
+                    result.Message = $"Failed to get settings for job {jobName}";
+                    return result;
+                }
 
                 if (string.IsNullOrEmpty(jobSettings?.StrategyName))
                     throw new ArgumentNullException("StrategyName");
@@ -377,28 +417,32 @@ namespace Backtester.Server.ControllerUtils
 
                 if (!jobGroup.Jobs.IsNullOrEmpty() && failed.IsNullOrEmpty())
                 {
-                    var result = await jobGroupsControllerUtils.AddJobGroup(jobGroup);
+                    var addResult = await jobGroupsControllerUtils.AddJobGroup(jobGroup);
 
-                    if (result.Success)
-                        return new CreateJobSubmitViewModel(jobName, true, $"Successfully split backtest job {jobName} into {jobGroup.Jobs.Count} subjobs ({string.Join(", ", jobGroup.Jobs.Keys)}) and submitted.");
+                    if (addResult.Success)
+                    {
+                        result.Success = true;
+                        result.Message = $"Successfully split backtest job {jobName} into {jobGroup.Jobs.Count} subjobs ({string.Join(", ", jobGroup.Jobs.Keys)}) and submitted.";
+                    }
                     else
-                        return new CreateJobSubmitViewModel(jobName, false, $"Failed to submit group job {jobName}: {result.Message}");
+                        result.Message = $"Failed to submit group job {jobName}: {result.Message}";
                 }
                 else
-                    return new CreateJobSubmitViewModel(jobName, false, $"Failed to submit one or more subjobs: {string.Join(", ", failed.Select(f => f.Message))}");
+                    result.Message = $"Failed to submit one or more subjobs: {string.Join(", ", failed.Select(f => f.Message))}";
+
+                return result;
             }
             catch (ArgumentNullException ex)
             {
-                string err = $"Failed to insert backtest job: missing or invalid parameter {ex.ParamName}";
-                logger.Error(err, ex);
-
-                return new CreateJobSubmitViewModel(jobName, false, err);
+                result.Message = $"Failed to insert backtest job: missing or invalid parameter {ex.ParamName}";
+                logger.Error(result.Message);
+                return result;
             }
             catch (Exception ex)
             {
                 logger.Error("Failed to insert backtest job", ex);
-
-                return new CreateJobSubmitViewModel(jobName, false, $"Failed to insert backtest job: {ex.Message}");
+                result.Message = $"Failed to insert backtest job: {ex.Message}";
+                return result;
             }
         }
     }

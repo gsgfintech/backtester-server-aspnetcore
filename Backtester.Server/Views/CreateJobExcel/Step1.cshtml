@@ -1,0 +1,25 @@
+﻿@using Backtester.Server.ViewModels.CreateJob
+
+@model Backtester.Server.ViewModels.CreateJobExcel.CreateJobExcelStep1ViewModel
+
+@{
+    ViewData["Title"] = "Excel Job Definition";
+}
+
+<div class="row">
+    <div class="col-xs-12">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4>Excel Job Definition File</h4>
+            </div>
+            <div class="panel-body">
+                <form class="form-inline" method="post" enctype="multipart/form-data" asp-controller="CreateJobExcel" asp-action="Step1Submit">
+                    <div class="form-group">
+                        <input class="form-control" type="file" name="files" />
+                        <button class="btn btn-primary" type="submit">Upload Excel job definition file</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

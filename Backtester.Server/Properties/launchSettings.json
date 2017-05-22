@@ -21,7 +21,7 @@
       "commandName": "Project",
       "commandLineArgs": "\"https://localhost:44379\" \"C:\\gsg.capital.pfx\" guillaume",
       "launchBrowser": true,
-      "launchUrl": "https://localhost:44379",
+      "launchUrl": "http://localhost:19458",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       },

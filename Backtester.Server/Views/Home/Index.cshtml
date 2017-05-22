@@ -12,6 +12,7 @@
     <div class="col-xs-12">
         <div style="margin-top: 0.8em; margin-bottom: 0.8em">
             <a class="btn btn-success" asp-controller="CreateJob" asp-action="Step1"><span class="glyphicon glyphicon-plus-sign"></span> Create A New Job</a>
+            <a class="btn btn-success" asp-controller="CreateJobExcel" asp-action="Step1"><span class="glyphicon glyphicon-plus-sign"></span> Create New Jobs From Excel File</a>
         </div>
         <div id="activeJobs">
             @await Component.InvokeAsync("JobGroupsList", new { listType = Active })

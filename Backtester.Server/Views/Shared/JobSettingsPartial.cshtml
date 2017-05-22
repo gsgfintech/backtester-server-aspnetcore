@@ -1,0 +1,69 @@
+﻿@model Backtester.Server.Models.BacktestJobSettingsModel
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        Strategy
+    </div>
+    <table class="table">
+        <tr>
+            <th>@Html.DisplayNameFor(m => Model.OriginalFileName)</th>
+            <td>@Html.DisplayFor(m => Model.OriginalFileName)</td>
+        </tr>
+        <tr>
+            <th>@Html.DisplayNameFor(m => Model.StrategyName)</th>
+            <td>@Html.DisplayFor(m => Model.StrategyName)</td>
+        </tr>
+        <tr>
+            <th>@Html.DisplayNameFor(m => Model.StrategyVersion)</th>
+            <td>@Html.DisplayFor(m => Model.StrategyVersion)</td>
+        </tr>
+        <tr>
+            <th>@Html.DisplayNameFor(m => Model.CrossesStr)</th>
+            <td>@Html.DisplayFor(m => Model.CrossesStr)</td>
+        </tr>
+    </table>
+</div>
+<div class="panel panel-default">
+    <div class="panel-heading">
+        @Html.DisplayNameFor(m => Model.Parameters)
+    </div>
+    @if (Model.Parameters?.Count > 0)
+    {
+        <table class="table">
+            @foreach (var parameter in Model.Parameters)
+            {
+                <tr>
+                    <th>@Html.DisplayFor(m => parameter.Name)</th>
+                    <td>@Html.DisplayFor(m => parameter.Value)</td>
+                </tr>
+            }
+        </table>
+    }
+</div>
+<div class="panel panel-default">
+    <div class="panel-heading">
+        Time Range
+    </div>
+    <table class="table">
+        <tr>
+            <th>@Html.DisplayNameFor(m => Model.StartDate)</th>
+            <td>@Html.DisplayFor(m => Model.StartDate)</td>
+        </tr>
+        <tr>
+            <th>@Html.DisplayNameFor(m => Model.EndDate)</th>
+            <td>@Html.DisplayFor(m => Model.EndDate)</td>
+        </tr>
+        <tr>
+            <th>@Html.DisplayNameFor(m => Model.TotalDays)</th>
+            <td>@Html.DisplayFor(m => Model.TotalDays)</td>
+        </tr>
+        <tr>
+            <th>@Html.DisplayNameFor(m => Model.StartTime)</th>
+            <td>@Html.DisplayFor(m => Model.StartTime)</td>
+        </tr>
+        <tr>
+            <th>@Html.DisplayNameFor(m => Model.EndTime)</th>
+            <td>@Html.DisplayFor(m => Model.EndTime)</td>
+        </tr>
+    </table>
+</div>

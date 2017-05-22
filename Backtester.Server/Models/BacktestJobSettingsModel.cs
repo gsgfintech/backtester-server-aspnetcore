@@ -3,6 +3,7 @@ using Capital.GSG.FX.Utils.Core;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
 
 namespace Backtester.Server.Models
 {
@@ -45,6 +46,10 @@ namespace Backtester.Server.Models
         [DisplayFormat(DataFormatString = "{0:dd/MM/yy}")]
         [DataType(DataType.Date)]
         public DateTime EndDate { get; set; }
+
+        [Display(Name = "Total Business Days")]
+        [DisplayFormat(DataFormatString = "{0:N0}")]
+        public int TotalDays => DateTimeUtils.EachBusinessDay(StartDate, EndDate).Count();
 
         [Display(Name = "Begin Time (HKT)")]
         [DisplayFormat(DataFormatString = "{0:HH:mm}")]

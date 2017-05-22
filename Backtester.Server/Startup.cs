@@ -13,6 +13,7 @@ using Backtester.Server.Controllers.Info;
 using System;
 using Backtester.Server.BatchWorker.Connector;
 using Chimera.Extensions.Logging.Log4Net;
+using Backtester.Server.Controllers.CreateJobExcel;
 
 namespace Backtester.Server
 {
@@ -196,6 +197,15 @@ namespace Backtester.Server
                 JobGroupsControllerUtils jobGroupsControllerUtils = serviceProvider.GetService<JobGroupsControllerUtils>();
 
                 return new CreateJobControllerUtils(stratFilesUploadDirectory, jobsControllerUtils, jobGroupsControllerUtils);
+            });
+
+            services.AddSingleton((serviceProvider) =>
+            {
+                CreateJobControllerUtils createJobControllerUtils = serviceProvider.GetService<CreateJobControllerUtils>();
+                string excelJobFilesUploadDirectory = config.GetValue<string>("ExcelJobFileDropDir") ?? Path.GetTempPath();
+                string stratFilesUploadDirectory = config.GetValue<string>("StratFileDropDir") ?? Path.GetTempPath();
+
+                return new CreateJobExcelControllerUtils(createJobControllerUtils, excelJobFilesUploadDirectory, stratFilesUploadDirectory);
             });
 
             services.AddSingleton((serviceProvider) =>
