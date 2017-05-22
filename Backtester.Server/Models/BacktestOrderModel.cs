@@ -33,7 +33,7 @@ namespace Backtester.Server.Models
         public OrderSide Side { get; set; }
 
         [DisplayFormat(DataFormatString = "{0:N0}K")]
-        public int Quantity { get; set; }
+        public double Quantity { get; set; }
 
         public OrderType Type { get; set; }
 

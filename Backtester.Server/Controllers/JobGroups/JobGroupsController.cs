@@ -43,15 +43,15 @@ namespace Backtester.Server.Controllers.JobGroups
 
             var viewModel = new JobGroupInfoViewModel(group);
 
-            foreach (var kvm in viewModel.JobGroup.Jobs)
-            {
-                var pnlResult = await jobsControllerUtils.GetNetRealizedPnl(kvm.Key);
+            //foreach (var kvm in viewModel.JobGroup.Jobs)
+            //{
+            //    var pnlResult = await jobsControllerUtils.GetNetRealizedPnl(kvm.Key);
 
-                if (!pnlResult.Success)
-                    logger.Error($"Failed to get net realized pnl for job {kvm.Key}: {pnlResult.Message}");
+            //    if (!pnlResult.Success)
+            //        logger.Error($"Failed to get net realized pnl for job {kvm.Key}: {pnlResult.Message}");
 
-                viewModel.JobGroup.Jobs[kvm.Key].NetRealizedPnlUsd = pnlResult.NetRealizedPnlUsd;
-            }
+            //    viewModel.JobGroup.Jobs[kvm.Key].NetRealizedPnlUsd = pnlResult.NetRealizedPnlUsd;
+            //}
 
             return View(viewModel);
         }

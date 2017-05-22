@@ -39,6 +39,7 @@ namespace Backtester.Server.Models
                 ActualStartTime = job.ActualStartTime,
                 CompletionTime = job.CompletionTime,
                 DayStr = job.DayStr,
+                NetRealizedPnlUsd = job.NetRealizedPnlUsd,
                 Progress = job.Progress,
                 StatusCode = job.StatusCode,
                 UsedHistoMarketData = job.UsedHistoData,
