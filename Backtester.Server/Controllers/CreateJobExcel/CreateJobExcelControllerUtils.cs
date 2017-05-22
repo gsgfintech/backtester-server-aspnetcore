@@ -39,7 +39,7 @@ namespace Backtester.Server.Controllers.CreateJobExcel
 
             string fileExt = uploadedFileName.Substring(uploadedFileName.Length - 4);
 
-            return Path.Combine(excelJobFilesUploadDirectory, $"{uploadedFileName.Substring(0, uploadedFileName.Length - 4)}.{randomSuffix}{fileExt}");
+            return Path.Combine(excelJobFilesUploadDirectory, $"{uploadedFileName.Substring(0, uploadedFileName.Length - 4)}.{randomSuffix}.{fileExt}");
         }
 
         public (bool Success, string Message, List<BacktestJobSettingsModel> JobsSettings) ReadFile(string filePath)
