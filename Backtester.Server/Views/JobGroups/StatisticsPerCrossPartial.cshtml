@@ -1,34 +1,43 @@
-﻿@model IEnumerable<Backtester.Server.ViewModels.JobGroups.JobGroupPerCrossStatisticsViewModel>
+﻿@model Backtester.Server.ViewModels.JobGroups.JobGroupPerCrossStatisticsPartialViewModel
 
-<div class="row">
-    <div class="col-xs-12">
-        <div class="panel panel-default">
-            <div class="panel-heading">
-                <h4>Per Cross Drilldown</h4>
-            </div>
-            <table class="table">
-                <tr>
-                    <th class="text-right"></th>
-                    <th class="text-right">@Html.DisplayNameFor(m => Model.First().TradesCount)</th>
-                    <th class="text-right">@Html.DisplayNameFor(m => Model.First().Volume)</th>
-                    <th class="text-right">@Html.DisplayNameFor(m => Model.First().TotalPips)</th>
-                    <th class="text-right">@Html.DisplayNameFor(m => Model.First().TotalGrossUsd)</th>
-                    <th class="text-right">@Html.DisplayNameFor(m => Model.First().TotalFeesUsd)</th>
-                    <th class="text-right">@Html.DisplayNameFor(m => Model.First().TotalNet)</th>
-                </tr>
-                @foreach(var trade in Model)
-                {
+    <div class="row">
+        <div class="col-xs-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h4>Per Cross Drilldown</h4>
+                </div>
+                <table class="table">
                     <tr>
-                        <th>@Html.DisplayFor(m => trade.Pair)</th>
-                        <td class="text-right">@Html.DisplayFor(m => trade.TradesCount)</td>
-                        <td class="text-right">@Html.DisplayFor(m => trade.Volume)</td>
-                        <td class="text-right">@Html.DisplayFor(m => trade.TotalPips)</td>
-                        <td class="text-right">@Html.DisplayFor(m => trade.TotalGrossUsd)</td>
-                        <td class="text-right">@Html.DisplayFor(m => trade.TotalFeesUsd)</td>
-                        <td class="text-right">@Html.DisplayFor(m => trade.TotalNet)</td>
+                        <th class="text-right"></th>
+                        <th class="text-right">@Html.DisplayNameFor(m => Model.PerCrossStatistics.First().TradesCount)</th>
+                        <th class="text-right">@Html.DisplayNameFor(m => Model.PerCrossStatistics.First().Volume)</th>
+                        <th class="text-right">@Html.DisplayNameFor(m => Model.PerCrossStatistics.First().TotalPips)</th>
+                        <th class="text-right">@Html.DisplayNameFor(m => Model.PerCrossStatistics.First().TotalGrossUsd)</th>
+                        <th class="text-right">@Html.DisplayNameFor(m => Model.PerCrossStatistics.First().TotalFeesUsd)</th>
+                        <th class="text-right">@Html.DisplayNameFor(m => Model.PerCrossStatistics.First().TotalNet)</th>
                     </tr>
-                }
-            </table>
+                    @foreach (var trade in Model.PerCrossStatistics)
+                    {
+                        <tr>
+                            <th>@Html.DisplayFor(m => trade.Pair)</th>
+                            <td class="text-right">@Html.DisplayFor(m => trade.TradesCount)</td>
+                            <td class="text-right">@Html.DisplayFor(m => trade.Volume)</td>
+                            <td class="text-right">@Html.DisplayFor(m => trade.TotalPips)</td>
+                            <td class="text-right">@Html.DisplayFor(m => trade.TotalGrossUsd)</td>
+                            <td class="text-right">@Html.DisplayFor(m => trade.TotalFeesUsd)</td>
+                            <td class="text-right">@Html.DisplayFor(m => trade.TotalNet)</td>
+                        </tr>
+                    }
+                    <tr>
+                        <th>Total</th>
+                        <th class="text-right">@Html.DisplayFor(m => Model.TotalTradesCount)</th>
+                        <th class="text-right">@Html.DisplayFor(m => Model.TotalVolume)</th>
+                        <th class="text-right">@Html.DisplayFor(m => Model.TotalPips)</th>
+                        <th class="text-right">@Html.DisplayFor(m => Model.TotalGrossUsd)</th>
+                        <th class="text-right">@Html.DisplayFor(m => Model.TotalFeesUsd)</th>
+                        <th class="text-right">@Html.DisplayFor(m => Model.TotalNetUsd)</th>
+                    </tr>
+                </table>
+            </div>
         </div>
     </div>
-</div>

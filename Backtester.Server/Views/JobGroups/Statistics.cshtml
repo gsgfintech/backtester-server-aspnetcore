@@ -93,7 +93,7 @@
         </div>
     </div>
 </div>
-@if (Model.PerCrossStatistics?.Count > 0)
+@if (Model.PerCrossStatistics.PerCrossStatistics?.Count > 0)
 {
     @Html.Partial("StatisticsPerCrossPartial", Model.PerCrossStatistics)
 }

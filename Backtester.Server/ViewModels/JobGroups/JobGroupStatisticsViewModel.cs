@@ -1,6 +1,7 @@
 ﻿using Backtester.Server.Models;
 using Capital.GSG.FX.Backtest.DataTypes;
 using Capital.GSG.FX.Data.Core.ContractData;
+using Capital.GSG.FX.Utils.Core;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -128,12 +129,34 @@ namespace Backtester.Server.ViewModels.JobGroups
         [DisplayFormat(DataFormatString = @"{0:hh\:mm\:ss}")]
         public TimeSpan MaxDrawdownDuration { get; set; }
 
-        public List<JobGroupPerCrossStatisticsViewModel> PerCrossStatistics { get; set; }
+        public JobGroupPerCrossStatisticsPartialViewModel PerCrossStatistics { get; set; }
 
         public JobGroupStatisticsViewModel(string jobGroupId)
         {
             JobGroupId = jobGroupId;
         }
+    }
+
+    public class JobGroupPerCrossStatisticsPartialViewModel
+    {
+        public List<JobGroupPerCrossStatisticsViewModel> PerCrossStatistics { get; set; }
+
+        public int TotalTradesCount => !PerCrossStatistics.IsNullOrEmpty() ? PerCrossStatistics.Select(t => t.TradesCount).Sum() : 0;
+
+        [DisplayFormat(DataFormatString = "{0:N0} USD")]
+        public double TotalVolume => !PerCrossStatistics.IsNullOrEmpty() ? PerCrossStatistics.Select(t => t.Volume).Sum() : 0;
+
+        [DisplayFormat(DataFormatString = "{0:N2} USD")]
+        public double TotalGrossUsd => !PerCrossStatistics.IsNullOrEmpty() ? PerCrossStatistics.Select(t => t.TotalGrossUsd).Sum() : 0;
+
+        [DisplayFormat(DataFormatString = "{0:N2} USD")]
+        public double TotalFeesUsd => !PerCrossStatistics.IsNullOrEmpty() ? PerCrossStatistics.Select(t => t.TotalFeesUsd).Sum() : 0;
+
+        [DisplayFormat(DataFormatString = "{0:N2} USD")]
+        public double TotalNetUsd => !PerCrossStatistics.IsNullOrEmpty() ? PerCrossStatistics.Select(t => t.TotalNet).Sum() : 0;
+
+        [DisplayFormat(DataFormatString = "{0:N1} pips")]
+        public double TotalPips => !PerCrossStatistics.IsNullOrEmpty() ? PerCrossStatistics.Select(t => t.TotalPips).Sum() : 0;
     }
 
     public class JobGroupPerCrossStatisticsViewModel

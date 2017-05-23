@@ -90,7 +90,14 @@ namespace Backtester.Server.Controllers.CreateJob
 
         public async Task<IActionResult> Submit(string jobName)
         {
-            return View(await createJobControllerUtils.CreateJob(jobName));
+            var result = await createJobControllerUtils.CreateJob(jobName);
+
+            return View(new CreateJobSubmitViewModel()
+            {
+                JobName = result.JobName,
+                Message = result.Message,
+                Success = result.Success
+            });
         }
     }
 }

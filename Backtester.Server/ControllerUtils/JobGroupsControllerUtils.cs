@@ -332,7 +332,7 @@ namespace Backtester.Server.ControllerUtils
                 LongsWon = longsWon,
                 MaxDrawdown = maxDrawdown,
                 MaxDrawdownDuration = maxDrawdownDuration,
-                PerCrossStatistics = perCrossStats,
+                PerCrossStatistics = new JobGroupPerCrossStatisticsPartialViewModel() { PerCrossStatistics = perCrossStats },
                 ProfitFactor = profitFactor,
                 SharpeRatio = sharpeRatio,
                 ShortsCount = shortsCount,
