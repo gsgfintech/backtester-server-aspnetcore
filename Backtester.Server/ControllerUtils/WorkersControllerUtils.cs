@@ -6,6 +6,7 @@ using Microsoft.Extensions.Logging;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Backtester.Server.ControllerUtils
 {
@@ -66,6 +67,34 @@ namespace Backtester.Server.ControllerUtils
             });
 
             return new GenericActionResult(true, $"Updated status of worker {workerName}");
+        }
+
+        internal async Task<(bool Success, string Message)> AcceptJobs(string workerName)
+        {
+            await Task.CompletedTask;
+
+            return (true, "Not yet implemented");
+        }
+
+        internal async Task<(bool Success, string Message)> RejectJobs(string workerName)
+        {
+            await Task.CompletedTask;
+
+            return (true, "Not yet implemented");
+        }
+
+        internal async Task<(bool Success, string Message)> Start(string workerName)
+        {
+            await Task.CompletedTask;
+
+            return (true, "Not yet implemented");
+        }
+
+        internal async Task<(bool Success, string Message)> Stop(string workerName)
+        {
+            await Task.CompletedTask;
+
+            return (true, "Not yet implemented");
         }
     }
 }

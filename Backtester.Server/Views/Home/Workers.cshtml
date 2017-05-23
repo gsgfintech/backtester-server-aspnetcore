@@ -5,6 +5,11 @@
 }
 
 <div class="row">
+    <div class="col-xs-12" id="alertholder">
+    </div>
+</div>
+
+<div class="row">
     <div class="col-xs-12">
         <div class="panel panel-default">
             <div class="panel-heading">
@@ -26,15 +31,15 @@
                             <th>@Html.DisplayFor(m => worker.Name)</th>
                             <td class="@(worker.IsAcceptingJobs ? "bg-success" : "bg-danger")">
                                 <div class="btn-group btn-group-xs">
-                                    <button class="btn btn-success" ng-disabled="worker.status.isAcceptingJobs" ng-click="backtesterWorkersCtrl.workerAcceptJobs(worker.Name)">Yes</button>
-                                    <button class="btn btn-danger" ng-disabled="!worker.status.isAcceptingJobs" ng-click="backtesterWorkersCtrl.workerRejectJobs(worker.Name)">No</button>
+                                    <button class="@(worker.IsAcceptingJobs ? "btn btn-success disabled" : "btn btn-success")" data-toggle="modal" data-target="#warningModal" data-goal="acceptjobs" data-worker="@worker.Name">Yes</button>
+                                    <button class="@(worker.IsAcceptingJobs ? "btn btn-danger" : "btn btn-danger disabled")" data-toggle="modal" data-target="#warningModal" data-goal="rejectjobs" data-worker="@worker.Name">No</button>
                                 </div>
                             </td>
                             <td><a asp-controller="JobGroups" asp-action="Info" asp-route-groupid="@worker.CurrentJob">@Html.DisplayFor(m => worker.CurrentJob)</a></td>
                             <td class="@(worker.IsRunning ? "bg-success" : "bg-danger")">
                                 <div class="btn-group btn-group-xs">
-                                    <button class="btn btn-success" ng-disabled="worker.status.IsAlive" ng-click="backtesterWorkersCtrl.start(worker.Name)">Start</button>
-                                    <button class="btn btn-danger" ng-disabled="!worker.status.IsAlive" ng-click="backtesterWorkersCtrl.stop(worker.Name)">Stop</button>
+                                    <button class="@(worker.IsRunning ? "btn btn-success disabled" : "btn btn-success")" data-toggle="modal" data-target="#warningModal" data-goal="start" data-worker="@worker.Name">Start</button>
+                                    <button class="@(worker.IsRunning ? "btn btn-danger" : "btn btn-danger disabled")" data-toggle="modal" data-target="#warningModal" data-goal="stop" data-worker="@worker.Name">Stop</button>
                                 </div>
                             </td>
                             @*<td>
@@ -54,3 +59,145 @@
         </div>
     </div>
 </div>
+
+<!-- Modals -->
+<div class="modal fade" id="warningModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Warning</h4>
+            </div>
+            <div class="modal-body">
+
+            </div>
+            <div class="modal-footer">
+                <div class="btn-group">
+                    <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+                    <button id="btn-proceed" type="button" class="btn btn-danger" data-dismiss="modal">Proceed</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- End Modals -->
+
+@section Scripts
+{
+    <script>
+        function workerAcceptJobs(workerName) {
+            $.ajax({
+                type: 'GET',
+                url: '/api/workers/acceptjobs/' + workerName,
+                success: function (data) {
+                    console.log(data);
+                    if (data.success) {
+                        location.reload();
+                        showBootstrapAlert('success', data.message || 'Successfully requested worker ' + workerName + ' to accept jobs');
+                    }
+                    else {
+                        showBootstrapAlert('danger', data.message || 'Failed to request worker ' + workerName + ' to accept jobs');
+                    }
+                }
+            });
+        }
+
+        function workerRejectJobs(workerName) {
+            $.ajax({
+                type: 'GET',
+                url: '/api/workers/rejectjobs/' + workerName,
+                success: function (data) {
+                    console.log(data);
+                    if (data.success) {
+                        location.reload();
+                        showBootstrapAlert('success', data.message || 'Successfully requested worker ' + workerName + ' to reject jobs');
+                    }
+                    else {
+                        showBootstrapAlert('danger', data.message || 'Failed to request worker ' + workerName + ' to reject jobs');
+                    }
+                }
+            });
+        }
+
+        function startWorker(workerName) {
+            $.ajax({
+                type: 'GET',
+                url: '/api/workers/start/' + workerName,
+                success: function (data) {
+                    console.log(data);
+                    if (data.success) {
+                        location.reload();
+                        showBootstrapAlert('success', data.message || 'Successfully requested to start worker ' + workerName);
+                    }
+                    else {
+                        showBootstrapAlert('danger', data.message || 'Failed to request to start worker ' + workerName);
+                    }
+                }
+            });
+        }
+
+        function stopWorker(workerName) {
+            $.ajax({
+                type: 'GET',
+                url: '/api/workers/stop/' + workerName,
+                success: function (data) {
+                    console.log(data);
+                    if (data.success) {
+                        location.reload();
+                        showBootstrapAlert('success', data.message || 'Successfully requested to stop worker ' + workerName);
+                    }
+                    else {
+                        showBootstrapAlert('danger', data.message || 'Failed to request to stop worker ' + workerName);
+                    }
+                }
+            });
+        }
+
+        $(document).ready(function () {
+            $('#warningModal').on('show.bs.modal', function (event) {
+                // Get the button that triggered the modal
+                var button = $(event.relatedTarget);
+
+                // Extract value from data-* attributes
+                var worker = button.data('worker');
+
+                var goal = button.data('goal');
+
+                if (goal === 'acceptjobs') {
+                    $(this).find('.modal-body').text('Request ' + worker + ' to start accepting jobs?');
+
+                    $('#btn-proceed').click(function () {
+                        workerAcceptJobs(worker);
+
+                        $('#btn-proceed').off('click'); // necessary to remove the event handler otherwise it might get called again by another popup
+                    });
+                } else if (goal === 'rejectjobs') {
+                    $(this).find('.modal-body').text('Request ' + worker + ' to stop accepting jobs?');
+
+                    $('#btn-proceed').click(function () {
+                        workerRejectJobs(worker);
+
+                        $('#btn-proceed').off('click'); // necessary to remove the event handler otherwise it might get called again by another popup
+                    });
+                } else if (goal === 'start') {
+                    $(this).find('.modal-body').text('Request to start ' + worker + '?');
+
+                    $('#btn-proceed').click(function () {
+                        startWorker(worker);
+
+                        $('#btn-proceed').off('click'); // necessary to remove the event handler otherwise it might get called again by another popup
+                    });
+                } else if (goal === 'stop') {
+                    $(this).find('.modal-body').text('Request to start ' + worker + '?');
+
+                    $('#btn-proceed').click(function () {
+                        startWorker(worker);
+
+                        $('#btn-proceed').off('click'); // necessary to remove the event handler otherwise it might get called again by another popup
+                    });
+                } else {
+                    console.error('Invalid goal ' + goal);
+                }
+            });
+        });
+    </script>
+}
