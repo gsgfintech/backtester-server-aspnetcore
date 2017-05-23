@@ -129,7 +129,7 @@ namespace Backtester.Server.Models
 
             foreach (var trade in trades)
             {
-                netCumulPnl += (trade.RealizedPnlUsd ?? 0 - trade.CommissionUsd ?? 0);
+                netCumulPnl += ((trade.RealizedPnlUsd ?? 0) - (trade.CommissionUsd ?? 0));
 
                 trade.NetCumulPnlUsd = netCumulPnl;
             }
