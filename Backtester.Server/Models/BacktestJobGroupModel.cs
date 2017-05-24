@@ -124,7 +124,7 @@ namespace Backtester.Server.Models
                 AlgoTypeName = strategy.AlgoTypeName,
                 Crosses = !strategy.Crosses.IsNullOrEmpty() ? string.Join(", ", strategy.Crosses) : string.Empty,
                 Name = strategy.Name,
-                Parameters = strategy.Parameters.ToBacktestJobStrategyParameterModels(),
+                Parameters = strategy.Parameters.ToBacktestJobStrategyParameterModels("Param"),
                 DllPath = strategy.StrategyDllPath,
                 Version = strategy.Version,
                 StrategyTypeName = strategy.StrategyTypeName
