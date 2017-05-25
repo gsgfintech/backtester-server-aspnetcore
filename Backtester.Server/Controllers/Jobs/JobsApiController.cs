@@ -23,7 +23,9 @@ namespace Backtester.Server.Controllers.Jobs
         [HttpPost("update-status/{backtestJobName}")]
         public async Task<GenericActionResult> UpdateStatus(string backtestJobName, [FromBody]BacktestJob job)
         {
-            return await utils.UpdateJob(backtestJobName, job);
+            var result = await utils.UpdateJob(backtestJobName, job);
+
+            return new GenericActionResult(result.Success, result.Message);
         }
     }
 }

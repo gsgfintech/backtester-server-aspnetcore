@@ -101,7 +101,7 @@ namespace Backtester.Server.ControllerUtils
         //    return statuses;
         //}
 
-        internal async Task<GenericActionResult> AddJob(BacktestJob job)
+        internal async Task<(bool Success, string Message)> AddJob(BacktestJob job)
         {
             logger.Info($"Adding job {job.Name} to database and active queue");
 
@@ -112,10 +112,10 @@ namespace Backtester.Server.ControllerUtils
 
             pendingJobs.Enqueue(job.Name);
 
-            return new GenericActionResult(true, $"Successfully added job {job.Name}");
+            return (true, $"Successfully added job {job.Name}");
         }
 
-        internal async Task<GenericActionResult> UpdateJob(string jobName, BacktestJob job)
+        internal async Task<(bool Success, string Message)> UpdateJob(string jobName, BacktestJob job)
         {
             try
             {
@@ -126,13 +126,13 @@ namespace Backtester.Server.ControllerUtils
                 if (!result.Success)
                     return result;
                 else
-                    return new GenericActionResult(true, $"Successfully updated job {job.Name}");
+                    return (true, $"Successfully updated job {job.Name}");
             }
             catch (Exception ex)
             {
                 string err = $"Failed to update job {job?.Name}";
                 logger.Error(err, ex);
-                return new GenericActionResult(false, $"{err}: {ex.Message}");
+                return (false, $"{err}: {ex.Message}");
             }
         }
 

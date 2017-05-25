@@ -309,7 +309,7 @@ namespace Backtester.Server.ControllerUtils
         {
             (bool Success, string Message, List<string> JobNames) result = (true, null, null);
 
-            if(jobNames.IsNullOrEmpty())
+            if (jobNames.IsNullOrEmpty())
             {
                 result.Message = $"Unable to submit jobs: missing or empty parameter {jobNames}";
                 return result;
@@ -412,7 +412,7 @@ namespace Backtester.Server.ControllerUtils
                     if (addResult.Success)
                         jobGroup.Jobs.Add(job.Name, new BacktestJobLight() { DayStr = day.ToString("yyyy-MM-dd") });
                     else
-                        failed.Add(addResult);
+                        failed.Add(new GenericActionResult(addResult.Success, addResult.Message));
                 }
 
                 if (!jobGroup.Jobs.IsNullOrEmpty() && failed.IsNullOrEmpty())
