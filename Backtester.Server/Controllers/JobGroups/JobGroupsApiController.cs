@@ -1,4 +1,5 @@
 ﻿using Backtester.Server.ControllerUtils;
+using Backtester.Server.Models;
 using Capital.GSG.FX.Data.Core.WebApi;
 using Capital.GSG.FX.Utils.Core.Logging;
 using Microsoft.AspNetCore.Mvc;
@@ -26,6 +27,14 @@ namespace Backtester.Server.Controllers.JobGroups
         public async Task<GenericActionResult> Delete(string groupId)
         {
             return await utils.Delete(groupId);
+        }
+
+        [HttpPost("{excel}")]
+        public async Task<IActionResult> ExportListToExcel([FromBody]IEnumerable<BacktestJobGroupModel> jobGroups)
+        {
+            await Task.CompletedTask;
+
+            return null;
         }
     }
 }
