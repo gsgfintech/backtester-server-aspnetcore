@@ -9,10 +9,15 @@ using Capital.GSG.FX.Utils.Core;
 using Capital.GSG.FX.Utils.Core.Logging;
 using DataTypes.Core;
 using MathNet.Numerics.Statistics;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using OfficeOpenXml;
+using OfficeOpenXml.ConditionalFormatting;
+using OfficeOpenXml.Table;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -36,6 +41,12 @@ namespace Backtester.Server.ControllerUtils
 
         private ConcurrentDictionary<string, DateTimeOffset> jobGroupsWithFilesRequested = new ConcurrentDictionary<string, DateTimeOffset>();
 
+        private ConcurrentQueue<string> cachedJobsList = new ConcurrentQueue<string>();
+        private ConcurrentDictionary<string, BacktestJobGroup> cachedJobs = new ConcurrentDictionary<string, BacktestJobGroup>();
+
+        private bool resetPendingJobsRequested = false;
+        private object resetPendingJobsRequestedLocker = new object();
+
         public JobGroupsControllerUtils(BacktestJobGroupActioner actioner, JobsControllerUtils jobsControllerUtils, AllTradesConnector allTradesConnector, TradeGenericMetric2SeriesConnector tradeGenericMetric2SeriesConnector, UnrealizedPnlSeriesConnector unrealizedPnlSeriesConnector)
         {
             this.actioner = actioner;
@@ -54,7 +65,23 @@ namespace Backtester.Server.ControllerUtils
             var jobGroups = await actioner.GetAllActive(cts.Token);
 
             if (!jobGroups.IsNullOrEmpty())
+            {
                 jobGroups.Sort(BacktestJobGroupCreationDateComparer.Instance);
+
+                if (!resetPendingJobsRequested)
+                {
+                    lock (resetPendingJobsRequestedLocker)
+                    {
+                        resetPendingJobsRequested = true;
+                    }
+
+                    logger.Info($"First time loading active jobs: requesting {nameof(jobsControllerUtils)} to reset pending jobs");
+
+                    var pendingJobs = jobGroups.Select(g => g.Jobs.Keys.ToList()).Aggregate((cur, next) => cur.Concat(next).ToList());
+
+                    jobsControllerUtils.ResetPendingJobs(pendingJobs);
+                }
+            }
 
             return jobGroups;
         }
@@ -74,36 +101,41 @@ namespace Backtester.Server.ControllerUtils
 
         internal async Task<BacktestJobGroup> Get(string groupId)
         {
-            logger.Info($"Querying backtest job group {groupId} from database");
-
-            CancellationTokenSource cts = new CancellationTokenSource();
-            cts.CancelAfter(TimeSpan.FromMinutes(5));
-
-            var jobGroup = await actioner.Get(groupId, cts.Token);
-
-            if (jobGroup != null && !jobGroup.Jobs.IsNullOrEmpty() && BacktestJobStatusCodeUtils.InactiveStatus.Contains(jobGroup.GetStatus()) && jobGroup.Trades.IsNullOrEmpty() && !jobGroupsWithFilesRequested.ContainsKey(groupId))
+            if (cachedJobs.TryGetValue(groupId, out BacktestJobGroup jobGroup))
+                return jobGroup;
+            else
             {
-                if (jobGroupsWithFilesRequested.TryAdd(groupId, DateTimeOffset.Now))
+                logger.Info($"Querying backtest job group {groupId} from database");
+
+                CancellationTokenSource cts = new CancellationTokenSource();
+                cts.CancelAfter(TimeSpan.FromMinutes(5));
+
+                jobGroup = await actioner.Get(groupId, cts.Token);
+
+                if (jobGroup != null && !jobGroup.Jobs.IsNullOrEmpty() && BacktestJobStatusCodeUtils.InactiveStatus.Contains(jobGroup.GetStatus()) && jobGroup.Trades.IsNullOrEmpty() && !jobGroupsWithFilesRequested.ContainsKey(groupId))
                 {
-                    logger.Info($"Will request to compute trade list and generate Excel files for newly inactive job group {groupId} and update in database");
+                    if (jobGroupsWithFilesRequested.TryAdd(groupId, DateTimeOffset.Now))
+                    {
+                        logger.Info($"Will request to compute trade list and generate Excel files for newly inactive job group {groupId} and update in database");
 
-                    await allTradesConnector.PostFileRequest(groupId);
+                        await allTradesConnector.PostFileRequest(groupId);
 
-                    Task.Delay(TimeSpan.FromSeconds(1)).Wait();
+                        Task.Delay(TimeSpan.FromSeconds(1)).Wait();
 
-                    await tradeGenericMetric2SeriesConnector.PostFileRequest(groupId);
+                        await tradeGenericMetric2SeriesConnector.PostFileRequest(groupId);
 
-                    Task.Delay(TimeSpan.FromSeconds(1)).Wait();
+                        Task.Delay(TimeSpan.FromSeconds(1)).Wait();
 
-                    await unrealizedPnlSeriesConnector.PostUnrealizedPnlFileRequest(groupId);
+                        await unrealizedPnlSeriesConnector.PostUnrealizedPnlFileRequest(groupId);
 
-                    Task.Delay(TimeSpan.FromSeconds(1)).Wait();
+                        Task.Delay(TimeSpan.FromSeconds(1)).Wait();
 
-                    await unrealizedPnlSeriesConnector.PostUnrealizedPnlPerHourFileRequest(groupId);
+                        await unrealizedPnlSeriesConnector.PostUnrealizedPnlPerHourFileRequest(groupId);
+                    }
                 }
-            }
 
-            return jobGroup;
+                return jobGroup;
+            }
         }
 
         internal async Task<List<BacktestTradeModel>> GetTrades(string groupId)
@@ -360,6 +392,138 @@ namespace Backtester.Server.ControllerUtils
                 TradesCount = g.Count(t => t.IsPositionClosing() || t.IsPositionContinuing()),
                 Volume = g.Select(t => t.SizeUsd ?? 0).Sum() * 1000
             }).OrderBy(c => c.Pair).ToList();
+        }
+
+        internal string ExportListToExcel(List<BacktestJobGroupModel> jobGroups)
+        {
+            string fileName = $"BacktestJobs.{new Random().Next(10000)}.xlsx";
+            string fullPath = Path.Combine(Path.GetTempPath(), fileName);
+
+            byte[] bytes = CreateExcel(jobGroups);
+
+            using (MemoryStream stream = new MemoryStream(bytes))
+            {
+                if (File.Exists(fullPath))
+                    File.Delete(fullPath);
+
+                FileStream file = new FileStream(fullPath, FileMode.Create, FileAccess.Write);
+                stream.WriteTo(file);
+                file.Close();
+            }
+
+            return fileName;
+        }
+
+        private byte[] CreateExcel(List<BacktestJobGroupModel> jobGroups)
+        {
+            if (jobGroups.IsNullOrEmpty())
+                return new byte[0];
+
+            using (ExcelPackage excel = new ExcelPackage())
+            {
+                // Create the worksheet
+                ExcelWorksheet ws = excel.Workbook.Worksheets.Add("Jobs");
+
+                var paramsDict = ComputeParamsDict(jobGroups, 6);
+
+                // Header
+                ws.Cells[1, 1].Value = "Net PnL (USD)";
+                ws.Cells[1, 2].Value = "Start Date";
+                ws.Cells[1, 3].Value = "End Date";
+                ws.Cells[1, 4].Value = "Start Time";
+                ws.Cells[1, 5].Value = "End Time";
+
+                if (!paramsDict.IsNullOrEmpty())
+                {
+                    foreach (var kvp in paramsDict)
+                        ws.Cells[1, kvp.Value].Value = kvp.Key;
+                }
+
+                // Jobs
+                int rowCount = 2;
+                foreach (var jobGroup in jobGroups)
+                {
+                    ws.Cells[rowCount, 1].Value = jobGroup.NetRealizedPnlUsd;
+                    ws.Cells[rowCount, 2].Value = jobGroup.StartDate.ToLocalTime().ToString("dd/MM/yyyy");
+                    ws.Cells[rowCount, 3].Value = jobGroup.EndDate.ToLocalTime().ToString("dd/MM/yyyy");
+                    ws.Cells[rowCount, 4].Value = jobGroup.StartTime.ToLocalTime().ToString("HH:mm");
+                    ws.Cells[rowCount, 5].Value = jobGroup.EndTime.ToLocalTime().ToString("HH:mm");
+
+                    if (jobGroup.Strategy != null && !jobGroup.Strategy.Parameters.IsNullOrEmpty())
+                    {
+                        foreach (var parameter in jobGroup.Strategy.Parameters)
+                        {
+                            if (double.TryParse(parameter.Value, out double dblValue))
+                                ws.Cells[rowCount, paramsDict[parameter.Name]].Value = dblValue;
+                            else
+                                ws.Cells[rowCount, paramsDict[parameter.Name]].Value = parameter.Value;
+                        }
+                    }
+
+                    rowCount++;
+                }
+
+                var allRange = ws.Cells[1, 1, ws.Dimension.Rows, ws.Dimension.Columns];
+
+                // Create Table
+                var table = ws.Tables.Add(allRange, "Table");
+                table.ShowTotal = false;
+                table.StyleName = "White";
+                table.TableStyle = TableStyles.Light1;
+
+                // Formatting
+                ws.Column(1).Style.Numberformat.Format = "#,##0.00";
+                ws.Column(2).Style.Numberformat.Format = "dd/MM/yyyy";
+                ws.Column(3).Style.Numberformat.Format = "dd/MM/yyyy";
+                ws.Column(4).Style.Numberformat.Format = "HH:mm";
+                ws.Column(5).Style.Numberformat.Format = "HH:mm";
+
+                // Add colors
+                var condFormattingRule = ws.ConditionalFormatting.AddThreeColorScale(ws.Cells[2, 1, ws.Dimension.Rows, 1]);
+                condFormattingRule.MiddleValue.Type = eExcelConditionalFormattingValueObjectType.Num;
+                condFormattingRule.MiddleValue.Value = 0;
+
+                // Finally autofit all columns
+                allRange.AutoFitColumns();
+
+                return excel.GetAsByteArray();
+            }
+        }
+
+        private Dictionary<string, int> ComputeParamsDict(List<BacktestJobGroupModel> jobGroups, int colOffset)
+        {
+            List<string> paramsList = new List<string>();
+
+            foreach (var jobGroup in jobGroups)
+            {
+                if (jobGroup.Strategy != null && !jobGroup.Strategy.Parameters.IsNullOrEmpty())
+                {
+                    var parameters = jobGroup.Strategy.Parameters.Select(p => p.Name);
+
+                    foreach (var parameter in parameters)
+                    {
+                        if (!paramsList.Contains(parameter))
+                            paramsList.Add(parameter);
+                    }
+                }
+            }
+
+            paramsList.Sort();
+
+            return paramsList.ToDictionary(p => p, p => paramsList.IndexOf(p) + colOffset);
+        }
+
+        internal FileResult DownloadExcelList(string fileName)
+        {
+            string fullPath = Path.Combine(Path.GetTempPath(), fileName);
+            string contentType = "Application/msexcel";
+
+            FileStream fs = new FileStream(fullPath, FileMode.Open, FileAccess.Read);
+
+            return new FileStreamResult(fs, contentType)
+            {
+                FileDownloadName = "BacktestJobs.xlsx"
+            };
         }
 
         private class BacktestJobGroupCreationDateComparer : IComparer<BacktestJobGroup>

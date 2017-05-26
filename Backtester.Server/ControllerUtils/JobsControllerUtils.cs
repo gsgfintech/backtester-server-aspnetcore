@@ -1,5 +1,4 @@
-﻿using Backtester.Server.Models;
-using Capital.GSG.FX.Backtest.DataTypes;
+﻿using Capital.GSG.FX.Backtest.DataTypes;
 using Capital.GSG.FX.Backtest.MongoConnector.Actioner;
 using Capital.GSG.FX.Data.Core.WebApi;
 using Capital.GSG.FX.Utils.Core.Logging;
@@ -304,6 +303,17 @@ namespace Backtester.Server.ControllerUtils
                     }
                 }
             }
+        }
+
+        internal void ResetPendingJobs(List<string> newPendingJobs)
+        {
+            logger.Info($"Resetting pending jobs list: clearing the current list and adding jobs {string.Join(", ", newPendingJobs)}");
+
+            while (!pendingJobs.IsEmpty)
+                pendingJobs.TryDequeue(out _);
+
+            foreach (var newPendingJob in newPendingJobs)
+                pendingJobs.Enqueue(newPendingJob);
         }
     }
 }

@@ -4,12 +4,15 @@ using Backtester.Server.ViewComponents;
 using Backtester.Server.ViewModels;
 using Backtester.Server.ViewModels.JobGroups;
 using Capital.GSG.FX.Backtest.DataTypes;
+using Capital.GSG.FX.Utils.Core;
 using Capital.GSG.FX.Utils.Core.Logging;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using OfficeOpenXml;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading.Tasks;
 
 namespace Backtester.Server.Controllers.JobGroups
@@ -105,6 +108,19 @@ namespace Backtester.Server.Controllers.JobGroups
         public async Task<FileResult> ExportGenericMetric2ToExcel(string jobGroupId)
         {
             return await tradeGenericMetric2SeriesControllerUtils.ExportExcel(jobGroupId);
+        }
+
+        [HttpPost]
+        public JsonResult ExportListToExcel([FromBody]List<BacktestJobGroupModel> jobGroups)
+        {
+            var fileName = utils.ExportListToExcel(jobGroups);
+
+            return Json(new { fileName = fileName, errorMessage = "" });
+        }
+
+        public FileResult DownloadExcelList(string fileName)
+        {
+            return utils.DownloadExcelList(fileName);
         }
     }
 }

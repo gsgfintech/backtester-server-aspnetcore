@@ -8,3 +8,22 @@ function showBootstrapAlert(level, subject) {
         subject +
         '</div>');
 }
+
+function exportToExcel(jsonJobs) {
+    $.ajax({
+        type: 'POST',
+        url: '/JobGroups/ExportListToExcel',
+        data: JSON.stringify(jsonJobs),
+        dataType: 'json',
+        contentType: 'application/json; charset=utf-8',
+        success: function (data) {
+            console.log(data);
+
+            //get the file name for download
+            if (data.fileName) {
+                //use window.location.href for redirect to download action for download the file
+                window.location.href = '/JobGroups/DownloadExcelList/?fileName=' + data.fileName;
+            }
+        }
+    });
+}

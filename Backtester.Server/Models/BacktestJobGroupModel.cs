@@ -160,7 +160,7 @@ namespace Backtester.Server.Models
 
         public static List<BacktestJobGroupModel> ToBacktestJobGroupModels(this IEnumerable<BacktestJobGroup> groups)
         {
-            return groups?.Select(g => g.ToBacktestJobGroupModel()).ToList();
+            return groups?.Select(g => g.ToBacktestJobGroupModel()).ToList() ?? new List<BacktestJobGroupModel>();
         }
 
         private static StrategyParameter ToStrategyParameter(this BacktestJobStrategyParameterModel parameter, string namePrefix)
