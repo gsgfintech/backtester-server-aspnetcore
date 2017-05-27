@@ -77,7 +77,8 @@ namespace Backtester.Server.ControllerUtils
 
                     logger.Info($"First time loading active jobs: requesting {nameof(jobsControllerUtils)} to reset pending jobs");
 
-                    var pendingJobs = jobGroups.Select(g => g.Jobs.Keys.ToList()).Aggregate((cur, next) => cur.Concat(next).ToList());
+                    // Retrieve all subjobs that are not already completed
+                    var pendingJobs = jobGroups.Select(g => g.Jobs.Where(j => j.Value.StatusCode != BacktestJobStatusCode.COMPLETED).Select(sg => sg.Key).ToList()).Aggregate((cur, next) => cur.Concat(next).ToList());
 
                     jobsControllerUtils.ResetPendingJobs(pendingJobs);
                 }
