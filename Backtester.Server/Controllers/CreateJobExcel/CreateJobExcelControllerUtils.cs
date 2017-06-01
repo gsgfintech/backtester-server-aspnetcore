@@ -118,10 +118,11 @@ namespace Backtester.Server.Controllers.CreateJobExcel
 
                     List<BacktestJobSettingsModel> jobsSettings = new List<BacktestJobSettingsModel>();
 
-                    for (int rowIndex = 2; rowIndex <= ws.Dimension.End.Row; rowIndex++)
+                    int rowIndex = 2;
+                    while (ws.Cells[rowIndex, 1].Value != null)
                     {
                         #region DLL
-                        string dll = ws.Cells[rowIndex, 1].Value.ToString();
+                        string dll = ws.Cells[rowIndex, 1].Value?.ToString();
                         if (string.IsNullOrEmpty(dll))
                             return (false, $"Failed to parse job definition on row {rowIndex}: missing value for 'DLL'", null);
 
@@ -201,6 +202,8 @@ namespace Backtester.Server.Controllers.CreateJobExcel
                         jobSettings.JobName = createJobControllerUtils.AssignJobNameAndAddToDictionary(jobSettings);
 
                         jobsSettings.Add(jobSettings);
+
+                        rowIndex++;
                     }
 
                     if (jobsSettings.Count > 0)
