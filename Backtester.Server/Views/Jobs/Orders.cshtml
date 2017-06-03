@@ -12,11 +12,15 @@
 
 @Html.Partial("JobTabsPartial", new JobTabsPartialViewModel(Model.JobGroupId, Model.JobId))
 
-@Html.Partial("OrdersListPartial", new OrdersListPartialViewModel(Model.JobId, Model.ActiveOrders))
+@if (Model.ActiveOrders?.Count > 0)
+{
+    @Html.Partial("OrdersListPartial", new OrdersListPartialViewModel(Model.JobId, Model.ActiveOrders))
+}
+
 @Html.Partial("OrdersListPartial", new OrdersListPartialViewModel(Model.JobId, Model.InactiveOrders))
 
 @section Scripts
-{
+    {
     <script>
         $(document).ready(function () {
             new Clipboard('#copybtn');

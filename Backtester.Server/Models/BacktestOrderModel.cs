@@ -23,6 +23,15 @@ namespace Backtester.Server.Models
         [DisplayFormat(DataFormatString = "{0:dd/MM/yy HH:mm:ss}")]
         public DateTimeOffset? PlacedTime { get; set; }
 
+        [Display(Name = "Last Ask")]
+        public string LastAsk { get; set; }
+
+        [Display(Name = "Last Bid")]
+        public string LastBid { get; set; }
+
+        [Display(Name = "Last Mid")]
+        public string LastMid { get; set; }
+
         [Display(Name = "Last Update (HKT)")]
         [DisplayFormat(DataFormatString = "{0:dd/MM/yy HH:mm:ss}")]
         public DateTimeOffset? LastUpdateTime { get; set; }
@@ -88,6 +97,9 @@ namespace Backtester.Server.Models
             {
                 Cross = order.Cross,
                 FillPrice = FormatRate(order.Cross, order.FillPrice),
+                LastAsk = FormatRate(order.Cross, order.LastAsk),
+                LastBid = FormatRate(order.Cross, order.LastBid),
+                LastMid = FormatRate(order.Cross, order.LastMid),
                 LastUpdateTime = order.LastUpdateTime,
                 LimitPrice = FormatRate(order.Cross, order.LimitPrice),
                 OrderId = order.OrderId,

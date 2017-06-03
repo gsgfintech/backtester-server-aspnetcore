@@ -28,6 +28,8 @@
                     <th>@Html.DisplayNameFor(m => Model.Orders.First().LimitPrice)</th>
                     <th>@Html.DisplayNameFor(m => Model.Orders.First().StopPrice)</th>
                     <th>@Html.DisplayNameFor(m => Model.Orders.First().TrailingAmount)</th>
+                    <th>@Html.DisplayNameFor(m => Model.Orders.First().LastBid)</th>
+                    <th>@Html.DisplayNameFor(m => Model.Orders.First().LastAsk)</th>
                     <th></th>
                 </tr>
                 @foreach (var order in Model.Orders)
@@ -46,6 +48,8 @@
                         <td>@Html.DisplayFor(m => order.LimitPrice)</td>
                         <td>@Html.DisplayFor(m => order.StopPrice)</td>
                         <td>@Html.DisplayFor(m => order.TrailingAmount)</td>
+                        <td>@Html.DisplayFor(m => order.LastBid)</td>
+                        <td>@Html.DisplayFor(m => order.LastAsk)</td>
                         <td><button type="button" class="btn btn-primary btn-xs" data-toggle="modal" data-target="#orderModal-@order.OrderId"><span class="glyphicon glyphicon-plus"></span></button></td>
                     </tr>
                 }
