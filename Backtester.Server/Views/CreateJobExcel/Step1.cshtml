@@ -1,6 +1,4 @@
-﻿@using Backtester.Server.ViewModels.CreateJob
-
-@model Backtester.Server.ViewModels.CreateJobExcel.CreateJobExcelStep1ViewModel
+﻿@model Backtester.Server.ViewModels.CreateJobExcel.CreateJobExcelStep1ViewModel
 
 @{
     ViewData["Title"] = "Excel Job Definition";
@@ -8,6 +6,18 @@
 
 <div class="row">
     <div class="col-xs-12">
+        @if (Model != null && !Model.Success && Model.Message?.Length > 0)
+        {
+            <div class="panel panel-danger">
+                <div class="panel-heading">
+                    <h4>Failed To Process File</h4>
+                </div>
+                <div class="panel-body">
+                    <p>@Html.DisplayFor(m => Model.Message)</p>
+                </div>
+            </div>
+        }
+
         <div class="panel panel-default">
             <div class="panel-heading">
                 <h4>Excel Job Definition File</h4>

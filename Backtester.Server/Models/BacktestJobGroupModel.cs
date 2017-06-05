@@ -122,7 +122,7 @@ namespace Backtester.Server.Models
             return new BacktestJobStrategyModel()
             {
                 AlgoTypeName = strategy.AlgoTypeName,
-                Crosses = !strategy.Crosses.IsNullOrEmpty() ? string.Join(", ", strategy.Crosses) : string.Empty,
+                Crosses = !strategy.CrossesAndTicketSizes.IsNullOrEmpty() ? string.Join(", ", strategy.CrossesAndTicketSizes.Select(c => $"{c.Key} ({c.Value / 1000:N0}K)")) : string.Empty,
                 Name = strategy.Name,
                 Parameters = strategy.Parameters.ToBacktestJobStrategyParameterModels("Param"),
                 DllPath = strategy.StrategyDllPath,

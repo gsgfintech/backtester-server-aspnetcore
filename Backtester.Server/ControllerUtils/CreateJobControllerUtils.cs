@@ -78,7 +78,6 @@ namespace Backtester.Server.ControllerUtils
 
                     if (strategyInstance != null)
                     {
-                        result.Settings.Crosses = strategyInstance.Crosses.ToList();
                         result.Settings.StrategyName = strategyInstance.Name;
                         result.Settings.StrategyVersion = strategyInstance.Version;
                     }
@@ -231,7 +230,7 @@ namespace Backtester.Server.ControllerUtils
                         Settings = new BacktestJobSettingsModel()
                         {
                             AlgorithmClass = jobGroup.Strategy?.AlgoTypeName,
-                            Crosses = jobGroup.Strategy.Crosses,
+                            CrossesAndTicketSizes = jobGroup.Strategy.CrossesAndTicketSizes,
                             EndDate = jobGroup.EndDate.LocalDateTime,
                             EndTime = jobGroup.EndTime.LocalDateTime,
                             NewFileName = dllPath,
@@ -358,7 +357,7 @@ namespace Backtester.Server.ControllerUtils
                 if (string.IsNullOrEmpty(jobSettings?.StrategyClass))
                     throw new ArgumentNullException("StrategyClass");
 
-                if (jobSettings.Crosses.IsNullOrEmpty())
+                if (jobSettings.CrossesAndTicketSizes.IsNullOrEmpty())
                     throw new ArgumentNullException("Crosses");
 
                 if (jobSettings.Parameters.IsNullOrEmpty())
@@ -378,7 +377,7 @@ namespace Backtester.Server.ControllerUtils
                     Strategy = new Strategy()
                     {
                         AlgoTypeName = jobSettings.AlgorithmClass,
-                        Crosses = jobSettings.Crosses,
+                        CrossesAndTicketSizes = jobSettings.CrossesAndTicketSizes,
                         Name = jobSettings.StrategyName,
                         Parameters = jobSettings.Parameters.ToStrategyParameters("Param"),
                         StrategyDllPath = jobSettings.NewFileName,

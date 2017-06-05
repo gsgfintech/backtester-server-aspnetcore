@@ -1,8 +1,8 @@
 ﻿using Backtester.Server.ControllerUtils;
 using Backtester.Server.Models;
-using Backtester.Server.ViewModels.CreateJobExcel;
 using Capital.GSG.FX.Data.Core.ContractData;
 using Capital.GSG.FX.Trading.Strategy;
+using Capital.GSG.FX.Utils.Core;
 using Capital.GSG.FX.Utils.Core.Logging;
 using Microsoft.Extensions.Logging;
 using OfficeOpenXml;
@@ -86,36 +86,6 @@ namespace Backtester.Server.Controllers.CreateJobExcel
                         return result;
                     }
 
-                    if (ws.Cells[1, 2].Value.ToString() != "StartDate")
-                    {
-                        result.Message = $"Incorrect value for column 2: expected 'StartDate'";
-                        return result;
-                    }
-
-                    if (ws.Cells[1, 3].Value.ToString() != "EndDate")
-                    {
-                        result.Message = $"Incorrect value for column 3: expected 'EndDate'";
-                        return result;
-                    }
-
-                    if (ws.Cells[1, 4].Value.ToString() != "StartTime")
-                    {
-                        result.Message = $"Incorrect value for column 4: expected 'StartTime'";
-                        return result;
-                    }
-
-                    if (ws.Cells[1, 5].Value.ToString() != "EndTime")
-                    {
-                        result.Message = $"Incorrect value for column 5: expected 'EndTime'";
-                        return result;
-                    }
-
-                    if (ws.Cells[1, 6].Value.ToString() != "UseHistoDatabase")
-                    {
-                        result.Message = $"Incorrect value for column 6: expected 'UseHistoDatabase'";
-                        return result;
-                    }
-
                     List<BacktestJobSettingsModel> jobsSettings = new List<BacktestJobSettingsModel>();
 
                     int rowIndex = 2;
@@ -136,41 +106,101 @@ namespace Backtester.Server.Controllers.CreateJobExcel
                         }
                         #endregion
 
-                        #region StartDate
-                        if (string.IsNullOrEmpty(ws.Cells[rowIndex, 2].Value.ToString()) || !DateTime.TryParse(ws.Cells[rowIndex, 2].Value.ToString(), out DateTime startDate))
-                            return (false, $"Failed to parse job definition on row {rowIndex}: missing or invalid value for 'StartDate'", null);
+                        #region Crosses
+                        Dictionary<Cross, int> crossesAndTicketSizes = new Dictionary<Cross, int>();
 
+                        int colIndex = 2;
+                        string header = ws.Cells[1, colIndex].Value?.ToString();
+                        while (!string.IsNullOrEmpty(header) && header.ToLower().StartsWith("cross"))
+                        {
+                            string crossStrValue = ws.Cells[rowIndex, colIndex].Value?.ToString();
+
+                            if (!string.IsNullOrEmpty(crossStrValue))
+                            {
+                                string[] parts = crossStrValue.Split(':');
+
+                                if (parts.Length == 2)
+                                {
+                                    if (CrossUtils.TryParse(parts[0], out Cross cross) && int.TryParse(parts[1], out int quantity))
+                                    {
+                                        if (!crossesAndTicketSizes.ContainsKey(cross))
+                                            crossesAndTicketSizes.Add(cross, quantity);
+                                    }
+                                }
+                            }
+
+                            header = ws.Cells[1, ++colIndex].Value?.ToString();
+                        }
+
+                        if (crossesAndTicketSizes.IsNullOrEmpty())
+                        {
+                            result.Message = $"Failed to parse at least one cross for job on row {rowIndex}";
+                            return result;
+                        }
+                        #endregion
+
+                        #region StartDate
+                        if (ws.Cells[1, colIndex].Value.ToString() != "StartDate")
+                        {
+                            result.Message = $"Incorrect value for column {colIndex}: expected 'StartDate'";
+                            return result;
+                        }
+
+                        if (string.IsNullOrEmpty(ws.Cells[rowIndex, colIndex].Value.ToString()) || !DateTime.TryParse(ws.Cells[rowIndex, colIndex++].Value.ToString(), out DateTime startDate))
+                            return (false, $"Failed to parse job definition on row {rowIndex}: missing or invalid value for 'StartDate'", null);
                         #endregion
 
                         #region EndDate
-                        if (string.IsNullOrEmpty(ws.Cells[rowIndex, 3].Value.ToString()) || !DateTime.TryParse(ws.Cells[rowIndex, 3].Value.ToString(), out DateTime endDate))
-                            return (false, $"Failed to parse job definition on row {rowIndex}: missing or invalid value for 'EndDate'", null);
+                        if (ws.Cells[1, colIndex].Value.ToString() != "EndDate")
+                        {
+                            result.Message = $"Incorrect value for column {colIndex}: expected 'EndDate'";
+                            return result;
+                        }
 
+                        if (string.IsNullOrEmpty(ws.Cells[rowIndex, colIndex].Value.ToString()) || !DateTime.TryParse(ws.Cells[rowIndex, colIndex++].Value.ToString(), out DateTime endDate))
+                            return (false, $"Failed to parse job definition on row {rowIndex}: missing or invalid value for 'EndDate'", null);
                         #endregion
 
                         #region StartTime
-                        if (string.IsNullOrEmpty(ws.Cells[rowIndex, 4].Value.ToString()) || !DateTime.TryParse(ws.Cells[rowIndex, 4].Value.ToString(), out DateTime startTime))
-                            return (false, $"Failed to parse job definition on row {rowIndex}: missing or invalid value for 'StartTime'", null);
+                        if (ws.Cells[1, colIndex].Value.ToString() != "StartTime")
+                        {
+                            result.Message = $"Incorrect value for column {colIndex}: expected 'StartTime'";
+                            return result;
+                        }
 
+                        if (string.IsNullOrEmpty(ws.Cells[rowIndex, colIndex].Value.ToString()) || !DateTime.TryParse(ws.Cells[rowIndex, colIndex++].Value.ToString(), out DateTime startTime))
+                            return (false, $"Failed to parse job definition on row {rowIndex}: missing or invalid value for 'StartTime'", null);
                         #endregion
 
                         #region EndTime
-                        if (string.IsNullOrEmpty(ws.Cells[rowIndex, 5].Value.ToString()) || !DateTime.TryParse(ws.Cells[rowIndex, 5].Value.ToString(), out DateTime endTime))
+                        if (ws.Cells[1, colIndex].Value.ToString() != "EndTime")
+                        {
+                            result.Message = $"Incorrect value for column {colIndex}: expected 'EndTime'";
+                            return result;
+                        }
+
+                        if (string.IsNullOrEmpty(ws.Cells[rowIndex, colIndex].Value.ToString()) || !DateTime.TryParse(ws.Cells[rowIndex, colIndex++].Value.ToString(), out DateTime endTime))
                             return (false, $"Failed to parse job definition on row {rowIndex}: missing or invalid value for 'EndTime'", null);
                         #endregion
 
                         #region UseHistoDatabase
-                        if (string.IsNullOrEmpty(ws.Cells[rowIndex, 6].Value.ToString()) || !bool.TryParse(ws.Cells[rowIndex, 6].Value.ToString(), out bool useHistoDatabase))
+                        if (ws.Cells[1, colIndex].Value.ToString() != "UseHistoDatabase")
+                        {
+                            result.Message = $"Incorrect value for column {colIndex}: expected 'UseHistoDatabase'";
+                            return result;
+                        }
+
+                        if (string.IsNullOrEmpty(ws.Cells[rowIndex, colIndex].Value.ToString()) || !bool.TryParse(ws.Cells[rowIndex, colIndex++].Value.ToString(), out bool useHistoDatabase))
                             return (false, $"Failed to parse job definition on row {rowIndex}: missing or invalid value for 'UseHistoDatabase'", null);
                         #endregion
 
                         #region Parameters
                         Dictionary<string, BacktestJobStrategyParameterModel> parameters = new Dictionary<string, BacktestJobStrategyParameterModel>();
 
-                        for (int colIndex = 7; colIndex <= ws.Dimension.End.Column; colIndex++)
+                        for (int paramColIndex = colIndex; paramColIndex <= ws.Dimension.End.Column; paramColIndex++)
                         {
-                            string key = ws.Cells[1, colIndex].Value.ToString();
-                            string value = ws.Cells[rowIndex, colIndex].Value.ToString();
+                            string key = ws.Cells[1, paramColIndex].Value.ToString();
+                            string value = ws.Cells[rowIndex, paramColIndex].Value.ToString();
 
                             if (!string.IsNullOrEmpty(key) && !parameters.ContainsKey(key))
                                 parameters.Add(key, new BacktestJobStrategyParameterModel()
@@ -185,7 +215,7 @@ namespace Backtester.Server.Controllers.CreateJobExcel
                         var jobSettings = new BacktestJobSettingsModel()
                         {
                             AlgorithmClass = readDllResult.AlgorithmClass,
-                            Crosses = readDllResult.Crosses,
+                            CrossesAndTicketSizes = crossesAndTicketSizes,
                             EndDate = endDate,
                             EndTime = endTime,
                             NewFileName = readDllResult.DllFileName,

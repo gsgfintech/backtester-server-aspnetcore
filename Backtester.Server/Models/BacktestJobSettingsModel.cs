@@ -32,10 +32,10 @@ namespace Backtester.Server.Models
         [Display(Name = "Algo Class")]
         public string AlgorithmClass { get; set; }
 
-        public List<Cross> Crosses { get; set; }
+        public Dictionary<Cross, int> CrossesAndTicketSizes { get; set; }
 
         [Display(Name = "Pairs")]
-        public string CrossesStr => !Crosses.IsNullOrEmpty() ? string.Join(", ", Crosses) : string.Empty;
+        public string CrossesStr => !CrossesAndTicketSizes.IsNullOrEmpty() ? string.Join(", ", CrossesAndTicketSizes.Select(c => $"{c.Key} ({c.Value / 1000:N0}K)")) : string.Empty;
 
         [Display(Name = "Begin Date")]
         [DisplayFormat(DataFormatString = "{0:dd/MM/yy}")]
