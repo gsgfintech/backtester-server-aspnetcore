@@ -1,4 +1,6 @@
 ﻿using Backtester.Server.Models;
+using Newtonsoft.Json;
+using Syncfusion.JavaScript.Shared.Serializer;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,6 +14,8 @@ namespace Backtester.Server.ViewModels.CreateJobExcel
 
         public List<BacktestJobSettingsModel> JobsSettings { get; set; }
 
-        public string JobNamesStr => string.Join(",", JobsSettings.Select(j => j.JobName));
+        //public string JobNamesStr => string.Join(",", JobsSettings.Select(j => j.JobName));
+
+        public string JobNamesStr => JsonConvert.SerializeObject(JobsSettings.Select(j => j.JobName).ToList());
     }
 }

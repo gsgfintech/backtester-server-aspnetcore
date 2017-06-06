@@ -1,11 +1,13 @@
-﻿@model Backtester.Server.ViewModels.CreateJobExcel.CreateJobExcelReviewViewModel
+﻿@using Newtonsoft.Json;
+
+@model Backtester.Server.ViewModels.CreateJobExcel.CreateJobExcelReviewViewModel
 
     @{
         ViewData["Title"] = "Review";
     }
 
     <div class="row">
-        <div class="col-xs-12">
+        <div class="col-xs-12" id="col">
             <div class="panel panel-success">
                 <div class="panel-heading">
                     <h4 style="display:inline-block">@Html.DisplayFor(m => Model.Message)</h4>
@@ -32,3 +34,22 @@
             </div>
         </div>
     </div>
+
+
+@section Scripts
+{
+    <script>
+        function submit() {
+            $.ajax({
+                type: 'POST',
+                url: '/CreateJobExcel/Submit',
+                data: JSON.stringify(@Html.Raw(JsonConvert.SerializeObject(Model.JobsSettings.Select(j => j.JobName)))),
+                dataType: 'html',
+                contentType: 'application/json',
+                success: function (data) {
+                    $('#col').html(data);
+                }
+            });
+        }
+    </script>
+}

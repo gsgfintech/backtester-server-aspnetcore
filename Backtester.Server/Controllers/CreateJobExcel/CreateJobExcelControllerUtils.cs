@@ -262,7 +262,7 @@ namespace Backtester.Server.Controllers.CreateJobExcel
             }
         }
 
-        internal async Task<(bool Success, string Message, List<string> JobNames)> CreateJobs(string[] jobNames)
+        internal async Task<(bool Success, string Message, List<string> JobNames)> CreateJobs(List<string> jobNames)
         {
             return await createJobControllerUtils.CreateJobs(jobNames);
         }
@@ -305,7 +305,6 @@ namespace Backtester.Server.Controllers.CreateJobExcel
 
                     if (strategyInstance != null)
                     {
-                        result.Crosses = strategyInstance.Crosses.ToList();
                         result.StrategyName = strategyInstance.Name;
                         result.StrategyVersion = strategyInstance.Version;
                     }
@@ -369,12 +368,14 @@ namespace Backtester.Server.Controllers.CreateJobExcel
             {
                 string err = $"Not reading DLL file: missing or invalid parameter {ex.ParamName}";
                 logger.Error(err);
+                result.Message = err;
                 return result;
             }
             catch (Exception ex)
             {
                 string err = "Failed to read DLL file";
                 logger.Error(err, ex);
+                result.Message = ex.Message;
                 return result;
             }
         }

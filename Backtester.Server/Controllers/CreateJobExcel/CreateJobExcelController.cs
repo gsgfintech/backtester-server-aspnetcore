@@ -2,7 +2,6 @@
 using Backtester.Server.ViewModels.CreateJobExcel;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -61,13 +60,12 @@ namespace Backtester.Server.Controllers.CreateJobExcel
                 });
         }
 
-        public async Task<IActionResult> Submit(string jobnamesstr)
+        [HttpPost]
+        public async Task<IActionResult> Submit([FromBody]List<string> data)
         {
-            string[] jobNames = jobnamesstr.Split(',');
+            var result = await utils.CreateJobs(data);
 
-            var result = await utils.CreateJobs(jobNames);
-
-            return View(new CreateJobExcelSubmitViewModel()
+            return PartialView(new CreateJobExcelSubmitViewModel()
             {
                 JobNames = result.JobNames,
                 Message = result.Message,
