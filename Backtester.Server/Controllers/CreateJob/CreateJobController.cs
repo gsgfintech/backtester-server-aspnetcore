@@ -66,6 +66,13 @@ namespace Backtester.Server.Controllers.CreateJob
             return View("Step1", result);
         }
 
+        public IActionResult Step1b(string jobName)
+        {
+            BacktestJobSettingsModel settings = createJobControllerUtils.GetJobSettings(jobName);
+
+            return View(new CreateJobStep1bViewModel(settings));
+        }
+
         public IActionResult Step2(string jobName)
         {
             BacktestJobSettingsModel settings = createJobControllerUtils.GetJobSettings(jobName);

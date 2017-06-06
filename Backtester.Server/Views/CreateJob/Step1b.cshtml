@@ -1,0 +1,26 @@
+﻿@model Backtester.Server.ViewModels.CreateJob.CreateJobStep1bViewModel
+
+@{
+    ViewData["Title"] = "Pairs";
+}
+
+<div class="row">
+    <div class="col-xs-12">
+        @*<form role="form" class="form-horizontal" asp-controller="CreateJob" asp-action="Step2" asp-route-jobname="@Model.Settings.JobName" method="post">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h4>1b. Review Pairs</h4>
+                </div>
+
+            </div>
+        </form>*@
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4>1b. Review Pairs</h4>
+            </div>
+            <div class="panel-body" id="pairsholder">
+                @Html.Partial("Step1bPairsPartial", Model)
+            </div>
+        </div>
+    </div>
+</div>
