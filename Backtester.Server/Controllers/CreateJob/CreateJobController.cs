@@ -73,9 +73,25 @@ namespace Backtester.Server.Controllers.CreateJob
             return View(new CreateJobStep1bViewModel(settings));
         }
 
-        public IActionResult Step2(string jobName)
+        [HttpPost]
+        public IActionResult Step1bAddCross(string jobName, List<CreateJobStep1bPairViewModel> pairs)
         {
-            BacktestJobSettingsModel settings = createJobControllerUtils.GetJobSettings(jobName);
+            pairs.Add(new CreateJobStep1bPairViewModel());
+
+            var settings = createJobControllerUtils.GetJobSettings(jobName);
+
+            var vm = new CreateJobStep1bViewModel(settings)
+            {
+                Pairs = pairs
+            };
+
+            return View("Step1b", vm);
+        }
+
+        [HttpPost]
+        public IActionResult Step2(string jobName, List<CreateJobStep1bPairViewModel> pairs)
+        {
+            BacktestJobSettingsModel settings = createJobControllerUtils.SetCrosses(jobName, pairs);
 
             return View(new CreateJobStep2ViewModel(settings));
         }

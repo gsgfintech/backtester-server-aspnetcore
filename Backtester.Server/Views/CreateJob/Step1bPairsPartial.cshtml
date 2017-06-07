@@ -1,16 +1,19 @@
 ﻿@model Backtester.Server.ViewModels.CreateJob.CreateJobStep1bViewModel
 
-<form class="form-horizontal">
-    @for (int i = 0; i < Model.Pairs.Count; i++)
-    {
-        <div class="form-group">
-            <div class="col-sm-1 col-xs-6">
-                <select class="form-control" asp-for="Model.Pairs[@i].Cross" asp-items="Model.CrossesList"></select>
+    <form class="form-horizontal" asp-controller="CreateJob" asp-action="Step2" asp-route-jobName="@Model.Settings.JobName">
+        @for (int i = 0; i < Model.Pairs.Count; i++)
+        {
+            <div class="form-group">
+                <div class="col-lg-1 col-sm-2 col-xs-6">
+                    <select class="form-control" asp-for="Model.Pairs[@i].Cross" asp-items="Model.CrossesList"></select>
+                </div>
+                <div class="col-lg-1 col-sm-2 col-xs-6">
+                    <input class="form-control" asp-for="Model.Pairs[@i].Quantity" type="number" />
+                </div>
             </div>
-            <div class="col-sm-1 col-xs-6">
-                <input class="form-control" asp-for="Model.Pairs[@i].Quantity" type="number" />
-            </div>
+        }
+        <div class="btn-group btn-group-sm">
+            <button class="btn btn-success" asp-action="Step1bAddCross" asp-route-jobName="@Model.Settings.JobName"><span class="glyphicon glyphicon-plus-sign"></span> Add Pair</button>
+            <button class="btn btn-primary" type="submit">Next</button>
         </div>
-    }
-</form>
-<button class="btn btn-sm btn-success"><span class="glyphicon glyphicon-plus-sign"></span> Add</button>
+    </form>

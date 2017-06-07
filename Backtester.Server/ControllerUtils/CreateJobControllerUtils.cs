@@ -1,6 +1,7 @@
 ﻿using Backtester.Server.Models;
 using Backtester.Server.ViewModels.CreateJob;
 using Capital.GSG.FX.Backtest.DataTypes;
+using Capital.GSG.FX.Data.Core.ContractData;
 using Capital.GSG.FX.Data.Core.WebApi;
 using Capital.GSG.FX.Trading.Strategy;
 using Capital.GSG.FX.Utils.Core;
@@ -265,9 +266,7 @@ namespace Backtester.Server.ControllerUtils
 
         public BacktestJobSettingsModel GetJobSettings(string jobName)
         {
-            BacktestJobSettingsModel settings;
-
-            if (!jobs.TryGetValue(jobName, out settings))
+            if (!jobs.TryGetValue(jobName, out BacktestJobSettingsModel settings))
             {
                 logger.Error($"Failed to retrieve settings for job {jobName}");
                 settings = new BacktestJobSettingsModel()
@@ -278,6 +277,17 @@ namespace Backtester.Server.ControllerUtils
             }
 
             return settings;
+        }
+
+        public BacktestJobSettingsModel SetCrosses(string jobName, List<CreateJobStep1bPairViewModel> crosses)
+        {
+            return jobs.AddOrUpdate(jobName, (key) => null, (key, oldValue) =>
+            {
+                if (!crosses.IsNullOrEmpty())
+                    oldValue.CrossesAndTicketSizes = crosses.ToDictionary(c => CrossUtils.GetFromStr(c.Cross), c => c.Quantity);
+
+                return oldValue;
+            });
         }
 
         public BacktestJobSettingsModel SetParameters(string jobName, List<BacktestJobStrategyParameterModel> parameters)

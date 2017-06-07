@@ -40,7 +40,11 @@ namespace Backtester.Server.ViewModels.CreateJob
                 Value = c.ToString()
             }).ToList();
 
-            Pairs = new List<CreateJobStep1bPairViewModel>()
+            Pairs = Settings.CrossesAndTicketSizes?.Select(kvp => new CreateJobStep1bPairViewModel()
+            {
+                Cross = kvp.Key.ToString(),
+                Quantity = kvp.Value
+            }).ToList() ?? new List<CreateJobStep1bPairViewModel>()
             {
                 new CreateJobStep1bPairViewModel()
             };
